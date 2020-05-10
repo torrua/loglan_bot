@@ -3,7 +3,8 @@
 """
 from os import environ
 
-from bot import app, bot, APP_SITE, TOKEN
+from app import app
+from bot import bot, APP_SITE, TOKEN
 
 # how to undo last git commit
 #   git log --oneline
