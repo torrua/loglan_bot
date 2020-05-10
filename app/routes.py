@@ -19,6 +19,16 @@ def get_message():
     return "Ok", 200
 
 
+@app.route('/')
+@app.route('/heartbeat')
+def index():
+    """
+    Test functionality
+    :return:
+    """
+    return "I'm alive.", 200
+
+
 @app.route('/set')
 def webhook():
     """

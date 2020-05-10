@@ -31,5 +31,4 @@ EN = "en"
 DEFAULT_LANGUAGE = EN
 SEPARATOR = "@"
 
-from app import models
-from bot import routes
+from app import models, routes
