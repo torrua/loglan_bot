@@ -1,14 +1,12 @@
 # -*- coding: utf-8 -*-
+# pylint: disable = E1101
+
 """
-Модуль функций бота для работы с БД
+Working with a database
 """
 
 from typing import List
-
 from app.models import Word, Key, Definition, t_connect_keys
-
-
-# pylint: disable = E1101
 
 
 def word_by_name(name: str) -> List[Word]:
@@ -76,5 +74,4 @@ def translation_by_key(key: str) -> str:
 
 
 if __name__ == "__main__":
-    from pprint import pprint
-    pprint(definitions_by_key("test"))
+    pass
