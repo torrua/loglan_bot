@@ -3,10 +3,15 @@
 Providing routes for our application
 """
 
+from os import environ
 from flask import request as rq
 from telebot import types
+
 from app import app
-from bot import bot, APP_SITE, TOKEN
+from bot import bot
+
+APP_SITE = environ['APP_SITE']
+TOKEN = environ['TELEGRAM_BOT_TOKEN']
 
 
 @app.route("/%s" % TOKEN, methods=['POST'])

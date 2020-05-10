@@ -5,7 +5,7 @@
 
 from typing import List
 
-from bot import Word, Key, Definition, t_connect_keys
+from app.models import Word, Key, Definition, t_connect_keys
 
 
 # pylint: disable = E1101
@@ -77,4 +77,4 @@ def translation_by_key(key: str) -> str:
 
 if __name__ == "__main__":
     from pprint import pprint
-    pprint(definitions_by_key("жопа"))
+    pprint(definitions_by_key("test"))

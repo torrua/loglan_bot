@@ -6,7 +6,6 @@
 
 from os import environ
 from telebot import TeleBot, types
-from app import app
 from app.models import Word, Key, Definition, t_connect_keys
 
 TOKEN = environ["TELEGRAM_BOT_TOKEN"]
