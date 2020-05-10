@@ -5,7 +5,8 @@ Providing routes for our application
 
 from flask import request as rq
 from telebot import types
-from bot import app, bot, APP_SITE, TOKEN
+from app import app
+from bot import bot, APP_SITE, TOKEN
 
 
 @app.route("/%s" % TOKEN, methods=['POST'])
