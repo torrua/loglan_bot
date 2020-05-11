@@ -110,11 +110,11 @@ def check_foreign_word(user_id: int, request: str):
     return False
 
 
-def bot_text_messages_handler(message: msg) -> bool:
+def bot_text_messages_handler(message: msg) -> None:
     """
     Handle user's text messages
     :param message:
-    :return:
+    :return: None
     """
 
     user_request = message.text[1:] if message.text[0] == "/" else message.text
@@ -127,8 +127,6 @@ def bot_text_messages_handler(message: msg) -> bool:
             chat_id=uid,
             text=NOT_FOUND_MESSAGE % user_request,
             parse_mode=DEFAULT_PARSE_MODE, )
-
-    return True if message.text else False
 
 
 if __name__ == "__main__":

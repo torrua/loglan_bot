@@ -29,4 +29,3 @@ imp = types.InputMediaPhoto
 keyboard_permanent_resize = {"one_time_keyboard": False, "resize_keyboard": True, }
 
 from bot import commands
-
