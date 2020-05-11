@@ -10,6 +10,8 @@ from telebot import TeleBot, types
 
 TOKEN = environ["TELEGRAM_BOT_TOKEN"]
 APP_SITE = environ["APP_SITE"]
+EN = "en"
+DEFAULT_LANGUAGE = EN
 DEFAULT_PARSE_MODE = "HTML"
 NOT_FOUND_MESSAGE = "Sorry, but nothing was found for <b>%s</b>."
 

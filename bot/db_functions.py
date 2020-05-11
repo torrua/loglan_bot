@@ -6,70 +6,75 @@ Working with a database
 """
 
 from typing import List
+from bot import DEFAULT_LANGUAGE
 from app.models import Word, Key, Definition, t_connect_keys
 
 
-def word_by_name(name: str) -> List[Word]:
+def word_by_name(request: str) -> List[Word]:
     """
-    Получаем все объекты Word, у которых атрибут Word.name соответствует переменной.
-    :param name: Искомое значение объекта Word.name
-    :return: Список объектов Word
+    Get all Word objects for which the 'name' attribute matches the request
+    :param request: Requested string
+    :return: List of Words
     """
-    return Word.query.filter(Word.name.in_([name, name.lower(), name.upper()])).all()
+    return Word.query.filter(Word.name.in_([request, request.lower(), request.upper()])).all()
 
 
-def key_by_name(name: str) -> Key:
+def key_by_name(request: str) -> Key:
     """
-    Получаем все объекты Key, у которых атрибут Key.word соответствует переменной.
-    :param name: Искомое значение объекта Key.word
-    :return: Объект Key
+    Get a Key object for which the 'word' attribute matches the request
+    :param request: Requested string
+    :return: Key object
     """
-    return Key.query.filter(Key.word.in_([name, name.lower(), name.upper()])).first()
+    return Key.query.filter(Key.word.in_([request, request.lower(), request.upper()])).first()
 
 
-def definitions_by_key(key: str) -> List[Definition]:
+def definitions_by_key(request: str) -> List[Definition]:
     """
-    Получаем все объекты Definitions с ключом key.
-    :param key: Строка с ключом
+    Get all Definitions containing the request as a key.
+    :param request: Requested string
     :return: Список объектов Definitions
     """
-    key = key_by_name(key)
+    request = key_by_name(request)
 
-    return key.definitions if key else key
+    return request.definitions if request else request
 
 
-def loglan_words_by_key(key: str) -> dict:
+def loglan_cards_by_key(request: str, language: str = DEFAULT_LANGUAGE) -> dict:
     """
-    Получаем список всех слов на логлане, являющихся определениями искомого слова.
-    :param key: Строка с искомым словом
-    :return: Словарь, в котором ключ - слово на логлане,
-             а значение - список с определениями слова.
+    Get a dictionary of all the loglan words matching the user request
+    :param request: Requested string
+    :param language: Key language
+    :return: A dictionary where the loglan word is the key,
+        and the value is a list with definitions prepared for Telegram
     """
 
     words = Word.query.join(Definition).join(t_connect_keys, Key) \
-        .filter(Key.word.in_([key, key.lower(), key.upper()])).order_by(Word.name).all()
+        .filter(Key.word.in_([request, request.lower(), request.upper()]))\
+        .filter(Key.language == language).order_by(Word.name).all()
+
     result = {}
 
     for word in words:
         result[word.name] = []
         for definition in word.definitions:
             keys = [key.word for key in definition.keys]
-            if key in keys or key.lower() in keys or key.upper() in keys:
+            if request in keys or request.lower() in keys or request.upper() in keys:
                 result[word.name].append(definition.convert_for_telegram())
 
     return result
 
 
-def translation_by_key(key: str) -> str:
+def translation_by_key(request: str, language: str = DEFAULT_LANGUAGE) -> str:
     """
-    Получаем информацию о словах на логлне по ключу иностранного (английского) языка.
-    :param key: Строка с искомым словом
-    :return: Строка с результатами поиска, адаптированная для выдачи в Телеграм
+    We get information about loglan words by key in a foreign language
+    :param request: Requested string
+    :param language: Key language
+    :return: Search results string formatted for sending to Telegram
     """
-    result = loglan_words_by_key(key)
-
-    message = "\n".join(["/" + word_name + ",\n" + "\n".join(definitions)
-                         + "\n" for word_name, definitions in result.items()]).strip()
+    result = loglan_cards_by_key(request, language)
+    new = '\n'
+    message = new.join([f"/{word_name},{new}{new.join(definitions)}{new}"
+                        for word_name, definitions in result.items()]).strip()
     return message
 
 
