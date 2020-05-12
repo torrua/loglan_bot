@@ -7,6 +7,7 @@ Initializing telegram bot
 
 from os import environ
 from telebot import TeleBot, types
+from app.models import Word, Key, Definition, t_connect_keys
 
 TOKEN = environ["TELEGRAM_BOT_TOKEN"]
 APP_SITE = environ["APP_SITE"]

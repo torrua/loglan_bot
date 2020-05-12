@@ -6,8 +6,9 @@ Working with a database
 """
 
 from typing import List
-from bot import DEFAULT_LANGUAGE
-from app.models import Word, Key, Definition, t_connect_keys
+from bot import DEFAULT_LANGUAGE, Key, t_connect_keys
+from bot.models import TelegramWord as Word, \
+    TelegramDefinition as Definition
 
 
 def word_by_name(request: str) -> List[Word]:
@@ -56,10 +57,10 @@ def loglan_cards_by_key(request: str, language: str = DEFAULT_LANGUAGE) -> dict:
 
     for word in words:
         result[word.name] = []
-        for definition in word.definitions:
+        for definition in word.get_definitions():
             keys = [key.word for key in definition.keys]
             if request in keys or request.lower() in keys or request.upper() in keys:
-                result[word.name].append(definition.convert_for_telegram())
+                result[word.name].append(definition.export())
 
     return result
 

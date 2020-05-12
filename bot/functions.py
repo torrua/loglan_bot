@@ -85,7 +85,7 @@ def check_loglan_word(user_id: int, request: str) -> bool:
         return False
 
     for word in words:
-        for element in word.get_telegram_card():
+        for element in word.export():
             bot.send_message(
                 chat_id=user_id,
                 text=element,

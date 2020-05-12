@@ -45,11 +45,15 @@ class BaseFunctions:
     """
     Base class for common methods
     """
+
     def __repr__(self) -> str:
         return str(self.__dict__)
 
     def __init__(self, dictionary: dict):
         self.__dict__.update(dictionary)
+
+    def export(self):
+        pass
 
 
 class Author(BaseFunctions, db.Model):
@@ -63,13 +67,6 @@ class Author(BaseFunctions, db.Model):
     full_name = db.Column(db.String(256))
     notes = db.Column(db.String(256))
 
-    def export_as_string(self):
-        """
-        Prepare Author data for exporting to text file
-        :return: Formatted basic string
-        """
-        return f"{self.abbreviation}@{self.full_name}@{self.notes}"
-
 
 class Event(BaseFunctions, db.Model):
     """
@@ -82,15 +79,6 @@ class Event(BaseFunctions, db.Model):
     definition = db.Column(db.Text, nullable=False)
     annotation = db.Column(db.Text, nullable=False)
     suffix = db.Column(db.Text, nullable=False)
-
-    def export_as_string(self):
-        """
-        Prepare Event data for exporting to text file
-        :return: Formatted basic string
-        """
-        return f"{self.EID}@{self.name}" \
-               f"@{self.date.strftime('%m/%d/%Y')}@{self.definition}" \
-               f"@{self.annotation}@{self.suffix}"
 
 
 class Key(BaseFunctions, db.Model):
@@ -114,13 +102,6 @@ class Setting(BaseFunctions, db.Model):
     db_version = db.Column(db.Integer, nullable=False)
     last_word_id = db.Column(db.Integer, nullable=False)
 
-    def export_as_string(self):
-        """
-        Prepare Settings data for exporting to text file
-        :return: Formatted basic string
-        """
-        return f"{self.date.strftime('%d.%m.%Y %H:%M:%S')}@{self.db_version}@{self.last_word_id}"
-
 
 class Syllable(BaseFunctions, db.Model):
     """
@@ -131,13 +112,6 @@ class Syllable(BaseFunctions, db.Model):
     SYID = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.Text, nullable=False)
     type = db.Column(db.Text, nullable=False)
-
-    def export_as_string(self):
-        """
-        Prepare Syllable data for exporting to text file
-        :return: Formatted basic string
-        """
-        return f"{self.name}"
 
 
 class Type(BaseFunctions, db.Model):
@@ -151,13 +125,6 @@ class Type(BaseFunctions, db.Model):
     type_x = db.Column(db.Text, nullable=False)
     group = db.Column(db.Text)
     parentable = db.Column(db.Boolean, nullable=False)
-
-    def export_as_string(self):
-        """
-        Prepare Type data for exporting to text file
-        :return: Formatted basic string
-        """
-        return f"{self.type}@{self.type_x}@{self.group}@{self.parentable}"
 
 
 class Definition(BaseFunctions, db.Model):
@@ -193,31 +160,6 @@ class Definition(BaseFunctions, db.Model):
             self.keys.append(key)
             return True
         return False
-
-    def convert_for_telegram(self) -> str:
-        """
-        Convert definition's data to str for sending as a telegram messages
-        :return: Adopted for posting in telegram string
-        """
-        d_usage = f"<b>{self.usage.replace('%', '—')}</b> " if self.usage else ""
-        d_grammar = f"({self.slots if self.slots is not None else ''}{self.grammar_code}) "
-        d_body = self.body \
-            .replace('<', '&#60;').replace('>', '&#62;')\
-            .replace('«', '<i>').replace('»', '</i>') \
-            .replace('≤', '<code>').replace('≥', '</code>')
-
-        d_case_tags = f" [{self.case_tags}]" if self.case_tags else ""
-        return f"{d_usage}{d_grammar}{d_body}{d_case_tags}"
-
-    def export_as_string(self):
-        """
-        Prepare Definition data for exporting to text file
-        :return: Formatted basic string
-        """
-        return f"{self.word.WID_old}@{self.position}@{self.usage}" \
-               f"@{self.slots if self.slots else ''}" \
-               f"{self.grammar_code if self.grammar_code else ''}" \
-               f"@{self.body}@@{self.case_tags}"
 
 
 class Word(BaseFunctions, db.Model):
@@ -262,49 +204,6 @@ class Word(BaseFunctions, db.Model):
         secondaryjoin=(t_connect_words.c.child_id == WID),
         backref=db.backref('parents_id', lazy='dynamic'),
         lazy='dynamic')
-
-    def export_as_string(self):
-        """
-        Prepare Word data for exporting to text file
-        :return: Formatted basic string
-        """
-        notes = self.notes if self.notes else {}
-
-        w_affixes = self.get_afx()
-        affixes = ' '.join(sorted([afx.name for afx in w_affixes])) if w_affixes else ""
-
-        w_match = self.match
-        match = w_match if w_match else ""
-
-        w_source = self.authors.all()
-        # print(self) if not self.authors.all() else None
-        source = '/'.join(sorted([auth.abbreviation for auth in w_source]))\
-            if len(w_source) > 1 else w_source[0].abbreviation
-        source = source + (" "+notes["author"] if notes.get("author", False) else "")
-
-        year = str(self.year.year) + (" "+notes["year"] if notes.get("year", False) else "")
-
-        rank = self.rank + (" "+notes["rank"] if notes.get("rank", False) else "")
-
-        w_usedin = self.get_cpx()
-        usedin = ' | '.join(sorted([cpx.name for cpx in w_usedin])) if w_usedin else ""
-
-        w_tid_old = self.TID_old
-        tid_old = w_tid_old if self.TID_old else ""
-
-        return f"{self.WID_old}@{self.type.type}@{self.type.type_x}@{affixes}" \
-               f"@{match}@{source}@{year}@{rank}" \
-               f"@{self.origin}@{self.origin_x}@{usedin}@{tid_old}"
-
-    def export_spell_as_string(self):
-        """
-        Prepare Word Spell data for exporting to text file
-        :return: Formatted basic string
-        """
-        code_name = "".join(["0" if symbol.isupper() else "5" for symbol in self.name])
-
-        return f"{self.WID_old}@{self.name}@{self.name.lower()}@{code_name}" \
-               f"@{self.event_start_id}@{self.event_end_id if self.event_end else 9999}@"
 
     def __is_parented(self, child: Word) -> bool:
         """
@@ -390,53 +289,25 @@ class Word(BaseFunctions, db.Model):
         """
         return self.get_derivatives(word_type="Afx")
 
-    def get_telegram_card(self) -> List[str]:
-        """
-        Convert word's data to str for sending as a telegram messages
-        :return: List of str with technical info, definitions, used_in part
-        """
-        def split_list(a_list):
-            half = len(a_list) // 2
-            return [a_list[:half], a_list[half:]]
+    @property
+    def complexes(self):
+        return self.get_cpx()
 
-        # Word
-        list_of_afx = ["" + w.name for w in self.get_afx()]
-        w_affixes = f" ({' '.join(list_of_afx)})" if list_of_afx else ""
-        w_match = self.match + " " if self.match else ""
-        w_year = "'" + str(self.year.year)[-2:] + " "
-        w_origin_x = " = " + self.origin_x if self.origin_x else ""
-        w_orig = "\n<i>&#60;" + self.origin + w_origin_x + "&#62;</i>" \
-            if self.origin or w_origin_x else ""
-        w_authors = '/'.join([a.abbreviation for a in self.authors]) + " "
-        w_type = self.type.type + " "
-        w_rank = self.rank + " " if self.rank else ""
-        word_str = f"<b>{self.name}</b>{w_affixes}," \
-            f"\n{w_match}{w_type}{w_authors}{w_year}{w_rank}{w_orig}"
+    @property
+    def affixes(self):
+        return self.get_afx()
 
-        # Definitions
-        definitions_str = "\n\n".join([d.convert_for_telegram() for d in self.definitions])
-
-        # Used in
-        list_of_all_cpx = ["/" + w.name for w in self.get_cpx()]
-
-        # Divide the list if the text does not place in one message
-        split_cpx = split_list(list_of_all_cpx) if \
-            len("; ".join(list_of_all_cpx)) > 3900 else [list_of_all_cpx, ]
-
-        used_in_str = ["\n\nUsed in: " + "; ".join(list_cpx)
-                       if list_cpx else "" for list_cpx in split_cpx]
-
-        # Combine
-        result = [word_str, definitions_str, *used_in_str]
-        return [element for element in result if element]
+    @property
+    def parents(self):
+        return self.get_parents()
 
 
-class WordSpell:
+class WordSpell(BaseFunctions):
     __Tablename__ = t_name_word_spells
     pass
 
 
-class XWord:
+class XWord(BaseFunctions):
     __Tablename__ = t_name_x_words
     pass
 
