@@ -6,7 +6,7 @@ Initializing application module
 Create an application object and database
 """
 
-import os
+from os import environ
 
 from flask import Flask
 from flask_migrate import Migrate
@@ -17,7 +17,8 @@ class Config:
     """
     Configuration object for remote database
     """
-    SQLALCHEMY_DATABASE_URI = os.environ.get('LOD_DATABASE_URL')
+    SQLALCHEMY_DATABASE_URI = environ.get('LOD_DATABASE_URL')
+    SQLALCHEMY_BINDS = {"user_database": environ.get('DATABASE_URL'), }
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 
@@ -28,7 +29,7 @@ db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 
 EN = "en"
-DEFAULT_LANGUAGE = EN
+DEFAULT_LANGUAGE = environ.get('DEFAULT_LANGUAGE', EN)
 SEPARATOR = "@"
 
-from app import models, routes
+from app import model_dictionary, model_user, routes

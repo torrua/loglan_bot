@@ -7,17 +7,17 @@ Initializing telegram bot
 
 from os import environ
 from telebot import TeleBot, types
-from app.models import Word, Key, Definition, t_connect_keys
+from app.model_dictionary import Word, Key, Definition, t_connect_keys
 
-TOKEN = environ["TELEGRAM_BOT_TOKEN"]
-APP_SITE = environ["APP_SITE"]
+TOKEN = environ.get("TELEGRAM_BOT_TOKEN")
+APP_SITE = environ.get("APP_SITE")
 EN = "en"
-DEFAULT_LANGUAGE = EN
+DEFAULT_LANGUAGE = environ.get("DEFAULT_LANGUAGE", EN)
 DEFAULT_PARSE_MODE = "HTML"
 NOT_FOUND_MESSAGE = "Sorry, but nothing was found for <b>%s</b>."
 
 bot = TeleBot(TOKEN)
-admin = int(environ["TELEGRAM_ADMIN_ID"])
+admin = int(environ.get("TELEGRAM_ADMIN_ID"))
 
 ikm = types.InlineKeyboardMarkup
 ikb = types.InlineKeyboardButton

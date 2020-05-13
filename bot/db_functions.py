@@ -7,7 +7,7 @@ Working with a database
 
 from typing import List
 from bot import DEFAULT_LANGUAGE, Key, t_connect_keys
-from bot.models import TelegramWord as Word, \
+from bot.model_dictionary_telegram import TelegramWord as Word, \
     TelegramDefinition as Definition
 
 

@@ -10,8 +10,8 @@ from telebot import types
 from app import app
 from bot import bot
 
-APP_SITE = environ['APP_SITE']
-TOKEN = environ['TELEGRAM_BOT_TOKEN']
+APP_SITE = environ.get('APP_SITE')
+TOKEN = environ.get('TELEGRAM_BOT_TOKEN')
 
 
 @app.route("/%s" % TOKEN, methods=['POST'])

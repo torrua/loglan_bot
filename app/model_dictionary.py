@@ -53,6 +53,7 @@ class BaseFunctions:
         self.__dict__.update(dictionary)
 
     def export(self):
+        """Export object data"""
         pass
 
 
@@ -304,12 +305,10 @@ class Word(BaseFunctions, db.Model):
 
 class WordSpell(BaseFunctions):
     __Tablename__ = t_name_word_spells
-    pass
 
 
 class XWord(BaseFunctions):
     __Tablename__ = t_name_x_words
-    pass
 
 
 if __name__ == "__main__":
