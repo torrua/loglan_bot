@@ -27,6 +27,7 @@ app.config.from_object(Config)
 
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
+session = db.session(autoflush=True, autocommit=False)
 
 EN = "en"
 DEFAULT_LANGUAGE = environ.get('DEFAULT_LANGUAGE', EN)

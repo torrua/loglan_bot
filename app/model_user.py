@@ -42,7 +42,9 @@ class Basic:
                     if not k.startswith("_sa_")})
 
     def export(self):
-        pass
+        """
+        :return:
+        """
 
 
 class BasicUser:
@@ -70,6 +72,9 @@ class TelegramUser:
 
     @property
     def info_card(self):
+        """
+        :return:
+        """
         return f"{self.first_name}" \
                f"{f' {self.last_name} ' if self.last_name else ' '}" \
                f"({self.id})" \
@@ -84,7 +89,6 @@ class User(db.Model, BasicUser, TelegramUser, Basic, ):
     __bind_key__ = 'user_database'
     settings = relationship("Settings", uselist=False,
                             back_populates="user", cascade="all, delete-orphan")
-    pass
 
 
 class Settings(db.Model, Basic):
@@ -96,7 +100,8 @@ class Settings(db.Model, Basic):
 
     rid = Column(Integer, primary_key=True, autoincrement=True)
     user_id = Column(Integer, ForeignKey('users.id'), unique=True, nullable=False)
-    user = relationship("User", back_populates="settings")
+    user = relationship("User", back_populates="settings",
+                        cascade="all, delete-orphan", single_parent=True)
     language = Column(String, nullable=False, default=DEFAULT_LANGUAGE)
     trigger = Column(String)
 

@@ -31,7 +31,7 @@ def key_by_name(request: str) -> Key:
 
 def definitions_by_key(request: str) -> List[Definition]:
     """
-    Get all Definitions containing the request as a key.
+    Get all Definitions containing the request as a key
     :param request: Requested string
     :return: Список объектов Definitions
     """

@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
-"""
-Processing commands received from telegram bot
-"""
+"""Processing commands received from telegram bot"""
 
 from bot import bot, msg
-from bot.functions import bot_text_messages_handler, bot_cmd_start, bot_cmd_gle, bot_cmd_log
+from bot.handlers.commands import bot_cmd_start, bot_cmd_gle, bot_cmd_log
+from bot.handlers.messages import bot_text_messages_handler
 
 
 @bot.message_handler(commands=["start"])
@@ -17,7 +16,7 @@ def command_start(message: msg):
     bot_cmd_start(message)
 
 
-@bot.message_handler(commands=["gleci", "gle", "g", "e", ])
+@bot.message_handler(commands=["g", "e", ])
 def command_gleci(message: msg):
     """
     Handle command /gleci
@@ -27,7 +26,7 @@ def command_gleci(message: msg):
     bot_cmd_gle(message)
 
 
-@bot.message_handler(commands=["logli", "log", "l", ])
+@bot.message_handler(commands=["l", ])
 def command_logli(message: msg):
     """
     Handle command /logli

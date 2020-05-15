@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
-"""
-Configuration file for the whole project
-"""
+"""Configuration file for the whole project"""
 
 import logging
 

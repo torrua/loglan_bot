@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Model of LOD postgresql database
+Model of LOD database
 """
 
 from __future__ import annotations
@@ -54,7 +54,6 @@ class BaseFunctions:
 
     def export(self):
         """Export object data"""
-        pass
 
 
 class Author(BaseFunctions, db.Model):

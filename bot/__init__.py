@@ -17,7 +17,7 @@ DEFAULT_PARSE_MODE = "HTML"
 NOT_FOUND_MESSAGE = "Sorry, but nothing was found for <b>%s</b>."
 
 bot = TeleBot(TOKEN)
-admin = int(environ.get("TELEGRAM_ADMIN_ID"))
+ADMIN = int(environ.get("TELEGRAM_ADMIN_ID"))
 
 ikm = types.InlineKeyboardMarkup
 ikb = types.InlineKeyboardButton
@@ -29,4 +29,4 @@ imp = types.InputMediaPhoto
 
 keyboard_permanent_resize = {"one_time_keyboard": False, "resize_keyboard": True, }
 
-from bot import commands
+from bot import processor

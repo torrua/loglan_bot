@@ -1,9 +1,13 @@
 # -*- coding: utf-8 -*-
+"""Model of LOD database for Telegram"""
+
 from typing import List
 from bot import Word, Definition
 
 
 class TelegramDefinition(Definition):
+    """Definition class extensions for Telegram"""
+
     def export(self):
         """
         Convert definition's data to str for sending as a telegram messages
@@ -21,6 +25,8 @@ class TelegramDefinition(Definition):
 
 
 class TelegramWord(Word):
+    """Word class extensions for Telegram"""
+
     def export(self) -> List[str]:
         """
         Convert word's data to str for sending as a telegram messages
@@ -64,7 +70,7 @@ class TelegramWord(Word):
 
     def get_definitions(self) -> List[TelegramDefinition]:
         """
-        Get all definitions of the word.
+        Get all definitions of the word
         :return: List of Definition objects ordered by Definition.position
         """
         return TelegramDefinition.query.filter(TelegramDefinition.WID == self.WID)\

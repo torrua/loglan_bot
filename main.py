@@ -1,14 +1,10 @@
-"""
-Главный модуль запуска приложения на Heroku и вообще
-"""
+# -*- coding: utf-8 -*-
+"""The main module for launching Heroku application"""
+
 from os import environ
 
 from app import app
 from bot import bot, APP_SITE, TOKEN
-
-# how to undo last git commit
-#   git log --oneline
-#   git reset HEAD@{1}
 
 ENV = environ["ENVIRONMENT"]
 
