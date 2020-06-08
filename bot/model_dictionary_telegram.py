@@ -73,5 +73,5 @@ class TelegramWord(Word):
         Get all definitions of the word
         :return: List of Definition objects ordered by Definition.position
         """
-        return TelegramDefinition.query.filter(TelegramDefinition.word_id == self.word_id)\
-            .order_by(TelegramDefinition.position.asc()).all()
+        return TelegramDefinition.query.filter(Definition.word_id == self.id)\
+            .order_by(Definition.position.asc()).all()
