@@ -19,14 +19,7 @@ NOT_FOUND_MESSAGE = "Sorry, but nothing was found for <b>%s</b>."
 bot = TeleBot(TOKEN)
 ADMIN = int(environ.get("TELEGRAM_ADMIN_ID"))
 
-ikm = types.InlineKeyboardMarkup
-ikb = types.InlineKeyboardButton
-rkm = types.ReplyKeyboardMarkup
-rkb = types.KeyboardButton
 cbq = types.CallbackQuery
 msg = types.Message
-imp = types.InputMediaPhoto
-
-keyboard_permanent_resize = {"one_time_keyboard": False, "resize_keyboard": True, }
 
 from bot import processor
