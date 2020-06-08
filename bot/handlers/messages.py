@@ -17,8 +17,10 @@ def bot_text_messages_handler(message: msg) -> None:
     user_request = message.text[1:] if message.text[0] == "/" else message.text
     uid = message.chat.id
 
-    if not check_loglan_word(user_id=uid, request=user_request) and \
-            not check_foreign_word(user_id=uid, request=user_request):
+    if not (
+        check_loglan_word(user_id=uid, request=user_request)
+        or check_foreign_word(user_id=uid, request=user_request)
+    ):
 
         bot.send_message(
             chat_id=uid,
