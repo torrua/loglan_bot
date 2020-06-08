@@ -31,7 +31,7 @@ def index():
     Test functionality
     :return:
     """
-    return "I'm alive.", 200
+    return str({k: v for k, v in bot.get_me().__dict__.items() if v}), 200
 
 
 @app.route('/set')
