@@ -74,9 +74,8 @@ def translation_by_key(request: str, language: str = DEFAULT_LANGUAGE) -> str:
     """
     result = loglan_cards_by_key(request, language)
     new = '\n'
-    message = new.join([f"/{word_name},{new}{new.join(definitions)}{new}"
-                        for word_name, definitions in result.items()]).strip()
-    return message
+    return new.join([f"/{word_name},{new}{new.join(definitions)}{new}"
+                     for word_name, definitions in result.items()]).strip()
 
 
 if __name__ == "__main__":
