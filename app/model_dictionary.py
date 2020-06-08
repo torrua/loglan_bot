@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
 """
-Model of LOD database
+Models of LOD database
 """
 
 from __future__ import annotations
-from typing import List
-from sqlalchemy.orm import backref
+
+from datetime import datetime
+from typing import List, Set
+
 from app import db
 
 # pylint: disable=R0903, E1101, C0103
@@ -26,19 +28,19 @@ t_name_word_spells = "word_spells"
 
 t_connect_authors = db.Table(
     'connect_authors', db.metadata,
-    db.Column('AID', db.ForeignKey('author.AID'), primary_key=True),
-    db.Column('WID', db.ForeignKey('word.WID'), primary_key=True), )
+    db.Column('AID', db.ForeignKey('author.id'), primary_key=True),
+    db.Column('WID', db.ForeignKey('word.id'), primary_key=True), )
 
 t_connect_words = db.Table(
     'connect_words', db.metadata,
-    db.Column('parent_id', db.ForeignKey('word.WID'), primary_key=True),
-    db.Column('child_id', db.ForeignKey('word.WID'), primary_key=True), )
+    db.Column('parent_id', db.ForeignKey('word.id'), primary_key=True),
+    db.Column('child_id', db.ForeignKey('word.id'), primary_key=True), )
 
 
 t_connect_keys = db.Table(
     'connect_keys', db.metadata,
-    db.Column('KID', db.ForeignKey('key.KID'), primary_key=True),
-    db.Column('DID', db.ForeignKey('definition.DID'), primary_key=True), )
+    db.Column('KID', db.ForeignKey('key.id'), primary_key=True),
+    db.Column('DID', db.ForeignKey('definition.id'), primary_key=True), )
 
 
 class BaseFunctions:
@@ -46,14 +48,98 @@ class BaseFunctions:
     Base class for common methods
     """
 
+    created = db.Column(db.TIMESTAMP, default=datetime.now(), nullable=False)
+    updated = db.Column(db.TIMESTAMP, onupdate=db.func.now())
+
     def __repr__(self) -> str:
         return str(self.__dict__)
 
     def __init__(self, dictionary: dict):
         self.__dict__.update(dictionary)
 
+    def save(self):
+        """
+        Add record to DB
+        :return:
+        """
+        db.session.add(self)
+        db.session.commit()
+
+    def update(self, data):
+        """
+        Update record in DB
+        :param data:
+        :return:
+        """
+        for key, item in data.items():
+            setattr(self, key, item)
+        db.session.commit()
+
+    def delete(self):
+        """
+        Delete record from DB
+        :return:
+        """
+        db.session.delete(self)
+        db.session.commit()
+
     def export(self):
-        """Export object data"""
+        """
+        Export record data from DB
+        Should be redefine in model's class
+        :return:
+        """
+
+    @classmethod
+    def get_all(cls) -> list:
+        """
+        Get all model objects from DB
+        :return:
+        """
+        return cls.query.all()
+
+    @classmethod
+    def non_foreign_keys(cls) -> Set[str]:
+        """
+        :return:
+        """
+        return {column.name for column in cls.__table__.columns
+                if not (column.foreign_keys or column.name.startswith("_"))}
+
+    @classmethod
+    def relationships(cls) -> Set[str]:
+        """
+        :return:
+        """
+        return {key for key in cls.__mapper__.relationships.keys() if not key.startswith("_")}
+
+    @classmethod
+    def all_attributes(cls) -> Set[str]:
+        """
+        :return:
+        """
+        return {key for key in cls.__mapper__.attrs.keys() if not key.startswith("_")}
+
+    @classmethod
+    def foreign_keys(cls) -> Set[str]:
+        """
+        :return:
+        """
+        return set(cls.all_attributes() - cls.relationships() - cls.non_foreign_keys())
+
+    @classmethod
+    def attributes_basic(cls) -> Set[str]:
+        """
+        :return:
+        """
+        return set(cls.all_attributes() - cls.relationships())
+
+    @classmethod
+    def attributes_extended(cls) -> Set[str]:
+        """
+        :return:
+        """
+        return set(cls.all_attributes() - cls.foreign_keys())
 
 
 class Author(BaseFunctions, db.Model):
@@ -62,7 +148,7 @@ class Author(BaseFunctions, db.Model):
     """
     __Tablename__ = t_name_authors
 
-    AID = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True)
     abbreviation = db.Column(db.String(256), unique=True, nullable=False)
     full_name = db.Column(db.String(256))
     notes = db.Column(db.String(256))
@@ -73,8 +159,8 @@ class Event(BaseFunctions, db.Model):
     Event model
     """
     __Tablename__ = t_name_events
-    EID = db.Column(db.Integer, primary_key=True)
-    date = db.Column(db.DateTime, nullable=False)
+    id = db.Column(db.Integer, primary_key=True)
+    date = db.Column(db.Date, nullable=False)
     name = db.Column(db.Text, nullable=False)
     definition = db.Column(db.Text, nullable=False)
     annotation = db.Column(db.Text, nullable=False)
@@ -86,7 +172,7 @@ class Key(BaseFunctions, db.Model):
     Key model
     """
     __Tablename__ = t_name_keys
-    KID = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True)
     word = db.Column(db.String(256), unique=True, nullable=False)
     language = db.Column(db.String(256))
 
@@ -97,8 +183,8 @@ class Setting(BaseFunctions, db.Model):
     """
     __Tablename__ = t_name_settings
 
-    SID = db.Column(db.Integer, primary_key=True)
-    date = db.Column(db.DateTime, nullable=True)
+    id = db.Column(db.Integer, primary_key=True)
+    date = db.Column(db.Date, nullable=True)
     db_version = db.Column(db.Integer, nullable=False)
     last_word_id = db.Column(db.Integer, nullable=False)
 
@@ -109,7 +195,7 @@ class Syllable(BaseFunctions, db.Model):
     """
     __Tablename__ = t_name_syllables
 
-    SYID = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.Text, nullable=False)
     type = db.Column(db.Text, nullable=False)
 
@@ -120,7 +206,7 @@ class Type(BaseFunctions, db.Model):
     """
     __Tablename__ = t_name_types
 
-    TID = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True)
     type = db.Column(db.Text, nullable=False)
     type_x = db.Column(db.Text, nullable=False)
     group = db.Column(db.Text)
@@ -133,8 +219,8 @@ class Definition(BaseFunctions, db.Model):
     """
     __Tablename__ = t_name_definitions
 
-    DID = db.Column(db.Integer, primary_key=True)
-    WID = db.Column(db.Integer, db.ForeignKey('word.WID'), nullable=False)
+    id = db.Column(db.Integer, primary_key=True)
+    word_id = db.Column(db.Integer, db.ForeignKey('word.id'), nullable=False)
     position = db.Column(db.Integer, nullable=False)
     usage = db.Column(db.Text)
     grammar_code = db.Column(db.Text)
@@ -147,12 +233,10 @@ class Definition(BaseFunctions, db.Model):
     keys = db.relationship(Key.__name__, secondary=t_connect_keys,
                            backref="definitions", lazy='dynamic')
 
-    word = db.relationship("Word")
-
     def add_key(self, key: Key) -> bool:
         """
-
-        :param key:
+        Connect Key object with Definition object
+        :param key: Key object
         :return:
         """
 
@@ -168,21 +252,22 @@ class Word(BaseFunctions, db.Model):
     """
     __Tablename__ = t_name_words
 
-    WID = db.Column(db.Integer, primary_key=True)
-    WID_old = db.Column(db.Integer, nullable=False)  # Compatibility with the previous database
+    id = db.Column(db.Integer, primary_key=True)
+    id_old = db.Column(db.Integer, nullable=False)  # Compatibility with the previous database
     name = db.Column(db.String(64), nullable=False)
     origin = db.Column(db.String(256))
     origin_x = db.Column(db.String(256))
 
-    type_id = db.Column("type", db.ForeignKey('type.TID'), nullable=False)
-    type = db.relationship(Type.__name__,
-                           backref=backref("words", uselist=False))
+    type_id = db.Column("type", db.ForeignKey('type.id'), nullable=False)
+    type = db.relationship(Type.__name__, backref="words")
 
-    event_start_id = db.Column("event_start", db.ForeignKey("event.EID"), nullable=False)
-    event_start = db.relationship("Event", foreign_keys=[event_start_id])
+    event_start_id = db.Column("event_start", db.ForeignKey("event.id"), nullable=False)
+    event_start = db.relationship(
+        "Event", foreign_keys=[event_start_id], backref="appeared_words")
 
-    event_end_id = db.Column("event_end", db.ForeignKey("event.EID"))
-    event_end = db.relationship("Event", foreign_keys=[event_end_id])
+    event_end_id = db.Column("event_end", db.ForeignKey("event.id"))
+    event_end = db.relationship(
+        "Event", foreign_keys=[event_end_id], backref="deprecated_words")
 
     match = db.Column(db.Text)
     rank = db.Column(db.Text)
@@ -200,9 +285,9 @@ class Word(BaseFunctions, db.Model):
     # word's derivatives
     __derivatives = db.relationship(
         'Word', secondary=t_connect_words,
-        primaryjoin=(t_connect_words.c.parent_id == WID),
-        secondaryjoin=(t_connect_words.c.child_id == WID),
-        backref=db.backref('parents_id', lazy='dynamic'),
+        primaryjoin=(t_connect_words.c.parent_id == id),
+        secondaryjoin=(t_connect_words.c.child_id == id),
+        backref=db.backref('parents', lazy='dynamic'),
         lazy='dynamic')
 
     def __is_parented(self, child: Word) -> bool:
@@ -211,12 +296,12 @@ class Word(BaseFunctions, db.Model):
         :param child: Word object
         :return: bool
         """
-        return self.__derivatives.filter(t_connect_words.c.child_id == child.WID).count() > 0
+        return self.__derivatives.filter(t_connect_words.c.child_id == child.id).count() > 0
 
     def add_child(self, child: Word) -> str:
         """
-        Add derivative for the source word.
-        Get words from Used In and add relationship in database.
+        Add derivative for the source word
+        Get words from Used In and add relationship in database
         :param child: Word object
         :return: None
         """
@@ -226,7 +311,7 @@ class Word(BaseFunctions, db.Model):
 
     def add_author(self, author: Author) -> str:
         """
-        Connect Author object with Word object.
+        Connect Author object with Word object
         :param author: Author object
         :return:
         """
@@ -236,31 +321,31 @@ class Word(BaseFunctions, db.Model):
 
     def get_definitions(self) -> List[Definition]:
         """
-        Get all definitions of the word.
+        Get all definitions of the word
         :return: List of Definition objects ordered by Definition.position
         """
-        return Definition.query.filter(Definition.WID == self.WID)\
+        return Definition.query.filter(Definition.id == self.id)\
             .order_by(Definition.position.asc()).all()
 
     def get_parents(self) -> List[Word]:
         """
-        Get all parents of the Complex predicates, Little words or Affixes.
-        :return: List of Word objects.
+        Get all parents of the Complex predicates, Little words or Affixes
+        :return: List of Word objects
         """
-        return self.parents_id.all()  # if self.type in self.__parentable else []
+        return self.parents.all()  # if self.type in self.__parentable else []
 
     def get_derivatives(self,
                         word_type: str = None,
                         word_type_x: str = None,
                         word_group: str = None) -> List[Word]:
         """
-        Get all derivatives of the word, depending on its parameters.
+        Get all derivatives of the word, depending on its parameters
         :param word_type:
         :param word_type_x:
         :param word_group:
         :return:
         """
-        result = self.__derivatives.filter(self.WID == t_connect_words.c.parent_id)
+        result = self.__derivatives.filter(self.id == t_connect_words.c.parent_id)
 
         if word_type or word_type_x or word_group:
             result = result.join(Type)
@@ -276,37 +361,44 @@ class Word(BaseFunctions, db.Model):
 
     def get_cpx(self) -> List[Word]:
         """
-        Get all the complexes that exist for this word.
-        :return: list of Word objects.
+        Get all the complexes that exist for this word
+        Only primitives have affixes
+        :return: list of Word objects
         """
         return self.get_derivatives(word_group="Cpx")
 
     def get_afx(self) -> List[Word]:
         """
-        Get all the affixes that exist for this word.
-        Only primitives have affixes.
-        :return: list of Word objects.
+        Get all the affixes that exist for this word
+        Only primitives have affixes
+        :return: list of Word objects
         """
         return self.get_derivatives(word_type="Afx")
 
     @property
-    def complexes(self):
+    def complexes(self) -> List[Word]:
+        """
+        Get list of word's complexes if exist
+        :return:
+        """
         return self.get_cpx()
 
     @property
-    def affixes(self):
+    def affixes(self) -> List[Word]:
+        """
+        Get list of word's affixes if exist
+        :return:
+        """
         return self.get_afx()
-
-    @property
-    def parents(self):
-        return self.get_parents()
 
 
 class WordSpell(BaseFunctions):
+    """WordSpell model"""
     __Tablename__ = t_name_word_spells
 
 
 class XWord(BaseFunctions):
+    """XWord model"""
     __Tablename__ = t_name_x_words
 
 
