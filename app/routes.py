@@ -7,7 +7,7 @@ from os import environ
 from flask import request as rq
 from telebot import types
 
-from app import app
+from config.postgres import app
 from bot import bot
 
 APP_SITE = environ.get('APP_SITE')

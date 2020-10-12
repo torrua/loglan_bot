@@ -38,7 +38,7 @@ class TelegramWord(Word):
             return [a_list[:half], a_list[half:]]
 
         # Word
-        list_of_afx = ["" + w.name for w in self.get_afx()]
+        list_of_afx = ["" + w.name for w in self.affixes]
         w_affixes = f" ({' '.join(list_of_afx)})" if list_of_afx else ""
         w_match = self.match + " " if self.match else ""
         w_year = "'" + str(self.year.year)[-2:] + " "
@@ -55,7 +55,7 @@ class TelegramWord(Word):
         definitions_str = "\n\n".join([d.export() for d in self.get_definitions()])
 
         # Used in
-        list_of_all_cpx = ["/" + w.name for w in self.get_cpx()]
+        list_of_all_cpx = ["/" + w.name for w in self.complexes]
 
         # Divide the list if the text does not place in one message
         split_cpx = split_list(list_of_all_cpx) if \

@@ -6,11 +6,14 @@ from typing import Optional, Union
 
 from sqlalchemy.exc import IntegrityError, InvalidRequestError, DataError
 from sqlalchemy.orm.exc import UnmappedInstanceError
+from sqlalchemy import inspect
 
-from app import session
-from app.model_user import Settings, User
+from config.postgres import db, run_with_context
+from config.postgres.model_user import Settings, User
 from bot import msg, cbq, DEFAULT_LANGUAGE
 from config import log
+
+session = db.session
 
 
 def get_lang(lang_code: str = DEFAULT_LANGUAGE) -> str:
@@ -48,7 +51,9 @@ def user_from(request: Union[msg, cbq]) -> User:
 
     log.debug('Get User from the request')
     message = message_from(request)
-    return User(**message.from_user.__dict__)
+    fields = inspect(User).all_orm_descriptors.keys()
+    data = {k: v for k, v in message.from_user.__dict__.items() if k in fields}
+    return User(**data)
 
 
 def user_id_from(request: Union[msg, cbq]) -> Optional[str]:

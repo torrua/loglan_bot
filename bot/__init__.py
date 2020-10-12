@@ -7,7 +7,10 @@ Initializing telegram bot
 
 from os import environ
 from telebot import TeleBot, types
-from app.model_dictionary import Word, Key, Definition, t_connect_keys
+from config.postgres import app, db
+from config.postgres.models import Word, Key, Definition
+from config.postgres.model_base import t_connect_keys
+from config.postgres import model_user
 
 TOKEN = environ.get("TELEGRAM_BOT_TOKEN")
 APP_SITE = environ.get("APP_SITE")

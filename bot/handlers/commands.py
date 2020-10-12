@@ -7,8 +7,10 @@ from bot import bot, msg, ADMIN, EN, DEFAULT_PARSE_MODE, NOT_FOUND_MESSAGE
 from bot.functions_dictionary_db import translation_by_key
 from bot.functions_user import db_combo_start_command
 from bot.handlers.functions import check_loglan_word, extract_args
+from config.postgres import run_with_context
 
 
+@run_with_context
 def bot_cmd_start(message: msg):
     """
     Handle start command
@@ -22,6 +24,7 @@ def bot_cmd_start(message: msg):
     db_combo_start_command(message)
 
 
+@run_with_context
 def bot_cmd_gle(message: msg):
     """
     Handle command for english word
@@ -45,6 +48,7 @@ def bot_cmd_gle(message: msg):
         parse_mode=DEFAULT_PARSE_MODE)
 
 
+@run_with_context
 def bot_cmd_log(message: msg):
     """
     Handle command for loglan word
