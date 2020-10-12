@@ -64,7 +64,7 @@ def run_with_context(function):
 
 
 app = app_lod()
-
+from app import routes
 
 if __name__ == "__main__":
 
