@@ -25,9 +25,6 @@ DEFAULT_LANGUAGE = os.getenv("DEFAULT_LANGUAGE", EN)
 DEFAULT_STYLE = os.getenv("DEFAULT_STYLE", "ultra")
 SEPARATOR = "@"
 
-root_pattern = r".*\\"
-root_directory = re.search(root_pattern, sys.executable)[0]
-
 
 def create_app(config, database):
     """
