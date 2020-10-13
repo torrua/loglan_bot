@@ -3,12 +3,12 @@
 
 from os import environ
 from config.postgres import app
+from bot import bot, APP_SITE, TOKEN
 
 ENV = environ["ENVIRONMENT"]
 
 if __name__ == "__main__":
     # pylint: disable=W0106
-    from bot import bot, APP_SITE, TOKEN
 
     if int(ENV) == 0:
         bot.remove_webhook()
