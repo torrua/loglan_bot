@@ -563,23 +563,42 @@ class BaseWord(db.Model, InitBase, DBBase):
             .order_by(cls.name)
 
     @classmethod
-    def by_name(cls, name: str) -> BaseQuery:
+    def by_name(cls, name: str, case_sensitive: bool = False) -> BaseQuery:
         """
         Word.Query filtered by specified name
         :param name: str
+        :param case_sensitive: bool
         :return: Query
         """
-        return cls.query.filter(cls.name == name)
+        if case_sensitive:
+            return cls.query.filter(cls.name == name)
+        else:
+            return cls.query.filter(cls.name.in_([name, name.lower(), name.upper()]))
 
     @classmethod
-    def by_key(cls, key: Union[BaseKey, str]) -> BaseQuery:
+    def by_key(
+            cls, key: Union[BaseKey, str],
+            language: str = None,
+            case_sensitive: bool = False) -> BaseQuery:
         """
         Word.Query filtered by specified key
         :param key: BaseKey object or str
+        :param language: Language of key
+        :param case_sensitive: bool
         :return: Query
         """
+
         key = BaseKey.word if isinstance(key, BaseKey) else str(key)
-        return cls.query.join(BaseDefinition, t_connect_keys, BaseKey).filter(BaseKey.word == key)
+        request = cls.query.join(BaseDefinition, t_connect_keys, BaseKey)
+
+        if case_sensitive:
+            request = request.filter(BaseKey.word == key)
+        else:
+            request = request.filter(BaseKey.word.in_([key, key.lower(), key.upper()]))
+
+        if language:
+            request = request.filter(BaseKey.language == language)
+        return request
 
 
 class BaseWordSource(InitBase):

@@ -3,9 +3,9 @@
 Telegram bot common functions
 """
 
-from bot import bot, DEFAULT_PARSE_MODE
-from bot.functions_dictionary_db import word_by_name, translation_by_key
+from bot import bot, DEFAULT_PARSE_MODE, DEFAULT_LANGUAGE
 from config import log
+from config.postgres.models import Word
 
 
 def check_loglan_word(user_id: int, request: str) -> bool:
@@ -15,7 +15,7 @@ def check_loglan_word(user_id: int, request: str) -> bool:
     :param request: User request
     :return: Boolean
     """
-    words = word_by_name(request)
+    words = Word.by_name(request).all()
     if not words:
         return False
 
@@ -35,7 +35,7 @@ def check_foreign_word(user_id: int, request: str):
     :param request: User request
     :return: Boolean
     """
-    translation = translation_by_key(request)
+    translation = Word.translation_by_key(request, DEFAULT_LANGUAGE)
     if translation:
         bot.send_message(
             chat_id=user_id,

@@ -1,6 +1,6 @@
 from config.postgres.model_base import BaseAuthor, BaseEvent, \
-    BaseKey, BaseSetting, BaseSyllable, BaseType, \
-    BaseDefinition, BaseWord, BaseWordSpell, BaseWordSource
+    BaseKey, BaseSetting, BaseSyllable, BaseType, BaseWordSpell, BaseWordSource
+from config.postgres.model_telegram import TelegramWord, TelegramDefinition
 
 
 class DictionaryBase:
@@ -33,11 +33,11 @@ class Type(DictionaryBase, BaseType):
     pass
 
 
-class Definition(DictionaryBase, BaseDefinition):
+class Definition(DictionaryBase, TelegramDefinition):
     pass
 
 
-class Word(DictionaryBase, BaseWord):
+class Word(DictionaryBase, TelegramWord):
     pass
 
 

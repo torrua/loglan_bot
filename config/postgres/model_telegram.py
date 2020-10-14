@@ -2,10 +2,10 @@
 """Model of LOD database for Telegram"""
 
 from typing import List
-from bot import Word, Definition
+from config.postgres.model_base import BaseDefinition, BaseWord
 
 
-class TelegramDefinition(Definition):
+class TelegramDefinition(BaseDefinition):
     """Definition class extensions for Telegram"""
 
     def export(self):
@@ -24,7 +24,7 @@ class TelegramDefinition(Definition):
         return f"{d_usage}{d_grammar}{d_body}{d_case_tags}"
 
 
-class TelegramWord(Word):
+class TelegramWord(BaseWord):
     """Word class extensions for Telegram"""
 
     def export(self) -> List[str]:
@@ -73,5 +73,28 @@ class TelegramWord(Word):
         Get all definitions of the word
         :return: List of Definition objects ordered by Definition.position
         """
-        return TelegramDefinition.query.filter(Definition.word_id == self.id)\
-            .order_by(Definition.position.asc()).all()
+        return TelegramDefinition.query.filter(BaseDefinition.word_id == self.id)\
+            .order_by(BaseDefinition.position.asc()).all()
+
+    @classmethod
+    def translation_by_key(cls, request: str, language: str = None) -> str:
+        """
+        We get information about loglan words by key in a foreign language
+        :param request: Requested string
+        :param language: Key language
+        :return: Search results string formatted for sending to Telegram
+        """
+        words = cls.by_key(request, language).order_by(cls.name).all()
+        result = {}
+
+        for word in words:
+            result[word.name] = []
+            for definition in word.get_definitions():
+                keys = [key.word.lower() for key in definition.keys]
+                if request.lower() in keys:
+                    result[word.name].append(definition.export())
+
+        new = '\n'
+
+        return new.join([f"/{word_name},{new}{new.join(definitions)}{new}"
+                         for word_name, definitions in result.items()]).strip()

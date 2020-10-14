@@ -4,10 +4,10 @@ Telegram bot command functions
 """
 
 from bot import bot, msg, ADMIN, EN, DEFAULT_PARSE_MODE, NOT_FOUND_MESSAGE
-from bot.functions_dictionary_db import translation_by_key
 from bot.handlers.functions import check_loglan_word, extract_args
 from config.postgres import run_with_context
 from config.postgres.model_user import User
+from config.postgres.models import Word
 
 
 @run_with_context
@@ -22,11 +22,12 @@ def bot_cmd_start(message: msg):
         f"{key}: {value}" for key, value in message.from_user.__dict__.items()]))
     bot.send_message(ADMIN, text)
 
-    new_user = User.create_from(message)
     db_user = User.from_db_by(message)
+
     if db_user:
         db_user.settings.reset()
     else:
+        new_user = User.create_from(message)
         new_user.save()
         new_user.add_default_settings()
 
@@ -43,7 +44,7 @@ def bot_cmd_gle(message: msg):
 
     if arguments:
         user_request = arguments[0]
-        result = translation_by_key(request=user_request, language=EN)
+        result = Word.translation_by_key(request=user_request, language=EN)
         message_text = result if result else NOT_FOUND_MESSAGE % user_request
 
     else:
@@ -71,6 +72,7 @@ def bot_cmd_log(message: msg):
         message_text = NOT_FOUND_MESSAGE % user_request
     else:
         message_text = "You need to specify the Loglan word you would like to find."
+
     bot.send_message(
         chat_id=message.chat.id,
         text=message_text,

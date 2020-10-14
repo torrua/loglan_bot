@@ -5,8 +5,6 @@
 Configuration file for the whole project
 """
 import os
-import sys
-import re
 import logging
 from flask import Flask
 
