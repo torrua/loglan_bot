@@ -5,9 +5,9 @@ Telegram bot command functions
 
 from bot import bot, msg, ADMIN, EN, DEFAULT_PARSE_MODE, NOT_FOUND_MESSAGE
 from bot.functions_dictionary_db import translation_by_key
-from bot.functions_user import db_combo_start_command
 from bot.handlers.functions import check_loglan_word, extract_args
 from config.postgres import run_with_context
+from config.postgres.model_user import User
 
 
 @run_with_context
@@ -21,7 +21,14 @@ def bot_cmd_start(message: msg):
     text = "\n".join(sorted([
         f"{key}: {value}" for key, value in message.from_user.__dict__.items()]))
     bot.send_message(ADMIN, text)
-    db_combo_start_command(message)
+
+    new_user = User.create_from(message)
+    db_user = User.from_db_by(message)
+    if db_user:
+        db_user.settings.reset()
+    else:
+        new_user.save()
+        new_user.add_default_settings()
 
 
 @run_with_context

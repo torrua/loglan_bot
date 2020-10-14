@@ -4,10 +4,13 @@
 """
 Model of user database
 """
+from __future__ import annotations
+from sqlalchemy import inspect
 
 from config.postgres import db
 from config.postgres.common_base import InitBase, DBBase
 from config import DEFAULT_LANGUAGE
+from typing import Optional
 
 db.metadata.clear()
 
@@ -21,6 +24,14 @@ class BasicUser:
     is_admin = db.Column(db.Boolean, default=False, nullable=False)
     is_invited = db.Column(db.Boolean, default=True, nullable=False)
     is_premium = db.Column(db.Boolean, default=False, nullable=False)
+
+    def enable(self):
+        self.is_active = True
+        db.session.commit()
+
+    def disable(self):
+        self.is_active = False
+        db.session.commit()
 
 
 class TelegramUser:
@@ -45,6 +56,17 @@ class TelegramUser:
                f"({self.id})" \
                f"{f' @{self.username}' if self.username else ''}"
 
+    @classmethod
+    def get_language(cls, language: str):
+        """
+        :param language:
+        :return:
+        """
+        if not language:
+            return DEFAULT_LANGUAGE.lower()
+
+        return language.split("-")[0].lower() if "-" in language else language.lower()
+
 
 class User(db.Model, BasicUser, TelegramUser, InitBase, DBBase):
     """
@@ -54,6 +76,38 @@ class User(db.Model, BasicUser, TelegramUser, InitBase, DBBase):
     __bind_key__ = 'user_database'
     settings = db.relationship("Settings", uselist=False,
                                back_populates="user", cascade="all, delete-orphan")
+
+    def add_default_settings(self):
+        settings = Settings()
+        settings.user_id = self.id
+        settings.language = self.get_language(self.language_code)
+        settings.save()
+
+    @classmethod
+    def from_db_by(cls, data) -> Optional[User]:
+        from bot import msg, cbq
+
+        if isinstance(data, cbq):
+            user_id = data.message.chat.id
+        elif isinstance(data, msg):
+            user_id = data.chat.id
+        elif isinstance(data, int) or (isinstance(data, str) and data.isdigit()):
+            user_id = data
+        else:
+            return None
+
+        return User.query.filter(User.id == user_id).first()
+
+    @classmethod
+    def create_from(cls, request) -> User:
+        from bot import cbq
+
+        if isinstance(request, cbq):
+            request = request.message
+
+        fields = inspect(User).all_orm_descriptors.keys()
+        data = {k: v for k, v in request.from_user.__dict__.items() if k in fields}
+        return User(**data)
 
 
 class Settings(db.Model, InitBase, DBBase):
@@ -69,6 +123,11 @@ class Settings(db.Model, InitBase, DBBase):
                            cascade="all, delete-orphan", single_parent=True)
     language = db.Column(db.String, nullable=False, default=DEFAULT_LANGUAGE)
     trigger = db.Column(db.String)
+
+    def reset(self):
+        self.language = self.user.get_language(self.user.language_code)
+        self.trigger = ""
+        self.user.enable()
 
 
 if __name__ == "__main__":
