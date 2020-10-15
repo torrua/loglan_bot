@@ -4,6 +4,7 @@
 from bot import bot, msg
 from bot.handlers.commands import bot_cmd_start, bot_cmd_gle, bot_cmd_log
 from bot.handlers.messages import bot_text_messages_handler
+from config.postgres import app
 
 
 @bot.message_handler(commands=["start"])
@@ -13,7 +14,8 @@ def command_start(message: msg):
     :param message:
     :return:
     """
-    bot_cmd_start(message)
+    with app.app_context():
+        bot_cmd_start(message)
 
 
 @bot.message_handler(commands=["g", "e", ])
@@ -23,7 +25,8 @@ def command_gleci(message: msg):
     :param message:
     :return:
     """
-    bot_cmd_gle(message)
+    with app.app_context():
+        bot_cmd_gle(message)
 
 
 @bot.message_handler(commands=["l", ])
@@ -33,7 +36,8 @@ def command_logli(message: msg):
     :param message:
     :return:
     """
-    bot_cmd_log(message)
+    with app.app_context():
+        bot_cmd_log(message)
 
 
 @bot.message_handler(regexp="/[a-z]+")
@@ -44,4 +48,5 @@ def cpx_messages_handler(message: msg):
     :param message:
     :return:
     """
-    bot_text_messages_handler(message)
+    with app.app_context():
+        bot_text_messages_handler(message)

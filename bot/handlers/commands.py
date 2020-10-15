@@ -5,12 +5,10 @@ Telegram bot command functions
 
 from bot import bot, msg, ADMIN, EN, DEFAULT_PARSE_MODE, NOT_FOUND_MESSAGE
 from bot.handlers.functions import check_loglan_word, extract_args
-from config.postgres import run_with_context
 from config.postgres.model_user import User
 from config.postgres.models import Word
 
 
-@run_with_context
 def bot_cmd_start(message: msg):
     """
     Handle start command
@@ -32,7 +30,6 @@ def bot_cmd_start(message: msg):
         new_user.add_default_settings()
 
 
-@run_with_context
 def bot_cmd_gle(message: msg):
     """
     Handle command for english word
@@ -56,7 +53,6 @@ def bot_cmd_gle(message: msg):
         parse_mode=DEFAULT_PARSE_MODE)
 
 
-@run_with_context
 def bot_cmd_log(message: msg):
     """
     Handle command for loglan word
