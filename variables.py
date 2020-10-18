@@ -10,6 +10,7 @@ mark_page = "page"
 mark_action = "act"
 mark_entity = "ent"
 mark_record_id = "rid"
+mark_slice_start = "ss"
 
 # entities
 entity_predy = "ep"

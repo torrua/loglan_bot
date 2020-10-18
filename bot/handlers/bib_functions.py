@@ -2,13 +2,12 @@
 """Processing inline buttons calls received from telegram bot"""
 
 from callbaker import info_from_callback
-from keyboa import keyboa_maker
 from telebot.apihelper import ApiException as TelebotApiException
 
 from bot import bot, cbq
 from bot.handlers.functions import check_loglan_word
 from config.postgres.models import Word
-from variables import mark_record_id
+from variables import mark_record_id, mark_slice_start
 
 
 def bib_cancel(call: cbq) -> bool:
@@ -33,9 +32,9 @@ def bib_predy_send_card(call: cbq):
 
 def bib_predy_kb_cpx_switcher(call: cbq, state: bool):
     info = info_from_callback(call.data)
-
+    slice_start = info.pop(mark_slice_start, 0)
     word = Word.query.filter(Word.id == info[mark_record_id]).first()
-    kb = keyboa_maker(word.keyboard_cpx(show_list=state))
+    kb = word.keyboard_cpx(show_list=state, slice_start=slice_start)
 
     bot.edit_message_reply_markup(
         chat_id=call.from_user.id,

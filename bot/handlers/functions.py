@@ -6,7 +6,6 @@ Telegram bot common functions
 from bot import bot, DEFAULT_PARSE_MODE, DEFAULT_LANGUAGE
 from config import log
 from config.postgres.models import Word
-from keyboa import keyboa_maker
 
 
 def check_loglan_word(user_id: int, request: str) -> bool:
@@ -30,7 +29,7 @@ def check_loglan_word(user_id: int, request: str) -> bool:
             chat_id=user_id,
             text=word.export(),
             parse_mode=DEFAULT_PARSE_MODE,
-            reply_markup=keyboa_maker(word.keyboard_cpx()))
+            reply_markup=word.keyboard_cpx())
     return True
 
 

@@ -14,6 +14,8 @@ APP_SITE = environ.get("APP_SITE")
 DEFAULT_PARSE_MODE = "HTML"
 NOT_FOUND_MESSAGE = "Sorry, but nothing was found for <b>%s</b>."
 
+MIN_NUMBER_OF_BUTTONS = 50
+
 bot = TeleBot(TOKEN)
 ADMIN = int(environ.get("TELEGRAM_ADMIN_ID"))
 

@@ -1,13 +1,15 @@
 # -*- coding: utf-8 -*-
 """Model of LOD database for Telegram"""
 
-from typing import List, Optional
-from config.postgres.model_base import BaseDefinition, BaseWord
+from typing import List
+
 from callbaker import callback_from_info
+from keyboa import keyboa_maker, keyboa_combiner
+
+from config.postgres.model_base import BaseDefinition, BaseWord
 from variables import t, cbd, \
-    mark_action, mark_entity, mark_record_id, \
+    mark_action, mark_entity, mark_record_id, mark_slice_start, \
     action_predy_send_card, entity_predy, action_predy_kb_cpx_show, action_predy_kb_cpx_hide
-from keyboa.keyboards import MAXIMUM_ITEMS_IN_LINE
 
 
 class TelegramDefinition(BaseDefinition):
@@ -23,7 +25,8 @@ class TelegramDefinition(BaseDefinition):
         d_body = self.body \
             .replace('<', '&#60;').replace('>', '&#62;') \
             .replace('«', '<i>').replace('»', '</i>') \
-            .replace('≤', '<code>').replace('≥', '</code>')
+            .replace('{', '<code>').replace('}', '</code>') \
+            .replace('....', '….').replace('...', '…')
 
         d_case_tags = f" [{self.case_tags}]" if self.case_tags else ""
         return f"{d_usage}{d_grammar}{d_body}{d_case_tags}"
@@ -37,10 +40,6 @@ class TelegramWord(BaseWord):
         Convert word's data to str for sending as a telegram messages
         :return: List of str with technical info, definitions, used_in part
         """
-
-        def split_list(a_list):
-            half = len(a_list) // 2
-            return [a_list[:half], a_list[half:]]
 
         # Word
         list_of_afx = ["" + w.name for w in self.affixes]
@@ -58,18 +57,6 @@ class TelegramWord(BaseWord):
 
         # Definitions TODO maybe extract from method
         definitions_str = "\n\n".join([d.export() for d in self.get_definitions()])
-
-        # Used in
-        list_of_all_cpx = ["/" + w.name for w in self.complexes]
-
-        # Divide the list if the text does not place in one message
-        split_cpx = split_list(list_of_all_cpx) if \
-            len("; ".join(list_of_all_cpx)) > 3900 else [list_of_all_cpx, ]
-
-        """
-        used_in_str = ["\n\nUsed in: " + "; ".join(list_cpx)
-                       if list_cpx else "" for list_cpx in split_cpx]
-        """
 
         return f"{word_str}\n\n{definitions_str}"
 
@@ -101,70 +88,112 @@ class TelegramWord(BaseWord):
 
         new = '\n'
 
-        return new.join([f"/{word_name},{new}{new.join(definitions)}{new}"
+        return new.join([f"/{word_name},\n{new.join(definitions)}\n"
                          for word_name, definitions in result.items()]).strip()
 
-    def keyboard_cpx(self, show_list: bool = False) -> Optional[List[List[dict]]]:
+    def keyboard_cpx(self, show_list: bool = False, slice_start: int = 0):
         """
 
         :return:
         """
-        # TODO Add scrolling if number of cpx more than 100
 
-        complexes = self.complexes
+        kb_cpx_close = keyboa_maker({t: "Close", cbd: "close"})
 
-        if not complexes:
-            return None
+        def keyboard_navi(index_start, index_end, delimiter):
 
-        if not show_list:
-            callback_data_predy_kb_cpx_show = {
+            text_arrow_back = "\U0000276E" * 2
+            text_arrow_forward = "\U0000276F" * 2
+            button_back, button_forward = None, None
+
+            common_data = {
+                mark_entity: entity_predy,
+                mark_action: action_predy_kb_cpx_show,
+                mark_record_id: self.id,
+            }
+
+            if index_start != 0:
+                cbd_predy_kb_cpx_back = {
+                    **common_data, mark_slice_start: index_start - delimiter, }
+                button_back = {
+                    t: text_arrow_back,
+                    cbd: callback_from_info(cbd_predy_kb_cpx_back)}
+
+            if index_end != len(self.complexes):
+                cbd_predy_kb_cpx_forward = {
+                    **common_data, mark_slice_start: index_end, }
+                button_forward = {
+                    t: text_arrow_forward,
+                    cbd: callback_from_info(cbd_predy_kb_cpx_forward)}
+
+            nav_row = [b for b in [button_back, button_forward] if b]
+            return keyboa_maker(nav_row, items_in_row=2)
+
+        def keyboard_data(current_complexes):
+            cpx_items = [{t: cpx.name, cbd: callback_from_info({
+                mark_entity: entity_predy,
+                mark_action: action_predy_send_card,
+                mark_record_id: cpx.id, })} for cpx in current_complexes]
+            return keyboa_maker(items=cpx_items, auto_alignment=True, items_in_row=4)
+
+        def keyboard_hide(current_complexes):
+            tot_num_cpx = len(current_complexes)
+            text_cpx_hide = f"Hide Complex{'es' if tot_num_cpx > 1 else ''}"
+            cbd_predy_kb_cpx_hide = {
+                mark_entity: entity_predy,
+                mark_action: action_predy_kb_cpx_hide,
+                mark_record_id: self.id, }
+            button_predy_kb_cpx_hide = [{
+                t: text_cpx_hide, cbd: callback_from_info(cbd_predy_kb_cpx_hide)}, ]
+            return keyboa_maker(button_predy_kb_cpx_hide)
+
+        def keyboard_show(total_complexes):
+            tot_num_cpx = len(total_complexes)
+            text_cpx_show = f"Show Complex{'es' if tot_num_cpx > 1 else ''} ({tot_num_cpx})"
+            cbd_predy_kb_cpx_show = {
                 mark_entity: entity_predy,
                 mark_action: action_predy_kb_cpx_show,
                 mark_record_id: self.id, }
-
             button_show = [{
-                t: f"Show Complex{'es' if len(complexes) > 1 else ''} ({len(complexes)})",
-                cbd: callback_from_info(callback_data_predy_kb_cpx_show)}, ]
-            button_close = [{t: "Close", cbd: "close"}, ]
-            return [button_show, button_close, ]
+                t: text_cpx_show, cbd: callback_from_info(cbd_predy_kb_cpx_show)}, ]
+            return keyboa_combiner((keyboa_maker(button_show), kb_cpx_close))
 
-        callback_data_predy_kb_cpx_hide = {
-            mark_entity: entity_predy,
-            mark_action: action_predy_kb_cpx_hide,
-            mark_record_id: self.id, }
-        button = [{
-            t: f"Hide Complex{'es' if len(complexes) > 1 else ''}",
-            cbd: callback_from_info(callback_data_predy_kb_cpx_hide)}, ]
-        cpx_buttons = [button, ]
+        def get_delimiter(total_complexes):
+            from bot import MIN_NUMBER_OF_BUTTONS
+            total_number_of_complexes = len(total_complexes)
+            allowed_range = list(range(MIN_NUMBER_OF_BUTTONS, MIN_NUMBER_OF_BUTTONS + 11))
+            lst = [(total_number_of_complexes % i, i) for i in allowed_range]
+            delimiter = min(lst, key=lambda x: abs(x[0] - MIN_NUMBER_OF_BUTTONS))[1]
+            for i in lst:
+                if i[0] == 0:
+                    delimiter = i[1]
+                    break
+            return delimiter
 
-        len_current_row = 0
-        current_row = []
+        all_cpx = self.complexes
 
-        complexes_names = [c.name for c in complexes]
-        total_avg = sum(map(len, complexes_names)) / len(complexes_names)
-        average_items_in_line = 4
-        max_len_row = total_avg * average_items_in_line + average_items_in_line
+        if not all_cpx:
+            return kb_cpx_close
 
-        for cpx in complexes:
+        if not show_list:
+            return keyboard_show(self.complexes)
 
-            callback_data = {
-                mark_entity: entity_predy,
-                mark_action: action_predy_send_card,
-                mark_record_id: cpx.id, }
+        current_delimiter = get_delimiter(all_cpx)
 
-            button = {t: cpx.name, cbd: callback_from_info(callback_data)}
+        kb_cpx_hide = keyboard_hide(all_cpx)
 
-            if len_current_row + len(cpx.name) < max_len_row \
-                    and len(current_row) < MAXIMUM_ITEMS_IN_LINE:
-                current_row.append(button)
-                len_current_row = len_current_row + len(cpx.name)
-            else:
-                cpx_buttons.append(current_row)
-                len_current_row = len(cpx.name)
-                current_row = [button, ]
+        total_num_of_cpx = len(all_cpx)
 
-        if current_row:
-            cpx_buttons.append(current_row)
+        last_allowed_element = slice_start + current_delimiter
+        slice_end = last_allowed_element if last_allowed_element < len(all_cpx) else len(all_cpx)
 
-        cpx_buttons.append([{t: "Close", cbd: "close"}, ])
-        return cpx_buttons
+        current_cpx_set = all_cpx[slice_start:slice_end]
+
+        kb_cpx_data = keyboard_data(current_cpx_set)
+        kb_cpx_nav = None
+
+        if total_num_of_cpx > current_delimiter:
+            kb_cpx_nav = keyboard_navi(slice_start, slice_end, current_delimiter)
+
+        kb_combo = tuple([kb for kb in [kb_cpx_hide, kb_cpx_data, kb_cpx_nav, kb_cpx_close] if kb])
+
+        return keyboa_combiner(kb_combo)

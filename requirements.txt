@@ -5,4 +5,4 @@ psycopg2>=2.8.6
 pyTelegramBotAPI>=3.7.3
 gunicorn>=20.0.4
 keyboa>=2.2.5
-callbaker >=1.0.0
+callbaker>=1.0.0
