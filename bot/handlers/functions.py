@@ -6,6 +6,7 @@ Telegram bot common functions
 from bot import bot, DEFAULT_PARSE_MODE, DEFAULT_LANGUAGE
 from config import log
 from config.postgres.models import Word
+from keyboa import keyboa_maker
 
 
 def check_loglan_word(user_id: int, request: str) -> bool:
@@ -15,16 +16,21 @@ def check_loglan_word(user_id: int, request: str) -> bool:
     :param request: User request
     :return: Boolean
     """
-    words = Word.by_name(request).all()
+
+    if isinstance(request, int):
+        words = Word.query.filter(Word.id == request).all()
+    else:
+        words = Word.by_name(request).all()
+
     if not words:
         return False
 
     for word in words:
-        for element in word.export():
-            bot.send_message(
-                chat_id=user_id,
-                text=element,
-                parse_mode=DEFAULT_PARSE_MODE)
+        bot.send_message(
+            chat_id=user_id,
+            text=word.export(),
+            parse_mode=DEFAULT_PARSE_MODE,
+            reply_markup=keyboa_maker(word.keyboard_cpx()))
     return True
 
 

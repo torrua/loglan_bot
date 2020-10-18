@@ -1,8 +1,13 @@
 # -*- coding: utf-8 -*-
 """Model of LOD database for Telegram"""
 
-from typing import List
+from typing import List, Optional
 from config.postgres.model_base import BaseDefinition, BaseWord
+from callbaker import callback_from_info
+from variables import t, cbd, \
+    mark_action, mark_entity, mark_record_id, \
+    action_predy_send_card, entity_predy, action_predy_kb_cpx_show, action_predy_kb_cpx_hide
+from keyboa.keyboards import MAXIMUM_ITEMS_IN_LINE
 
 
 class TelegramDefinition(BaseDefinition):
@@ -27,7 +32,7 @@ class TelegramDefinition(BaseDefinition):
 class TelegramWord(BaseWord):
     """Word class extensions for Telegram"""
 
-    def export(self) -> List[str]:
+    def export(self) -> str:
         """
         Convert word's data to str for sending as a telegram messages
         :return: List of str with technical info, definitions, used_in part
@@ -61,12 +66,12 @@ class TelegramWord(BaseWord):
         split_cpx = split_list(list_of_all_cpx) if \
             len("; ".join(list_of_all_cpx)) > 3900 else [list_of_all_cpx, ]
 
+        """
         used_in_str = ["\n\nUsed in: " + "; ".join(list_cpx)
                        if list_cpx else "" for list_cpx in split_cpx]
+        """
 
-        # Combine
-        result = [word_str, definitions_str, *used_in_str]
-        return [element for element in result if element]
+        return f"{word_str}\n\n{definitions_str}"
 
     def get_definitions(self) -> List[TelegramDefinition]:
         """
@@ -98,3 +103,68 @@ class TelegramWord(BaseWord):
 
         return new.join([f"/{word_name},{new}{new.join(definitions)}{new}"
                          for word_name, definitions in result.items()]).strip()
+
+    def keyboard_cpx(self, show_list: bool = False) -> Optional[List[List[dict]]]:
+        """
+
+        :return:
+        """
+        # TODO Add scrolling if number of cpx more than 100
+
+        complexes = self.complexes
+
+        if not complexes:
+            return None
+
+        if not show_list:
+            callback_data_predy_kb_cpx_show = {
+                mark_entity: entity_predy,
+                mark_action: action_predy_kb_cpx_show,
+                mark_record_id: self.id, }
+
+            button_show = [{
+                t: f"Show Complex{'es' if len(complexes) > 1 else ''} ({len(complexes)})",
+                cbd: callback_from_info(callback_data_predy_kb_cpx_show)}, ]
+            button_close = [{t: "Close", cbd: "close"}, ]
+            return [button_show, button_close, ]
+
+        callback_data_predy_kb_cpx_hide = {
+            mark_entity: entity_predy,
+            mark_action: action_predy_kb_cpx_hide,
+            mark_record_id: self.id, }
+        button = [{
+            t: f"Hide Complex{'es' if len(complexes) > 1 else ''}",
+            cbd: callback_from_info(callback_data_predy_kb_cpx_hide)}, ]
+        cpx_buttons = [button, ]
+
+        len_current_row = 0
+        current_row = []
+
+        complexes_names = [c.name for c in complexes]
+        total_avg = sum(map(len, complexes_names)) / len(complexes_names)
+        average_items_in_line = 4
+        max_len_row = total_avg * average_items_in_line + average_items_in_line
+
+        for cpx in complexes:
+
+            callback_data = {
+                mark_entity: entity_predy,
+                mark_action: action_predy_send_card,
+                mark_record_id: cpx.id, }
+
+            button = {t: cpx.name, cbd: callback_from_info(callback_data)}
+
+            if len_current_row + len(cpx.name) < max_len_row \
+                    and len(current_row) < MAXIMUM_ITEMS_IN_LINE:
+                current_row.append(button)
+                len_current_row = len_current_row + len(cpx.name)
+            else:
+                cpx_buttons.append(current_row)
+                len_current_row = len(cpx.name)
+                current_row = [button, ]
+
+        if current_row:
+            cpx_buttons.append(current_row)
+
+        cpx_buttons.append([{t: "Close", cbd: "close"}, ])
+        return cpx_buttons

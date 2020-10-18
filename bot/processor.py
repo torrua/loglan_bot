@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 """Processing commands received from telegram bot"""
 
-from bot import bot, msg
+from bot import bot, msg, cbq
 from bot.handlers.commands import bot_cmd_start, bot_cmd_gle, bot_cmd_log
 from bot.handlers.messages import bot_text_messages_handler
+from bot.handlers.inline import bot_callback_inline
 from config.postgres import app
 
 
@@ -50,3 +51,14 @@ def cpx_messages_handler(message: msg):
     """
     with app.app_context():
         bot_text_messages_handler(message)
+
+
+@bot.callback_query_handler(func=lambda call: True)
+def callback_inline(call: cbq):
+    """
+    Все нажатия inline кнопок подадают на обработку в эту функцию.
+    :param call: Входяший инлайн запрос
+    :return:
+    """
+    with app.app_context():
+        bot_callback_inline(call)

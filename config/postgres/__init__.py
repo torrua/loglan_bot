@@ -7,10 +7,7 @@ Create an application object and database
 """
 import os
 from flask_sqlalchemy import SQLAlchemy
-
-db = SQLAlchemy()
-
-from config.postgres import models
+from config import log, create_app
 
 
 class CLIConfig:
@@ -22,7 +19,8 @@ class CLIConfig:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 
-from config import create_app
+db = SQLAlchemy()
+from config.postgres import models
 
 app = create_app(config=CLIConfig, database=db)
 from app import routes
