@@ -6,8 +6,7 @@ Initializing application module
 Create an application object and database
 """
 import os
-from flask_sqlalchemy import SQLAlchemy
-from config import log, create_app
+from loglan_db import app_lod
 
 
 class CLIConfig:
@@ -19,8 +18,6 @@ class CLIConfig:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 
-db = SQLAlchemy()
-from config.postgres import models
+app = app_lod(config_lod=CLIConfig)
 
-app = create_app(config=CLIConfig, database=db)
 from app import routes

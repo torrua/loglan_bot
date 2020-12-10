@@ -6,7 +6,7 @@ from typing import List
 from callbaker import callback_from_info
 from keyboa import keyboa_maker, keyboa_combiner
 
-from config.postgres.model_base import BaseDefinition, BaseWord
+from loglan_db.model_base import BaseDefinition, BaseWord
 from variables import t, cbd, \
     mark_action, mark_entity, mark_record_id, mark_slice_start, \
     action_predy_send_card, entity_predy, action_predy_kb_cpx_show, action_predy_kb_cpx_hide

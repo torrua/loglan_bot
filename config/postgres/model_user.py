@@ -7,8 +7,8 @@ Model of user database
 from __future__ import annotations
 from sqlalchemy import inspect
 
-from config.postgres import db
-from config.postgres.common_base import InitBase, DBBase
+from loglan_db import db
+from loglan_db.model_base import InitBase, DBBase
 from config import DEFAULT_LANGUAGE
 from typing import Optional
 
