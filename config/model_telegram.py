@@ -202,3 +202,7 @@ class TelegramWord(BaseWord, AddonWordGetter):
             text=self.export(),
             parse_mode=parse_mode,
             reply_markup=self.keyboard_cpx())
+
+    @classmethod
+    def by_request(cls, request) -> list:
+        return [cls.get_by_id(request), ] if isinstance(request, int) else cls.by_name(request).all()
