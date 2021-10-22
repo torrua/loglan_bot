@@ -1,6 +1,6 @@
 flask>=1.1.2
 flask-migrate>=2.5.3
-sqlalchemy==1.3.20
+sqlalchemy
 psycopg2>=2.8.6
 pyTelegramBotAPI>=3.7.4
 gunicorn>=20.0.4

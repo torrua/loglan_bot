@@ -5,7 +5,7 @@ from bot import bot, msg, cbq
 from bot.handlers.commands import bot_cmd_start, bot_cmd_gle, bot_cmd_log
 from bot.handlers.messages import bot_text_messages_handler
 from bot.handlers.inline import bot_callback_inline
-from config.postgres import app
+from config import app
 
 
 @bot.message_handler(commands=["start"])

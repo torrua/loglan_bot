@@ -7,7 +7,7 @@ Configuration file for the whole project
 import os
 import logging
 from flask import Flask
-
+from loglan_db import app_lod
 
 logging.basicConfig(
     # format='%(message)s',
@@ -24,18 +24,13 @@ DEFAULT_STYLE = os.getenv("DEFAULT_STYLE", "ultra")
 SEPARATOR = "@"
 
 
-def create_app(config, database):
+class CLIConfig:
     """
-    Create app
+    Configuration object for remote database
     """
+    SQLALCHEMY_DATABASE_URI = os.environ.get('LOD_DATABASE_URL').replace("://", "ql://", 1)
+    SQLALCHEMY_BINDS = {"user_database": os.environ.get('DATABASE_URL').replace("://", "ql://", 1), }
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
 
-    # app initialization
-    app = Flask(__name__)
 
-    app.config.from_object(config)
-
-    # db initialization
-    database.init_app(app)
-
-    # database.create_all(app=app) when use need to re-initialize db
-    return app
+app = app_lod(config_lod=CLIConfig)

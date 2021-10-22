@@ -5,7 +5,7 @@ Telegram bot common functions
 
 from bot import bot, DEFAULT_PARSE_MODE, DEFAULT_LANGUAGE
 from config import log
-from config.postgres.models import Word
+from config.models import Word
 
 
 def check_loglan_word(user_id: int, request: str) -> bool:

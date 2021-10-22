@@ -2,7 +2,7 @@
 """The main module for launching Heroku application"""
 
 from os import environ
-from config.postgres import app
+from config import app
 from bot import bot, APP_SITE, TOKEN
 
 ENV = environ["ENVIRONMENT"]

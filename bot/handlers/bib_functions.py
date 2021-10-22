@@ -6,7 +6,7 @@ from telebot.apihelper import ApiException as TelebotApiException
 
 from bot import bot, cbq
 from bot.handlers.functions import check_loglan_word
-from config.postgres.models import Word
+from config.models import Word
 from variables import mark_record_id, mark_slice_start
 
 

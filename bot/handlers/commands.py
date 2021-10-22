@@ -4,8 +4,8 @@ Telegram bot command functions
 """
 
 from bot import bot, msg, ADMIN, EN, DEFAULT_PARSE_MODE, NOT_FOUND_MESSAGE
-from config.postgres.model_user import User
-from config.postgres.models import Word
+from config.model_user import User
+from config.models import Word
 from bot.handlers.functions import check_loglan_word, extract_args
 
 
