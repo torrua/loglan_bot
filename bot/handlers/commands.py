@@ -3,10 +3,10 @@
 Telegram bot command functions
 """
 
-from bot import bot, msg, ADMIN, EN, DEFAULT_PARSE_MODE, NOT_FOUND_MESSAGE
+from bot import bot, msg, ADMIN, EN, DEFAULT_PARSE_MODE, MESSAGE_NOT_FOUND, MESSAGE_SPECIFY_LOGLAN_WORD
 from config.model_user import User
 from config.model_telegram import TelegramWord as Word
-from bot.handlers.functions import check_loglan_word, extract_args
+from bot.handlers.functions import extract_args
 
 
 def bot_cmd_start(message: msg):
@@ -42,7 +42,7 @@ def bot_cmd_gle(message: msg):
     if arguments:
         user_request = arguments[0]
         result = Word.translation_by_key(request=user_request, language=EN)
-        message_text = result if result else NOT_FOUND_MESSAGE % user_request
+        message_text = result if result else MESSAGE_NOT_FOUND % user_request
 
     else:
         message_text = "You need to specify the English word you would like to find."
@@ -59,17 +59,23 @@ def bot_cmd_log(message: msg):
     :param message:
     :return:
     """
-    arguments = extract_args(message.text)
 
-    if arguments:
-        user_request = arguments[0]
-        if check_loglan_word(user_id=message.chat.id, request=user_request):
-            return
-        message_text = NOT_FOUND_MESSAGE % user_request
-    else:
-        message_text = "You need to specify the Loglan word you would like to find."
+    if not (arguments := extract_args(message.text)):
+        bot.send_message(
+            chat_id=message.chat.id,
+            text=MESSAGE_SPECIFY_LOGLAN_WORD,
+            parse_mode=DEFAULT_PARSE_MODE)
+        return
 
-    bot.send_message(
-        chat_id=message.chat.id,
-        text=message_text,
-        parse_mode=DEFAULT_PARSE_MODE)
+    if not (words := Word.by_request(arguments[0])):
+        bot.send_message(
+            chat_id=message.chat.id,
+            text=MESSAGE_NOT_FOUND % arguments[0],
+            parse_mode=DEFAULT_PARSE_MODE)
+        return
+
+    for word in words:
+        word.send_card_to_user(
+            bot=bot,
+            user_id=message.chat.id,
+            parse_mode=DEFAULT_PARSE_MODE)

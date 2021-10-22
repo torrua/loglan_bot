@@ -8,28 +8,6 @@ from config import log
 from config.model_telegram import TelegramWord as Word
 
 
-def check_loglan_word(user_id: int, request: str) -> bool:
-    """
-    Handle loglan word
-    :param user_id: Telegram User ID
-    :param request: User request
-    :return: Boolean
-    """
-
-    if isinstance(request, int):
-        words = Word.query.filter(Word.id == request).all()
-    else:
-        words = Word.by_name(request).all()
-
-    if not words:
-        return False
-
-    for word in words:
-        word.send_card_to_user(bot, user_id, DEFAULT_PARSE_MODE)
-
-    return True
-
-
 def check_foreign_word(user_id: int, request: str):
     """
     Handle foreign word
