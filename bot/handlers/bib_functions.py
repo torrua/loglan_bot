@@ -2,25 +2,19 @@
 """Processing inline buttons calls received from telegram bot"""
 
 from callbaker import info_from_callback
-from telebot.apihelper import ApiException as TelebotApiException
 
 from bot import bot, cbq, DEFAULT_PARSE_MODE
 from config.model_telegram import TelegramWord as Word
 from variables import mark_record_id, mark_slice_start
 
 
-def bib_cancel(call: cbq) -> bool:
+def bib_cancel(call: cbq):
     """
     Дополнительные меню: обработка нажатия кнопки 'Отмена'
     :param call:
     :return:
     """
-    try:
-        bot.delete_message(call.message.chat.id, call.message.message_id)
-    except TelebotApiException:
-        return False
-    else:
-        return True
+    bot.delete_message(call.message.chat.id, call.message.message_id)
 
 
 def bib_predy_send_card(call: cbq):
