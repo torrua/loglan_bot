@@ -3,8 +3,7 @@
 Telegram bot messages functions
 """
 
-from bot import bot, DEFAULT_PARSE_MODE, msg, MESSAGE_NOT_FOUND
-from bot.handlers.functions import check_foreign_word
+from bot import bot, DEFAULT_PARSE_MODE, msg, MESSAGE_NOT_FOUND, DEFAULT_LANGUAGE
 from config.model_telegram import TelegramWord as Word
 
 
@@ -22,8 +21,13 @@ def bot_text_messages_handler(message: msg) -> None:
         for word in words:
             word.send_card_to_user(bot, uid, DEFAULT_PARSE_MODE)
 
-    elif not (check_foreign_word(user_id=uid, request=user_request)):
+    elif translation := Word.translation_by_key(user_request, DEFAULT_LANGUAGE):
+        bot.send_message(
+            chat_id=uid,
+            text=translation,
+            parse_mode=DEFAULT_PARSE_MODE)
 
+    else:
         bot.send_message(
             chat_id=uid,
             text=MESSAGE_NOT_FOUND % user_request,

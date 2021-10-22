@@ -6,7 +6,6 @@ Telegram bot command functions
 from bot import bot, msg, ADMIN, EN, DEFAULT_PARSE_MODE, MESSAGE_NOT_FOUND, MESSAGE_SPECIFY_LOGLAN_WORD
 from config.model_user import User
 from config.model_telegram import TelegramWord as Word
-from bot.handlers.functions import extract_args
 
 
 def bot_cmd_start(message: msg):
@@ -30,16 +29,14 @@ def bot_cmd_start(message: msg):
         new_user.add_default_settings()
 
 
-def bot_cmd_gle(message: msg):
+def bot_cmd_gle(message: msg):  # TODO
     """
     Handle command for english word
     :param message:
     :return:
     """
 
-    arguments = extract_args(message.text)
-
-    if arguments:
+    if arguments := message.text.split()[1:]:
         user_request = arguments[0]
         result = Word.translation_by_key(request=user_request, language=EN)
         message_text = result if result else MESSAGE_NOT_FOUND % user_request
@@ -60,7 +57,7 @@ def bot_cmd_log(message: msg):
     :return:
     """
 
-    if not (arguments := extract_args(message.text)):
+    if not (arguments := message.text.split()[1:]):
         bot.send_message(
             chat_id=message.chat.id,
             text=MESSAGE_SPECIFY_LOGLAN_WORD,
