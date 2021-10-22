@@ -12,8 +12,6 @@ from loglan_db.model_init import InitBase, DBBase
 from config import DEFAULT_LANGUAGE
 from typing import Optional
 
-# db.metadata.clear()
-
 
 class BasicUser:
     """
