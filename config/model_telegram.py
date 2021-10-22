@@ -195,3 +195,10 @@ class TelegramWord(BaseWord, AddonWordGetter):
         kb_combo = (kb_cpx_hide, kb_cpx_data, kb_cpx_nav, kb_cpx_close)
 
         return Keyboa.combine(kb_combo)
+
+    def send_card_to_user(self, bot, user_id, parse_mode):
+        bot.send_message(
+            chat_id=user_id,
+            text=self.export(),
+            parse_mode=parse_mode,
+            reply_markup=self.keyboard_cpx())
