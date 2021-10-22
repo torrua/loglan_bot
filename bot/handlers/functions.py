@@ -5,7 +5,7 @@ Telegram bot common functions
 
 from bot import bot, DEFAULT_PARSE_MODE, DEFAULT_LANGUAGE
 from config import log
-from config.models import Word
+from config.model_telegram import TelegramWord as Word
 
 
 def check_loglan_word(user_id: int, request: str) -> bool:
@@ -25,11 +25,8 @@ def check_loglan_word(user_id: int, request: str) -> bool:
         return False
 
     for word in words:
-        bot.send_message(
-            chat_id=user_id,
-            text=word.export(),
-            parse_mode=DEFAULT_PARSE_MODE,
-            reply_markup=word.keyboard_cpx())
+        word.send_card_to_user(bot, user_id, DEFAULT_PARSE_MODE)
+
     return True
 
 
