@@ -19,7 +19,7 @@ def command_start(message: msg):
         bot_cmd_start(message)
 
 
-@bot.message_handler(commands=["g", "e", ])
+@bot.message_handler(commands=["g", "e", "gleci", ])
 def command_gleci(message: msg):
     """
     Handle command /gleci
@@ -30,7 +30,7 @@ def command_gleci(message: msg):
         bot_cmd_gle(message)
 
 
-@bot.message_handler(commands=["l", ])
+@bot.message_handler(commands=["l", "logli", ])
 def command_logli(message: msg):
     """
     Handle command /logli
@@ -56,8 +56,8 @@ def cpx_messages_handler(message: msg):
 @bot.callback_query_handler(func=lambda call: True)
 def callback_inline(call: cbq):
     """
-    Все нажатия inline кнопок подадают на обработку в эту функцию.
-    :param call: Входяший инлайн запрос
+    All inline requests are processed by this function
+    :param call: Incoming inline request
     :return:
     """
     with app.app_context():
