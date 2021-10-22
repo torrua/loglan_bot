@@ -4,6 +4,6 @@ sqlalchemy
 psycopg2>=2.8.6
 pyTelegramBotAPI>=3.7.4
 gunicorn>=20.0.4
-keyboa>=2.2.7
+keyboa>=3.0.0
 callbaker>=1.0.0
 loglan_db
