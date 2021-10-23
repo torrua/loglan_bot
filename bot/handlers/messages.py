@@ -14,21 +14,20 @@ def bot_text_messages_handler(message: msg) -> None:
     :return: None
     """
 
-    user_request = message.text[1:] if message.text[0] == "/" else message.text
-    uid = message.chat.id
+    user_request = message.text.removeprefix("/")
 
     if words := Word.by_request(user_request):
         for word in words:
-            word.send_card_to_user(bot, uid, DEFAULT_PARSE_MODE)
+            word.send_card_to_user(bot, message.chat.id, DEFAULT_PARSE_MODE)
 
     elif translation := Word.translation_by_key(user_request, DEFAULT_LANGUAGE):
         bot.send_message(
-            chat_id=uid,
+            chat_id=message.chat.id,
             text=translation,
             parse_mode=DEFAULT_PARSE_MODE)
 
     else:
         bot.send_message(
-            chat_id=uid,
+            chat_id=message.chat.id,
             text=MESSAGE_NOT_FOUND % user_request,
             parse_mode=DEFAULT_PARSE_MODE, )

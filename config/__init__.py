@@ -35,4 +35,3 @@ class CLIConfig:
 app = app_lod(config_lod=CLIConfig)
 
 from app import routes
-

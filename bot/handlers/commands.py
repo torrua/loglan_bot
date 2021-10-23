@@ -44,10 +44,11 @@ def bot_cmd_gle(message: msg):
             parse_mode=DEFAULT_PARSE_MODE)
         return
 
-    result = Word.translation_by_key(request=arguments[0], language=EN)
+    user_request = arguments[0]
+    result = Word.translation_by_key(request=user_request, language=EN)
     bot.send_message(
         chat_id=message.chat.id,
-        text=result if result else MESSAGE_NOT_FOUND % arguments[0],
+        text=result if result else MESSAGE_NOT_FOUND % user_request,
         parse_mode=DEFAULT_PARSE_MODE)
 
 
