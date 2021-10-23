@@ -6,7 +6,6 @@ Configuration file for the whole project
 """
 import os
 import logging
-from flask import Flask
 from loglan_db import app_lod
 
 logging.basicConfig(
@@ -34,3 +33,6 @@ class CLIConfig:
 
 
 app = app_lod(config_lod=CLIConfig)
+
+from app import routes
+
