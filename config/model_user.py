@@ -5,12 +5,15 @@
 Model of user database
 """
 from __future__ import annotations
-from sqlalchemy import inspect
+
+from typing import Optional
 
 from loglan_db import db
 from loglan_db.model_init import InitBase, DBBase
+from sqlalchemy import inspect
+from telebot.types import Message, CallbackQuery
+
 from config import DEFAULT_LANGUAGE
-from typing import Optional
 
 
 class BasicUser:
@@ -83,24 +86,16 @@ class User(db.Model, BasicUser, TelegramUser, InitBase, DBBase):
 
     @classmethod
     def from_db_by(cls, data) -> Optional[User]:
-        from bot import msg, cbq
-
-        if isinstance(data, cbq):
-            user_id = data.message.chat.id
-        elif isinstance(data, msg):
-            user_id = data.chat.id
-        elif isinstance(data, int) or (isinstance(data, str) and data.isdigit()):
-            user_id = data
-        else:
-            return None
-
-        return User.query.filter(User.id == user_id).first()
+        if isinstance(data, CallbackQuery):
+            data = data.message.chat.id
+        elif isinstance(data, Message):
+            data = data.chat.id
+        return User.query.filter(User.id == data).first()
 
     @classmethod
     def create_from(cls, request) -> User:
-        from bot import cbq
 
-        if isinstance(request, cbq):
+        if isinstance(request, CallbackQuery):
             request = request.message
 
         fields = inspect(User).all_orm_descriptors.keys()
