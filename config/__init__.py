@@ -10,10 +10,13 @@ from loglan_db import app_lod
 
 logging.basicConfig(
     # format='%(message)s',
-    format=('%(filename)s [LINE:%(lineno)d]\t[%(asctime)s] '
-            '%(levelname)-s\t%(funcName)s() \t\t%(message)s'),
+    format=(
+        "%(filename)s [LINE:%(lineno)d]\t[%(asctime)s] "
+        "%(levelname)-s\t%(funcName)s() \t\t%(message)s"
+    ),
     level=logging.DEBUG,
-    datefmt="%y-%m-%d %H:%M:%S")
+    datefmt="%y-%m-%d %H:%M:%S",
+)
 
 log = logging.getLogger(__name__)
 
@@ -28,8 +31,11 @@ class CLIConfig:
     """
     Configuration object for remote database
     """
-    SQLALCHEMY_DATABASE_URI = os.getenv('LOD_DATABASE_URL').replace("://", "ql://", 1)
-    SQLALCHEMY_BINDS = {"user_database": os.getenv('DATABASE_URL').replace("://", "ql://", 1), }
+
+    SQLALCHEMY_DATABASE_URI = os.getenv("LOD_DATABASE_URL").replace("://", "ql://", 1)
+    SQLALCHEMY_BINDS = {
+        "user_database": os.getenv("DATABASE_URL").replace("://", "ql://", 1),
+    }
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 
