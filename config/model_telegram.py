@@ -155,10 +155,13 @@ class TelegramWordKeyboard:
     def __init__(self, word: TelegramWord):
         self.word = word
 
-    def keyboard_navi(self, index_start, index_end, delimiter):
-        text_arrow_back = "\U0000276E" * 2
-        text_arrow_forward = "\U0000276F" * 2
-        button_back, button_forward = None, None
+    def keyboard_navi(self, index_start, total_num_of_cpx):
+
+        delimiter = self.get_delimiter(total_num_of_cpx)
+        index_end = self.get_slice_end(index_start, total_num_of_cpx)
+
+        if total_num_of_cpx <= delimiter:
+            return None
 
         common_data = {
             mark_entity: entity_predy,
@@ -166,7 +169,11 @@ class TelegramWordKeyboard:
             mark_record_id: self.word.id,
         }
 
+        nav_row = []
+
         if index_start != 0:
+            text_arrow_back = "\U0000276E" * 2
+
             cbd_predy_kb_cpx_back = {
                 **common_data,
                 mark_slice_start: index_start - delimiter,
@@ -175,8 +182,11 @@ class TelegramWordKeyboard:
                 t: text_arrow_back,
                 cbd: callback_from_info(cbd_predy_kb_cpx_back),
             }
+            nav_row.append(button_back)
 
         if index_end != len(self.word.complexes.all()):
+            text_arrow_forward = "\U0000276F" * 2
+
             cbd_predy_kb_cpx_forward = {
                 **common_data,
                 mark_slice_start: index_end,
@@ -185,8 +195,8 @@ class TelegramWordKeyboard:
                 t: text_arrow_forward,
                 cbd: callback_from_info(cbd_predy_kb_cpx_forward),
             }
+            nav_row.append(button_forward)
 
-        nav_row = [b for b in [button_back, button_forward] if b]
         return Keyboa(nav_row, items_in_row=2)()
 
     def keyboard_cpx_switcher(self, total_number_of_complexes: int, show: bool = True):
@@ -259,25 +269,23 @@ class TelegramWordKeyboard:
             )
             return Keyboa.combine(keyboards)
 
-        current_delimiter = self.get_delimiter(total_num_of_cpx)
+        slice_end = self.get_slice_end(slice_start, total_num_of_cpx)
 
+        current_cpx_set = self.word.complexes.all()[slice_start:slice_end]
+        kb_cpx_data = self.keyboard_data(current_cpx_set)
+
+        kb_cpx_nav = self.keyboard_navi(slice_start, total_num_of_cpx)
         kb_cpx_hide = self.keyboard_cpx_switcher(total_num_of_cpx, show=False)
 
+        kb_combo = (kb_cpx_hide, kb_cpx_data, kb_cpx_nav, self.kb_cpx_close)
+        return Keyboa.combine(kb_combo)
+
+    def get_slice_end(self, slice_start, total_num_of_cpx):
+        current_delimiter = self.get_delimiter(total_num_of_cpx)
         last_allowed_element = slice_start + current_delimiter
         slice_end = (
             last_allowed_element
             if last_allowed_element < total_num_of_cpx
             else total_num_of_cpx
         )
-
-        current_cpx_set = self.word.complexes.all()[slice_start:slice_end]
-        kb_cpx_data = self.keyboard_data(current_cpx_set)
-
-        kb_cpx_nav = None
-
-        if total_num_of_cpx > current_delimiter:
-            kb_cpx_nav = self.keyboard_navi(slice_start, slice_end, current_delimiter)
-
-        kb_combo = (kb_cpx_hide, kb_cpx_data, kb_cpx_nav, self.kb_cpx_close)
-
-        return Keyboa.combine(kb_combo)
+        return slice_end
