@@ -45,7 +45,7 @@ class TelegramDefinition(BaseDefinition):
         for definition in cls.by_key(request, language).all():
             source_word_name = definition.source_word.name
             if not result.get(source_word_name):
-                result[source_word_name] = list()
+                result[source_word_name] = []
             result[source_word_name].append(definition.export())
 
         result = dict(sorted(result.items()))
