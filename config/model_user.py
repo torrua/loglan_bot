@@ -1,5 +1,5 @@
 # -*- coding:utf-8 -*-
-# pylint: disable=R0903, E1101
+# pylint: disable=R0903, E1101, R0401
 
 """
 Model of user database
