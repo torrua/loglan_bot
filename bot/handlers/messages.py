@@ -22,12 +22,12 @@ def bot_text_messages_handler(message: msg) -> None:
 
     elif translation := Definition.translation_by_key(user_request, DEFAULT_LANGUAGE):
         bot.send_message(
-            chat_id=message.chat.id,
-            text=translation,
-            parse_mode=DEFAULT_PARSE_MODE)
+            chat_id=message.chat.id, text=translation, parse_mode=DEFAULT_PARSE_MODE
+        )
 
     else:
         bot.send_message(
             chat_id=message.chat.id,
             text=MESSAGE_NOT_FOUND % user_request,
-            parse_mode=DEFAULT_PARSE_MODE, )
+            parse_mode=DEFAULT_PARSE_MODE,
+        )

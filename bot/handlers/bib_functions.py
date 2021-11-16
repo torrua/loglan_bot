@@ -46,7 +46,8 @@ def bib_predy_kb_cpx_switcher(call: cbq, state: bool):
     bot.edit_message_reply_markup(
         chat_id=call.from_user.id,
         message_id=call.message.message_id,
-        reply_markup=keyboard)
+        reply_markup=keyboard,
+    )
 
 
 def bib_predy_kb_cpx_show(call: cbq):

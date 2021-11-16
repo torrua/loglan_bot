@@ -13,8 +13,12 @@ TOKEN = environ.get("TELEGRAM_BOT_TOKEN")
 APP_SITE = environ.get("APP_SITE")
 DEFAULT_PARSE_MODE = "HTML"
 MESSAGE_NOT_FOUND = "Sorry, but nothing was found for <b>%s</b>."
-MESSAGE_SPECIFY_LOGLAN_WORD = "You need to specify the Loglan word you would like to find."
-MESSAGE_SPECIFY_ENGLISH_WORD = "You need to specify the English word you would like to find."
+MESSAGE_SPECIFY_LOGLAN_WORD = (
+    "You need to specify the Loglan word you would like to find."
+)
+MESSAGE_SPECIFY_ENGLISH_WORD = (
+    "You need to specify the English word you would like to find."
+)
 
 MIN_NUMBER_OF_BUTTONS = 50
 
