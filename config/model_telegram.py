@@ -126,6 +126,13 @@ class TelegramWord(BaseWord, AddonWordGetter):
         )
 
     def send_card_to_user(self, bot, user_id, parse_mode):
+        """
+
+        :param bot:
+        :param user_id:
+        :param parse_mode:
+        :return:
+        """
         bot.send_message(
             chat_id=user_id,
             text=self.export(),
@@ -135,6 +142,12 @@ class TelegramWord(BaseWord, AddonWordGetter):
 
     @classmethod
     def by_request(cls, request) -> list:
+        """
+
+        :param request:
+        :return:
+        """
+
         return (
             [
                 cls.get_by_id(request),
@@ -144,19 +157,34 @@ class TelegramWord(BaseWord, AddonWordGetter):
         )
 
     def keyboard_cpx(self, show_list: bool = False, slice_start: int = 0):
+        """
+
+        :param show_list:
+        :param slice_start:
+        :return:
+        """
         return TelegramWordKeyboard(self).keyboard_cpx(
             show_list=show_list, slice_start=slice_start
         )
 
 
 class TelegramWordKeyboard:
+    """
+    Keyboard for telegram bot
+    """
+
     word = None
 
     def __init__(self, word: TelegramWord):
         self.word = word
 
     def keyboard_navi(self, index_start, total_num_of_cpx):
+        """
 
+        :param index_start:
+        :param total_num_of_cpx:
+        :return:
+        """
         delimiter = self.get_delimiter(total_num_of_cpx)
         index_end = self.get_slice_end(index_start, total_num_of_cpx)
 
@@ -200,7 +228,12 @@ class TelegramWordKeyboard:
         return Keyboa(nav_row, items_in_row=2)()
 
     def keyboard_cpx_switcher(self, total_number_of_complexes: int, show: bool = True):
+        """
 
+        :param total_number_of_complexes:
+        :param show:
+        :return:
+        """
         button_text_number = f"({total_number_of_complexes})" if show else ""
         _es = (
             f"es {button_text_number}".strip() if total_number_of_complexes > 1 else ""
@@ -220,6 +253,11 @@ class TelegramWordKeyboard:
 
     @staticmethod
     def get_delimiter(total_number_of_complexes: int):
+        """
+
+        :param total_number_of_complexes:
+        :return:
+        """
         from bot import MIN_NUMBER_OF_BUTTONS
 
         allowed_range = list(range(MIN_NUMBER_OF_BUTTONS, MIN_NUMBER_OF_BUTTONS + 11))
@@ -233,6 +271,11 @@ class TelegramWordKeyboard:
 
     @staticmethod
     def keyboard_data(current_complexes):
+        """
+
+        :param current_complexes:
+        :return:
+        """
         cpx_items = [
             {
                 t: cpx.name,
@@ -250,10 +293,17 @@ class TelegramWordKeyboard:
 
     @property
     def kb_cpx_close(self):
+        """
+
+        :return:
+        """
         return Keyboa({t: "Close", cbd: "close"})()
 
     def keyboard_cpx(self, show_list: bool = False, slice_start: int = 0):
         """
+
+        :param show_list:
+        :param slice_start:
         :return:
         """
 
@@ -281,6 +331,12 @@ class TelegramWordKeyboard:
         return Keyboa.combine(kb_combo)
 
     def get_slice_end(self, slice_start, total_num_of_cpx):
+        """
+
+        :param slice_start:
+        :param total_num_of_cpx:
+        :return:
+        """
         current_delimiter = self.get_delimiter(total_num_of_cpx)
         last_allowed_element = slice_start + current_delimiter
         slice_end = (

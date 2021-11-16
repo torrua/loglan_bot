@@ -60,9 +60,11 @@ def action_selector_predy(call: cbq):
     info = info_from_callback(call.data)
     current_action = info.get(mark_action, None)
 
-    if current_action == action_predy_send_card:
-        bib_predy_send_card(call)
-    elif current_action == action_predy_kb_cpx_hide:
-        bib_predy_kb_cpx_hide(call)
-    elif current_action == action_predy_kb_cpx_show:
-        bib_predy_kb_cpx_show(call)
+    actions = {
+        action_predy_send_card: bib_predy_send_card,
+        action_predy_kb_cpx_hide: bib_predy_kb_cpx_hide,
+        action_predy_kb_cpx_show: bib_predy_kb_cpx_show,
+    }
+
+    if action_to_run := actions.get(current_action):
+        action_to_run(call)

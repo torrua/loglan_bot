@@ -28,10 +28,18 @@ class BasicUser:
     is_premium = db.Column(db.Boolean, default=False, nullable=False)
 
     def enable(self):
+        """
+
+        :return:
+        """
         self.is_active = True
         db.session.commit()
 
     def disable(self):
+        """
+
+        :return:
+        """
         self.is_active = False
         db.session.commit()
 
@@ -85,6 +93,10 @@ class User(db.Model, BasicUser, TelegramUser, InitBase, DBBase):
     )
 
     def add_default_settings(self):
+        """
+
+        :return:
+        """
         settings = Settings()
         settings.user_id = self.id
         settings.language = self.get_language(self.language_code)
@@ -92,6 +104,11 @@ class User(db.Model, BasicUser, TelegramUser, InitBase, DBBase):
 
     @classmethod
     def from_db_by(cls, data) -> Optional[User]:
+        """
+
+        :param data:
+        :return:
+        """
         if isinstance(data, CallbackQuery):
             data = data.message.chat.id
         elif isinstance(data, Message):
@@ -100,7 +117,11 @@ class User(db.Model, BasicUser, TelegramUser, InitBase, DBBase):
 
     @classmethod
     def create_from(cls, request) -> User:
+        """
 
+        :param request:
+        :return:
+        """
         if isinstance(request, CallbackQuery):
             request = request.message
 
@@ -131,6 +152,10 @@ class Settings(db.Model, InitBase, DBBase):
     trigger = db.Column(db.String)
 
     def reset(self):
+        """
+
+        :return:
+        """
         self.language = self.user.get_language(self.user.language_code)
         self.trigger = ""
         self.user.enable()
