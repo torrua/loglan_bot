@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+# pylint: disable=R0401
+
 """Processing commands received from telegram bot"""
 
 from bot import bot, msg, cbq
@@ -19,7 +21,13 @@ def command_start(message: msg):
         bot_cmd_start(message)
 
 
-@bot.message_handler(commands=["g", "e", "gleci", ])
+@bot.message_handler(
+    commands=[
+        "g",
+        "e",
+        "gleci",
+    ]
+)
 def command_gleci(message: msg):
     """
     Handle command /gleci
@@ -30,7 +38,12 @@ def command_gleci(message: msg):
         bot_cmd_gle(message)
 
 
-@bot.message_handler(commands=["l", "logli", ])
+@bot.message_handler(
+    commands=[
+        "l",
+        "logli",
+    ]
+)
 def command_logli(message: msg):
     """
     Handle command /logli
