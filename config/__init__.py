@@ -4,9 +4,8 @@
 """
 Configuration file for the whole project
 """
-import os
 import logging
-from loglan_db import app_lod
+import os
 
 logging.basicConfig(
     # format='%(message)s',
@@ -21,17 +20,3 @@ EN, RU = "en", "ru"
 DEFAULT_LANGUAGE = os.getenv("DEFAULT_LANGUAGE", EN)
 DEFAULT_STYLE = os.getenv("DEFAULT_STYLE", "ultra")
 SEPARATOR = "@"
-
-
-class CLIConfig:
-    """
-    Configuration object for remote database
-    """
-    SQLALCHEMY_DATABASE_URI = os.environ.get('LOD_DATABASE_URL').replace("://", "ql://", 1)
-    SQLALCHEMY_BINDS = {"user_database": os.environ.get('DATABASE_URL').replace("://", "ql://", 1), }
-    SQLALCHEMY_TRACK_MODIFICATIONS = False
-
-
-app = app_lod(config_lod=CLIConfig)
-
-from app import routes

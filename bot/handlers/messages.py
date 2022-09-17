@@ -5,6 +5,7 @@ Telegram bot messages functions
 
 from bot import bot, DEFAULT_PARSE_MODE, msg, MESSAGE_NOT_FOUND, DEFAULT_LANGUAGE
 from config.model_telegram import TelegramWord as Word
+from app import Session
 
 
 def bot_text_messages_handler(message: msg) -> None:
@@ -16,11 +17,10 @@ def bot_text_messages_handler(message: msg) -> None:
 
     user_request = message.text.removeprefix("/")
 
-    if words := Word.by_request(user_request):
+    if words := Word.by_request(Session, user_request):
         for word in words:
-            word.send_card_to_user(bot, message.chat.id, DEFAULT_PARSE_MODE)
-
-    elif translation := Word.translation_by_key(user_request, DEFAULT_LANGUAGE):
+            word.send_card_to_user(Session, bot, message.chat.id, DEFAULT_PARSE_MODE)
+    elif translation := Word.translation_by_key(Session, user_request, DEFAULT_LANGUAGE):
         bot.send_message(
             chat_id=message.chat.id,
             text=translation,

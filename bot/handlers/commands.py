@@ -5,8 +5,8 @@ Telegram bot command functions
 
 from bot import bot, msg, ADMIN, EN, DEFAULT_PARSE_MODE, \
     MESSAGE_NOT_FOUND, MESSAGE_SPECIFY_LOGLAN_WORD, MESSAGE_SPECIFY_ENGLISH_WORD
-from config.model_user import User
 from config.model_telegram import TelegramWord as Word
+from app import Session
 
 
 def bot_cmd_start(message: msg):
@@ -19,15 +19,6 @@ def bot_cmd_start(message: msg):
     text = "\n".join(sorted([
         f"{key}: {value}" for key, value in message.from_user.__dict__.items()]))
     bot.send_message(ADMIN, text)
-
-    db_user = User.from_db_by(message)
-
-    if db_user:
-        db_user.settings.reset()
-    else:
-        new_user = User.create_from(message)
-        new_user.save()
-        new_user.add_default_settings()
 
 
 def bot_cmd_gle(message: msg):
@@ -45,7 +36,7 @@ def bot_cmd_gle(message: msg):
         return
 
     user_request = arguments[0]
-    result = Word.translation_by_key(request=user_request, language=EN)
+    result = Word.translation_by_key(session=Session, request=user_request, language=EN)
     bot.send_message(
         chat_id=message.chat.id,
         text=result if result else MESSAGE_NOT_FOUND % user_request,
@@ -74,7 +65,4 @@ def bot_cmd_log(message: msg):
         return
 
     for word in words:
-        word.send_card_to_user(
-            bot=bot,
-            user_id=message.chat.id,
-            parse_mode=DEFAULT_PARSE_MODE)
+        word.send_card_to_user(None, bot=bot, user_id=message.chat.id, parse_mode=DEFAULT_PARSE_MODE)

@@ -2,13 +2,14 @@
 """Model of LOD database for Telegram"""
 
 from typing import List
+from sqlalchemy.orm import Session
 
 from callbaker import callback_from_info
 from keyboa import Keyboa
 from config import log
-from loglan_db.model_db.base_word import BaseWord
-from loglan_db.model_db.base_definition import BaseDefinition
-from loglan_db.model_db.addons.addon_word_getter import AddonWordGetter
+from loglan_core.word import BaseWord
+from loglan_core.definition import BaseDefinition
+from loglan_core.addons.word_getter import AddonWordGetter
 from variables import t, cbd, \
     mark_action, mark_entity, mark_record_id, mark_slice_start, \
     action_predy_send_card, entity_predy, action_predy_kb_cpx_show, action_predy_kb_cpx_hide
@@ -37,9 +38,10 @@ class TelegramDefinition(BaseDefinition):
 class TelegramWord(BaseWord, AddonWordGetter):
     """Word class extensions for Telegram"""
 
-    def export(self) -> str:
+    def export(self, session: Session) -> str:
         """
         Convert word's data to str for sending as a telegram messages
+        :param session:
         :return: List of str with technical info, definitions, used_in part
         """
 
@@ -58,32 +60,33 @@ class TelegramWord(BaseWord, AddonWordGetter):
                    f"\n{w_match}{w_type}{w_authors}{w_year}{w_rank}{w_orig}"
 
         # Definitions TODO maybe extract from method
-        definitions_str = "\n\n".join([d.export() for d in self.get_definitions()])
-
+        definitions_str = "\n\n".join([d.export() for d in self.get_definitions(session=session)])
         return f"{word_str}\n\n{definitions_str}"
 
-    def get_definitions(self) -> List[TelegramDefinition]:
+    def get_definitions(self, session: Session) -> List[TelegramDefinition]:
         """
         Get all definitions of the word
+        :param session: Session
         :return: List of Definition objects ordered by Definition.position
         """
-        return TelegramDefinition.query.filter(BaseDefinition.word_id == self.id)\
+        return session.query(TelegramDefinition).filter(BaseDefinition.word_id == self.id)\
             .order_by(BaseDefinition.position.asc()).all()
 
     @classmethod
-    def translation_by_key(cls, request: str, language: str = None) -> str:
+    def translation_by_key(cls, session: Session, request: str, language: str = None) -> str:
         """
         We get information about loglan words by key in a foreign language
+        :param session: Session
         :param request: Requested string
         :param language: Key language
         :return: Search results string formatted for sending to Telegram
         """
-        words = cls.by_key(request, language).order_by(cls.name).all()
+        words = cls.by_key(session, request, language).order_by(cls.name).all()
         result = {}
 
         for word in words:
             result[word.name] = []
-            for definition in word.get_definitions():
+            for definition in word.get_definitions(session=session):
                 keys = [key.word.lower() for key in definition.keys]
                 if request.lower() in keys:
                     result[word.name].append(definition.export())
@@ -169,7 +172,7 @@ class TelegramWord(BaseWord, AddonWordGetter):
                     break
             return delimiter
 
-        total_num_of_cpx = self.complexes.count()
+        total_num_of_cpx = len(self.complexes)
 
         if not total_num_of_cpx:
             return kb_cpx_close
@@ -184,7 +187,7 @@ class TelegramWord(BaseWord, AddonWordGetter):
         last_allowed_element = slice_start + current_delimiter
         slice_end = last_allowed_element if last_allowed_element < total_num_of_cpx else total_num_of_cpx
 
-        current_cpx_set = self.complexes.all()[slice_start:slice_end]
+        current_cpx_set = self.complexes[slice_start:slice_end]
         kb_cpx_data = keyboard_data(current_cpx_set)
 
         kb_cpx_nav = None
@@ -196,13 +199,13 @@ class TelegramWord(BaseWord, AddonWordGetter):
 
         return Keyboa.combine(kb_combo)
 
-    def send_card_to_user(self, bot, user_id, parse_mode):
+    def send_card_to_user(self, session: Session, bot, user_id, parse_mode):
         bot.send_message(
             chat_id=user_id,
-            text=self.export(),
+            text=self.export(session),
             parse_mode=parse_mode,
             reply_markup=self.keyboard_cpx())
 
     @classmethod
-    def by_request(cls, request) -> list:
-        return [cls.get_by_id(request), ] if isinstance(request, int) else cls.by_name(request).all()
+    def by_request(cls, session: Session, request) -> list:
+        return [cls.get_by_id(session, request), ] if isinstance(request, int) else cls.by_name(session, request).all()
