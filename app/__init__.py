@@ -23,8 +23,8 @@ class CLIConfig:
     """
     Configuration object for remote database
     """
-    SQLALCHEMY_DATABASE_URI = os.environ.get('LOD_DATABASE_URL').replace("://", "ql://", 1)
-    SQLALCHEMY_BINDS = {"user_database": os.environ.get('DATABASE_URL').replace("://", "ql://", 1), }
+    SQLALCHEMY_DATABASE_URI = os.environ.get('LOD_DATABASE_URL')
+    SQLALCHEMY_BINDS = {"user_database": os.environ.get('DATABASE_URL'), }
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 
