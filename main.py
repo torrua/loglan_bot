@@ -4,8 +4,10 @@
 from os import environ
 from app import app
 from bot import bot, APP_SITE, TOKEN
+from config import log
 
 ENV = environ["ENVIRONMENT"]
+log.debug(f"ENVIRONMENT = {ENV}")
 
 if __name__ == "__main__":
     # pylint: disable=W0106
