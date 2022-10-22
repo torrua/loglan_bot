@@ -34,3 +34,6 @@ app = create_app(CLIConfig)
 @app.teardown_appcontext
 def cleanup(resp_or_exc):
     Session.remove()
+
+
+from app import routes
