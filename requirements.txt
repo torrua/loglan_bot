@@ -5,4 +5,4 @@ keyboa==3.1.0
 psycopg2-binary==2.9.4
 SQLAlchemy==1.4.42
 pyTelegramBotAPI==4.7.1
-Loglan-Core==0.0.3
+Loglan-Core==0.0.4
