@@ -19,4 +19,8 @@ if __name__ == "__main__":
     else:
         bot.set_webhook(url="https://%s/%s" % (APP_SITE, TOKEN))
         # app.run(host="0.0.0.0", port=int(environ.get('PORT', 5000)))
-        app.run(debug=True, port=os.getenv("PORT", default=5000))
+        if int(ENV) == 2:
+            app.run()
+        else:
+            app.run(debug=True, port=os.getenv("PORT", default=5000))
+
