@@ -1,10 +1,7 @@
 import os
 
 from flask import Flask
-from loglan_core.setup import engine
-from sqlalchemy.orm import scoped_session, sessionmaker
-
-Session = scoped_session(sessionmaker(bind=engine))
+from loglan_core.setup import Session
 
 
 def create_app(config):
@@ -12,19 +9,18 @@ def create_app(config):
     Create app
     """
 
-    app = Flask(__name__)
+    new_app = Flask(__name__)
 
-    app.config.from_object(config)
+    new_app.config.from_object(config)
 
-    return app
+    return new_app
 
 
 class CLIConfig:
     """
     Configuration object for remote database
     """
-    SQLALCHEMY_DATABASE_URI = os.environ.get('LOD_DATABASE_URL')
-    SQLALCHEMY_BINDS = {"user_database": os.environ.get('DATABASE_URL'), }
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 
