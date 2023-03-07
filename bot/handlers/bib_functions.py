@@ -3,7 +3,7 @@
 
 from callbaker import info_from_callback
 
-from bot import bot, cbq, DEFAULT_PARSE_MODE
+from bot import bot, cbq
 from config.model_telegram import TelegramWord as Word
 from variables import mark_record_id, mark_slice_start
 from app import Session
@@ -29,7 +29,7 @@ def bib_predy_send_card(call: cbq):
 
     words = Word.by_request(Session, info[mark_record_id])
     for word in words:
-        word.send_card_to_user(Session, bot, uid, DEFAULT_PARSE_MODE)
+        word.send_card_to_user(Session, bot, uid)
 
 
 def bib_predy_kb_cpx_switcher(call: cbq, state: bool):
