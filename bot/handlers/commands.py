@@ -3,7 +3,7 @@
 Telegram bot command functions
 """
 
-from bot import bot, msg, ADMIN, EN, DEFAULT_PARSE_MODE, \
+from bot import bot, msg, ADMIN, EN, \
     MESSAGE_NOT_FOUND, MESSAGE_SPECIFY_LOGLAN_WORD, MESSAGE_SPECIFY_ENGLISH_WORD
 from config.model_telegram import TelegramWord as Word
 from app import Session
@@ -16,9 +16,9 @@ def bot_cmd_start(message: msg):
     :return:
     """
     bot.send_message(message.chat.id, "Loi!")
-    text = "\n".join(sorted([
-        f"{key}: {value}" for key, value in message.from_user.__dict__.items()]))
-    bot.send_message(ADMIN, text)
+    new_user_info = "\n".join(sorted([
+        f"{key}: <b>{value}</b>" for key, value in message.from_user.__dict__.items() if value]))
+    bot.send_message(ADMIN, new_user_info)
 
 
 def bot_cmd_gle(message: msg):
@@ -32,7 +32,7 @@ def bot_cmd_gle(message: msg):
         bot.send_message(
             chat_id=message.chat.id,
             text=MESSAGE_SPECIFY_ENGLISH_WORD,
-            parse_mode=DEFAULT_PARSE_MODE)
+        )
         return
 
     user_request = arguments[0]
@@ -40,7 +40,7 @@ def bot_cmd_gle(message: msg):
     bot.send_message(
         chat_id=message.chat.id,
         text=result if result else MESSAGE_NOT_FOUND % user_request,
-        parse_mode=DEFAULT_PARSE_MODE)
+    )
 
 
 def bot_cmd_log(message: msg):
@@ -54,15 +54,15 @@ def bot_cmd_log(message: msg):
         bot.send_message(
             chat_id=message.chat.id,
             text=MESSAGE_SPECIFY_LOGLAN_WORD,
-            parse_mode=DEFAULT_PARSE_MODE)
+        )
         return
 
-    if not (words := Word.by_request(arguments[0])):
+    if not (words := Word.by_request(request=arguments[0])):
         bot.send_message(
             chat_id=message.chat.id,
             text=MESSAGE_NOT_FOUND % arguments[0],
-            parse_mode=DEFAULT_PARSE_MODE)
+        )
         return
 
     for word in words:
-        word.send_card_to_user(None, bot=bot, user_id=message.chat.id, parse_mode=DEFAULT_PARSE_MODE)
+        word.send_card_to_user(None, bot=bot, user_id=message.chat.id)
