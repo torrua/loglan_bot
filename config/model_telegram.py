@@ -2,11 +2,10 @@
 """Model of LOD database for Telegram"""
 
 from typing import List
-from sqlalchemy.orm import Session
+from app import Session
 
 from callbaker import callback_from_info
 from keyboa import Keyboa
-from config import log
 from loglan_core.word import BaseWord
 from loglan_core.definition import BaseDefinition
 from loglan_core.addons.word_getter import AddonWordGetter
@@ -41,7 +40,6 @@ class TelegramWord(BaseWord, AddonWordGetter):
     def export(self, session: Session) -> str:
         """
         Convert word's data to str for sending as a telegram messages
-        :param session:
         :return: List of str with technical info, definitions, used_in part
         """
 
@@ -67,7 +65,7 @@ class TelegramWord(BaseWord, AddonWordGetter):
         """
         Get all definitions of the word
         :param session: Session
-        :return: List of Definition objects ordered by Definition.position
+        :return: List of Definition objects ordered by position
         """
         return session.query(TelegramDefinition).filter(BaseDefinition.word_id == self.id)\
             .order_by(BaseDefinition.position.asc()).all()
@@ -123,7 +121,7 @@ class TelegramWord(BaseWord, AddonWordGetter):
                     t: text_arrow_back,
                     cbd: callback_from_info(cbd_predy_kb_cpx_back)}
 
-            if index_end != len(self.complexes.all()):
+            if index_end != len(self.complexes):
                 cbd_predy_kb_cpx_forward = {
                     **common_data, mark_slice_start: index_end, }
                 button_forward = {
@@ -151,7 +149,6 @@ class TelegramWord(BaseWord, AddonWordGetter):
             return Keyboa(button_predy_kb_cpx_hide)()
 
         def keyboard_show(total_number_of_complexes: int):
-            log.debug("tot_num_cpx: %s", total_number_of_complexes)
             text_cpx_show = f"Show Complex{'es' if total_number_of_complexes > 1 else ''} ({total_number_of_complexes})"
             cbd_predy_kb_cpx_show = {
                 mark_entity: entity_predy,
@@ -199,11 +196,10 @@ class TelegramWord(BaseWord, AddonWordGetter):
 
         return Keyboa.combine(kb_combo)
 
-    def send_card_to_user(self, session: Session, bot, user_id, parse_mode):
+    def send_card_to_user(self, session: Session, bot, user_id):
         bot.send_message(
             chat_id=user_id,
             text=self.export(session),
-            parse_mode=parse_mode,
             reply_markup=self.keyboard_cpx())
 
     @classmethod
