@@ -22,7 +22,7 @@ MESSAGE_SPECIFY_ENGLISH_WORD = (
 
 MIN_NUMBER_OF_BUTTONS = 50
 
-bot = TeleBot(TOKEN)
+bot = TeleBot(TOKEN, parse_mode=DEFAULT_PARSE_MODE)
 ADMIN = int(environ.get("TELEGRAM_ADMIN_ID"))
 
 cbq = types.CallbackQuery
