@@ -1,0 +1,13 @@
+checks:
+    python:
+        code_rating: true
+        duplicate_code: true
+
+build:
+  environment:
+    python: 3.8.1
+  nodes:
+    tests:
+      dependencies:
+        before:
+          - pip install -r requirements-test.txt
