@@ -2,12 +2,14 @@
 """Model of LOD database for Telegram"""
 
 from typing import List
-from app import Session
+from collections import defaultdict
 
 from callbaker import callback_from_info
 from keyboa import Keyboa
 from loglan_core.word import BaseWord
 from loglan_core.definition import BaseDefinition
+from loglan_core.connect_tables import t_connect_keys
+from loglan_core.key import BaseKey
 from loglan_core.addons.word_getter import AddonWordGetter
 from variables import t, cbd, \
     mark_action, mark_entity, mark_record_id, mark_slice_start, \
@@ -37,7 +39,7 @@ class TelegramDefinition(BaseDefinition):
 class TelegramWord(BaseWord, AddonWordGetter):
     """Word class extensions for Telegram"""
 
-    def export(self, session: Session) -> str:
+    def export(self, session) -> str:
         """
         Convert word's data to str for sending as a telegram messages
         :return: List of str with technical info, definitions, used_in part
@@ -61,7 +63,7 @@ class TelegramWord(BaseWord, AddonWordGetter):
         definitions_str = "\n\n".join([d.export() for d in self.get_definitions(session=session)])
         return f"{word_str}\n\n{definitions_str}"
 
-    def get_definitions(self, session: Session) -> List[TelegramDefinition]:
+    def get_definitions(self, session) -> List[TelegramDefinition]:
         """
         Get all definitions of the word
         :param session: Session
@@ -71,7 +73,7 @@ class TelegramWord(BaseWord, AddonWordGetter):
             .order_by(BaseDefinition.position.asc()).all()
 
     @classmethod
-    def translation_by_key(cls, session: Session, request: str, language: str = None) -> str:
+    def translation_by_key(cls, session, request: str, language: str = None) -> str:
         """
         We get information about loglan words by key in a foreign language
         :param session: Session
@@ -79,24 +81,30 @@ class TelegramWord(BaseWord, AddonWordGetter):
         :param language: Key language
         :return: Search results string formatted for sending to Telegram
         """
-        words = cls.by_key(session, request, language).order_by(cls.name).all()
-        result = {}
+        from config import log
+        log.debug("translation_by_key")
+
+        words = session.query(cls.name, TelegramDefinition).\
+            join(BaseDefinition).\
+            join(t_connect_keys).\
+            join(BaseKey).\
+            filter(BaseKey.word==request).\
+            filter(BaseKey.language==language).\
+            order_by(cls.id, BaseDefinition.position).all()
+
+        result = defaultdict(list)
 
         for word in words:
-            result[word.name] = []
-            for definition in word.get_definitions(session=session):
-                keys = [key.word.lower() for key in definition.keys]
-                if request.lower() in keys:
-                    result[word.name].append(definition.export())
+            name, definition = word
+            result[name].append(definition.export())
 
         new = '\n'
-
-        return new.join([f"/{word_name},\n{new.join(definitions)}\n"
-                         for word_name, definitions in result.items()]).strip()
+        word_items = [f"/{word_name},\n{new.join(definitions)}\n"
+                         for word_name, definitions in result.items()]
+        return new.join(word_items).strip()
 
     def keyboard_cpx(self, show_list: bool = False, slice_start: int = 0):
         """
-
         :return:
         """
 
@@ -196,12 +204,12 @@ class TelegramWord(BaseWord, AddonWordGetter):
 
         return Keyboa.combine(kb_combo)
 
-    def send_card_to_user(self, session: Session, bot, user_id):
+    def send_card_to_user(self, session, bot, user_id):
         bot.send_message(
             chat_id=user_id,
             text=self.export(session),
             reply_markup=self.keyboard_cpx())
 
     @classmethod
-    def by_request(cls, session: Session, request) -> list:
+    def by_request(cls, session, request) -> list:
         return [cls.get_by_id(session, request), ] if isinstance(request, int) else cls.by_name(session, request).all()

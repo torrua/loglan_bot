@@ -11,7 +11,8 @@ from bot.handlers.bib_functions import (
     bib_predy_kb_cpx_hide,
     bib_predy_kb_cpx_show,
 )
-from config import log
+from bot.decorators import logging_time
+
 from variables import (
     action_predy_send_card,
     action_predy_kb_cpx_hide,
@@ -20,15 +21,15 @@ from variables import (
 from variables import cancel, close, mark_entity, mark_action, entity_predy
 
 
+@logging_time
 def bot_callback_inline(call: cbq):
     """
     Основной обработчик событий по нажатым inline кнопкам
     :param call:
     :return:
     """
-    log.info("bot_callback_inline")
-    # Если сообщение из чата с ботом
 
+    # Если сообщение из чата с ботом
     if call.data in [cancel, close]:
         bib_cancel(call)  # no need to lang input
         return
@@ -43,12 +44,12 @@ def bot_callback_inline(call: cbq):
     entity_selector_general(call)
 
 
+@logging_time
 def entity_selector_general(call: cbq):
     """
     :param call:
     :return:
     """
-    log.info("entity_selector_general")
     info = info_from_callback(call.data)
     current_entity = info.get(mark_entity, None)
 
@@ -56,12 +57,12 @@ def entity_selector_general(call: cbq):
         action_selector_predy(call)
 
 
+@logging_time
 def action_selector_predy(call: cbq):
     """
     :param call:
     :return:
     """
-    log.info("action_selector_predy")
     info = info_from_callback(call.data)
     current_action = info.get(mark_action, None)
 

@@ -6,9 +6,11 @@ Telegram bot command functions
 from bot import bot, msg, ADMIN, EN, \
     MESSAGE_NOT_FOUND, MESSAGE_SPECIFY_LOGLAN_WORD, MESSAGE_SPECIFY_ENGLISH_WORD
 from config.model_telegram import TelegramWord as Word
-from app import Session
+from engine import Session
+from bot.decorators import logging_time
 
 
+@logging_time
 def bot_cmd_start(message: msg):
     """
     Handle start command
@@ -21,6 +23,7 @@ def bot_cmd_start(message: msg):
     bot.send_message(ADMIN, new_user_info)
 
 
+@logging_time
 def bot_cmd_gle(message: msg):
     """
     Handle command for english word
@@ -36,13 +39,21 @@ def bot_cmd_gle(message: msg):
         return
 
     user_request = arguments[0]
-    result = Word.translation_by_key(session=Session, request=user_request, language=EN)
-    bot.send_message(
-        chat_id=message.chat.id,
-        text=result if result else MESSAGE_NOT_FOUND % user_request,
-    )
+    from config import log
+    log.debug(user_request)
+
+    with Session() as session:
+        log.debug("inside session")
+        result = Word.translation_by_key(session=session, request=user_request, language=EN)
+        log.debug(result)
+
+        bot.send_message(
+            chat_id=message.chat.id,
+            text=result if result else MESSAGE_NOT_FOUND % user_request,
+        )
 
 
+@logging_time
 def bot_cmd_log(message: msg):
     """
     Handle command for loglan word
@@ -57,12 +68,13 @@ def bot_cmd_log(message: msg):
         )
         return
 
-    if not (words := Word.by_request(request=arguments[0])):
-        bot.send_message(
-            chat_id=message.chat.id,
-            text=MESSAGE_NOT_FOUND % arguments[0],
-        )
-        return
+    with Session() as session:
+        if not (words := Word.by_request(session=session, request=arguments[0])):
+            bot.send_message(
+                chat_id=message.chat.id,
+                text=MESSAGE_NOT_FOUND % arguments[0],
+            )
+            return
 
-    for word in words:
-        word.send_card_to_user(None, bot=bot, user_id=message.chat.id)
+        for word in words:
+            word.send_card_to_user(session=session, bot=bot, user_id=message.chat.id)
