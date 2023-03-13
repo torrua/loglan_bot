@@ -101,68 +101,90 @@ class TelegramWord(BaseWord, AddonWordGetter):
         return new.join(word_items).strip()
 
 
-    def keyboard_navi(self, index_start, index_end, delimiter):
+    def keyboard_navi(self, index_start: int, index_end: int, delimiter: int):
+        """
+        :param index_start:
+        :param index_end:
+        :param delimiter:
+        :return:
+        """
+        text_arrow_back = "\U0000276E" * 2
+        text_arrow_forward = "\U0000276F" * 2
+        button_back, button_forward = None, None
 
-            text_arrow_back = "\U0000276E" * 2
-            text_arrow_forward = "\U0000276F" * 2
-            button_back, button_forward = None, None
+        common_data = {
+            mark_entity: entity_predy,
+            mark_action: action_predy_kb_cpx_show,
+            mark_record_id: self.id,
+        }
 
-            common_data = {
-                mark_entity: entity_predy,
-                mark_action: action_predy_kb_cpx_show,
-                mark_record_id: self.id,
-            }
+        if index_start != 0:
+            cbd_predy_kb_cpx_back = {
+                **common_data, mark_slice_start: index_start - delimiter, }
+            button_back = {
+                t: text_arrow_back,
+                cbd: callback_from_info(cbd_predy_kb_cpx_back)}
 
-            if index_start != 0:
-                cbd_predy_kb_cpx_back = {
-                    **common_data, mark_slice_start: index_start - delimiter, }
-                button_back = {
-                    t: text_arrow_back,
-                    cbd: callback_from_info(cbd_predy_kb_cpx_back)}
+        if index_end != len(self.complexes):
+            cbd_predy_kb_cpx_forward = {
+                **common_data, mark_slice_start: index_end, }
+            button_forward = {
+                t: text_arrow_forward,
+                cbd: callback_from_info(cbd_predy_kb_cpx_forward)}
 
-            if index_end != len(self.complexes):
-                cbd_predy_kb_cpx_forward = {
-                    **common_data, mark_slice_start: index_end, }
-                button_forward = {
-                    t: text_arrow_forward,
-                    cbd: callback_from_info(cbd_predy_kb_cpx_forward)}
+        nav_row = [b for b in [button_back, button_forward] if b]
+        return Keyboa(nav_row, items_in_row=2)()
 
-            nav_row = [b for b in [button_back, button_forward] if b]
-            return Keyboa(nav_row, items_in_row=2)()
-
-    def keyboard_hide(self, total_number_of_complexes):
-            text_cpx_hide = f"Hide Complex{'es' if total_number_of_complexes > 1 else ''}"
-            cbd_predy_kb_cpx_hide = {
-                mark_entity: entity_predy,
-                mark_action: action_predy_kb_cpx_hide,
-                mark_record_id: self.id, }
-            button_predy_kb_cpx_hide = [{
-                t: text_cpx_hide, cbd: callback_from_info(cbd_predy_kb_cpx_hide)}, ]
-            return Keyboa(button_predy_kb_cpx_hide)()
+    def keyboard_hide(self, total_number_of_complexes: int):
+        """
+        :param total_number_of_complexes:
+        :return:
+        """
+        text_cpx_hide = f"Hide Complex{'es' if total_number_of_complexes > 1 else ''}"
+        cbd_predy_kb_cpx_hide = {
+            mark_entity: entity_predy,
+            mark_action: action_predy_kb_cpx_hide,
+            mark_record_id: self.id, }
+        button_predy_kb_cpx_hide = [{
+            t: text_cpx_hide, cbd: callback_from_info(cbd_predy_kb_cpx_hide)}, ]
+        return Keyboa(button_predy_kb_cpx_hide)()
 
     def keyboard_show(self, total_number_of_complexes: int):
-            text_cpx_show = f"Show Complex{'es' if total_number_of_complexes > 1 else ''} ({total_number_of_complexes})"
-            cbd_predy_kb_cpx_show = {
-                mark_entity: entity_predy,
-                mark_action: action_predy_kb_cpx_show,
-                mark_record_id: self.id, }
-            button_show = [{
-                t: text_cpx_show, cbd: callback_from_info(cbd_predy_kb_cpx_show)}, ]
-            return Keyboa.combine((Keyboa(button_show)(), kb_close()))
+        """
+        :param total_number_of_complexes:
+        :return:
+        """
+        text_cpx_show = f"Show Complex{'es' if total_number_of_complexes > 1 else ''}" \
+                        f" ({total_number_of_complexes})"
+        cbd_predy_kb_cpx_show = {
+            mark_entity: entity_predy,
+            mark_action: action_predy_kb_cpx_show,
+            mark_record_id: self.id, }
+        button_show = [{
+            t: text_cpx_show, cbd: callback_from_info(cbd_predy_kb_cpx_show)}, ]
+        return Keyboa.combine((Keyboa(button_show)(), kb_close()))
 
     @staticmethod
     def get_delimiter(total_number_of_complexes: int):
-            from bot import MIN_NUMBER_OF_BUTTONS
-            allowed_range = list(range(MIN_NUMBER_OF_BUTTONS, MIN_NUMBER_OF_BUTTONS + 11))
-            lst = [(total_number_of_complexes % i, i) for i in allowed_range]
-            delimiter = min(lst, key=lambda x: abs(x[0] - MIN_NUMBER_OF_BUTTONS))[1]
-            for i in lst:
-                if i[0] == 0:
-                    delimiter = i[1]
-                    break
-            return delimiter
+        """
+        :param total_number_of_complexes:
+        :return:
+        """
+        from bot import MIN_NUMBER_OF_BUTTONS
+        allowed_range = list(range(MIN_NUMBER_OF_BUTTONS, MIN_NUMBER_OF_BUTTONS + 11))
+        lst = [(total_number_of_complexes % i, i) for i in allowed_range]
+        delimiter = min(lst, key=lambda x: abs(x[0] - MIN_NUMBER_OF_BUTTONS))[1]
+        for i in lst:
+            if i[0] == 0:
+                delimiter = i[1]
+                break
+        return delimiter
     @staticmethod
-    def keyboard_data(current_complexes):
+    def keyboard_data(current_complexes: list):
+        """
+        :param current_complexes:
+        :return:
+        """
         cpx_items = [{t: cpx.name, cbd: callback_from_info({
             mark_entity: entity_predy,
             mark_action: action_predy_send_card,
@@ -171,6 +193,8 @@ class TelegramWord(BaseWord, AddonWordGetter):
 
     def keyboard_cpx(self, show_list: bool = False, slice_start: int = 0):
         """
+        :param show_list:
+        :param slice_start:
         :return:
         """
 
@@ -201,15 +225,29 @@ class TelegramWord(BaseWord, AddonWordGetter):
 
         return Keyboa.combine(kb_combo)
 
-    def send_card_to_user(self, session, bot, user_id):
+    def send_card_to_user(self, session, bot, user_id: int | str):
+        """
+        :param session:
+        :param bot:
+        :param user_id:
+        :return:
+        """
         bot.send_message(
             chat_id=user_id,
             text=self.export(session),
             reply_markup=self.keyboard_cpx())
 
     @classmethod
-    def by_request(cls, session, request) -> list:
+    def by_request(cls, session, request: str) -> list:
+        """
+        :param session:
+        :param request:
+        :return:
+        """
         return [cls.get_by_id(session, request), ] if isinstance(request, int) else cls.by_name(session, request).all()
 
 def kb_close():
+    """
+    :return:
+    """
     return Keyboa({t: "Close", cbd: "close"})()
