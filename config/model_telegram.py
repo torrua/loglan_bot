@@ -108,7 +108,7 @@ class TelegramWord(BaseWord, AddonWordGetter):
         :return:
         """
 
-        kb_cpx_close = Keyboa({t: "Close", cbd: "close"})()
+        kb_cpx_close = kb_close()
 
         def keyboard_navi(index_start, index_end, delimiter):
 
@@ -213,3 +213,6 @@ class TelegramWord(BaseWord, AddonWordGetter):
     @classmethod
     def by_request(cls, session, request) -> list:
         return [cls.get_by_id(session, request), ] if isinstance(request, int) else cls.by_name(session, request).all()
+
+def kb_close():
+    return Keyboa({t: "Close", cbd: "close"})()
