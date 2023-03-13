@@ -39,13 +39,9 @@ def bot_cmd_gle(message: msg):
         return
 
     user_request = arguments[0]
-    from config import log
-    log.debug(user_request)
 
     with Session() as session:
-        log.debug("inside session")
         result = Word.translation_by_key(session=session, request=user_request, language=EN)
-        log.debug(result)
 
         bot.send_message(
             chat_id=message.chat.id,
