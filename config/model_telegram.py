@@ -101,7 +101,7 @@ class TelegramWord(BaseWord, AddonWordGetter):
         return new.join(word_items).strip()
 
 
-    def keyboard_navi(self, index_start: int, index_end: int, delimiter: int):
+    def _keyboard_navi(self, index_start: int, index_end: int, delimiter: int):
         """
         :param index_start:
         :param index_end:
@@ -135,7 +135,7 @@ class TelegramWord(BaseWord, AddonWordGetter):
         nav_row = [b for b in [button_back, button_forward] if b]
         return Keyboa(nav_row, items_in_row=2)()
 
-    def keyboard_hide(self, total_number_of_complexes: int):
+    def _keyboard_hide(self, total_number_of_complexes: int):
         """
         :param total_number_of_complexes:
         :return:
@@ -149,7 +149,7 @@ class TelegramWord(BaseWord, AddonWordGetter):
             t: text_cpx_hide, cbd: callback_from_info(cbd_predy_kb_cpx_hide)}, ]
         return Keyboa(button_predy_kb_cpx_hide)()
 
-    def keyboard_show(self, total_number_of_complexes: int):
+    def _keyboard_show(self, total_number_of_complexes: int):
         """
         :param total_number_of_complexes:
         :return:
@@ -165,7 +165,7 @@ class TelegramWord(BaseWord, AddonWordGetter):
         return Keyboa.combine((Keyboa(button_show)(), kb_close()))
 
     @staticmethod
-    def get_delimiter(total_number_of_complexes: int):
+    def _get_delimiter(total_number_of_complexes: int):
         """
         :param total_number_of_complexes:
         :return:
@@ -180,7 +180,7 @@ class TelegramWord(BaseWord, AddonWordGetter):
                 break
         return delimiter
     @staticmethod
-    def keyboard_data(current_complexes: list):
+    def _keyboard_data(current_complexes: list):
         """
         :param current_complexes:
         :return:
@@ -204,22 +204,22 @@ class TelegramWord(BaseWord, AddonWordGetter):
             return kb_close()
 
         if not show_list:
-            return self.keyboard_show(total_num_of_cpx)
+            return self._keyboard_show(total_num_of_cpx)
 
-        current_delimiter = self.get_delimiter(total_num_of_cpx)
+        current_delimiter = self._get_delimiter(total_num_of_cpx)
 
-        kb_cpx_hide = self.keyboard_hide(total_num_of_cpx)
+        kb_cpx_hide = self._keyboard_hide(total_num_of_cpx)
 
         last_allowed_element = slice_start + current_delimiter
         slice_end = last_allowed_element if last_allowed_element < total_num_of_cpx else total_num_of_cpx
 
         current_cpx_set = self.complexes[slice_start:slice_end]
-        kb_cpx_data = self.keyboard_data(current_cpx_set)
+        kb_cpx_data = self._keyboard_data(current_cpx_set)
 
         kb_cpx_nav = None
 
         if total_num_of_cpx > current_delimiter:
-            kb_cpx_nav = self.keyboard_navi(slice_start, slice_end, current_delimiter)
+            kb_cpx_nav = self._keyboard_navi(slice_start, slice_end, current_delimiter)
 
         kb_combo = (kb_cpx_hide, kb_cpx_data, kb_cpx_nav, kb_close())
 
