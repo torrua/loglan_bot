@@ -210,8 +210,8 @@ class TelegramWord(BaseWord, AddonWordGetter):
 
         kb_cpx_hide = self._keyboard_hide(total_num_of_cpx)
 
-        last_allowed_element = slice_start + current_delimiter
-        slice_end = last_allowed_element if last_allowed_element < total_num_of_cpx else total_num_of_cpx
+        last_allowed_item = slice_start + current_delimiter
+        slice_end = last_allowed_item if last_allowed_item < total_num_of_cpx else total_num_of_cpx
 
         current_cpx_set = self.complexes[slice_start:slice_end]
         kb_cpx_data = self._keyboard_data(current_cpx_set)
@@ -244,7 +244,9 @@ class TelegramWord(BaseWord, AddonWordGetter):
         :param request:
         :return:
         """
-        return [cls.get_by_id(session, request), ] if isinstance(request, int) else cls.by_name(session, request).all()
+        if isinstance(request, int):
+            return [cls.get_by_id(session, request), ]
+        return cls.by_name(session, request).all()
 
 def kb_close():
     """
