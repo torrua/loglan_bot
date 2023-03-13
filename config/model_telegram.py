@@ -1,16 +1,18 @@
 # -*- coding: utf-8 -*-
 """Model of LOD database for Telegram"""
 
-from typing import List
 from collections import defaultdict
+from typing import List
 
 from callbaker import callback_from_info
 from keyboa import Keyboa
-from loglan_core.word import BaseWord
-from loglan_core.definition import BaseDefinition
-from loglan_core.connect_tables import t_connect_keys
-from loglan_core.key import BaseKey
 from loglan_core.addons.word_getter import AddonWordGetter
+from loglan_core.connect_tables import t_connect_keys
+from loglan_core.definition import BaseDefinition
+from loglan_core.key import BaseKey
+from loglan_core.word import BaseWord
+
+from bot import MIN_NUMBER_OF_BUTTONS
 from variables import t, cbd, \
     mark_action, mark_entity, mark_record_id, mark_slice_start, \
     action_predy_send_card, entity_predy, action_predy_kb_cpx_show, action_predy_kb_cpx_hide
@@ -170,7 +172,6 @@ class TelegramWord(BaseWord, AddonWordGetter):
         :param total_number_of_complexes:
         :return:
         """
-        from bot import MIN_NUMBER_OF_BUTTONS
         allowed_range = list(range(MIN_NUMBER_OF_BUTTONS, MIN_NUMBER_OF_BUTTONS + 11))
         lst = [(total_number_of_complexes % i, i) for i in allowed_range]
         delimiter = min(lst, key=lambda x: abs(x[0] - MIN_NUMBER_OF_BUTTONS))[1]
