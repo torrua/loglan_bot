@@ -4,10 +4,11 @@
 from callbaker import info_from_callback
 
 from bot import bot, cbq
-from config.model_telegram import TelegramWord as Word
-from variables import mark_record_id, mark_slice_start
-from engine import Session
 from bot.decorators import logging_time
+from config.model_telegram import TelegramWord as Word
+from engine import Session
+from variables import mark_record_id, mark_slice_start
+
 
 @logging_time
 def bib_cancel(call: cbq):

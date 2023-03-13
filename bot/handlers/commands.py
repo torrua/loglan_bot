@@ -5,10 +5,10 @@ Telegram bot command functions
 
 from bot import bot, msg, ADMIN, EN, \
     MESSAGE_NOT_FOUND, MESSAGE_SPECIFY_LOGLAN_WORD, MESSAGE_SPECIFY_ENGLISH_WORD
-from config.model_telegram import TelegramWord as Word
-from engine import Session
 from bot.decorators import logging_time
+from config.model_telegram import TelegramWord as Word
 from config.model_telegram import kb_close
+from engine import Session
 
 
 @logging_time
