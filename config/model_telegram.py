@@ -81,9 +81,6 @@ class TelegramWord(BaseWord, AddonWordGetter):
         :param language: Key language
         :return: Search results string formatted for sending to Telegram
         """
-        from config import log
-        log.debug("translation_by_key")
-
         words = session.query(cls.name, TelegramDefinition).\
             join(BaseDefinition).\
             join(t_connect_keys).\
