@@ -59,7 +59,7 @@ def send_message_by_key(session, user_request: str, user_id: str|int) -> None:
         chat_id=user_id,
         text=reply if words_found else MESSAGE_NOT_FOUND % user_request,
         reply_markup=kb_close() if words_found else None,
-        )
+    )
 
 
 @logging_time
