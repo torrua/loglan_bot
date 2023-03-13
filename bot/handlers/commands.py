@@ -8,6 +8,7 @@ from bot import bot, msg, ADMIN, EN, \
 from config.model_telegram import TelegramWord as Word
 from engine import Session
 from bot.decorators import logging_time
+from config.model_telegram import kb_close
 
 
 @logging_time
@@ -46,6 +47,7 @@ def bot_cmd_gle(message: msg):
         bot.send_message(
             chat_id=message.chat.id,
             text=result if result else MESSAGE_NOT_FOUND % user_request,
+            reply_markup=kb_close(),
         )
 
 
