@@ -99,7 +99,7 @@ class TelegramWord(BaseWord, AddonWordGetter):
             result[name].append(definition.export())
 
         new = '\n'
-        word_items = [f"<b>{request}</b>\n/{word_name},\n{new.join(definitions)}\n"
+        word_items = [f"/{word_name},\n{new.join(definitions)}\n"
                          for word_name, definitions in result.items()]
         return new.join(word_items).strip()
 

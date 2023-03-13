@@ -43,10 +43,11 @@ def bot_cmd_gle(message: msg):
 
     with Session() as session:
         result = Word.translation_by_key(session=session, request=user_request, language=EN)
+        reply = f"<b>{user_request}:</b>\n\n{result}"
 
         bot.send_message(
             chat_id=message.chat.id,
-            text=result if result else MESSAGE_NOT_FOUND % user_request,
+            text=reply if result else MESSAGE_NOT_FOUND % user_request,
             reply_markup=kb_close(),
         )
 
