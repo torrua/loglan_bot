@@ -52,7 +52,9 @@ def send_message_by_key(session, user_request: str, user_id: str|int) -> None:
     :param user_id:
     :return:
     """
-    words_found = Word.translation_by_key(session=session, request=user_request.lower(), language=EN)
+    words_found = Word.translation_by_key(
+        session=session, request=user_request.lower(), language=EN,
+    )
     reply = f"<b>{user_request}:</b>\n\n{words_found}"
 
     bot.send_message(
