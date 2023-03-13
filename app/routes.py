@@ -39,7 +39,7 @@ def webhook():
     """
     bot.remove_webhook()
     bot.set_webhook(url="https://%s/%s" % (APP_SITE, TOKEN))
-    return "Webhook was set.", 200
+    return "⚓ Webhook was set.", 200
 
 
 @app_routes.route('/delete')
@@ -49,4 +49,4 @@ def delete():
     :return:
     """
     bot.remove_webhook()
-    return "Webhook was deleted.", 200
+    return "⚓ Webhook was deleted.", 200
