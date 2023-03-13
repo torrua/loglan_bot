@@ -100,14 +100,8 @@ class TelegramWord(BaseWord, AddonWordGetter):
                          for word_name, definitions in result.items()]
         return new.join(word_items).strip()
 
-    def keyboard_cpx(self, show_list: bool = False, slice_start: int = 0):
-        """
-        :return:
-        """
 
-        kb_cpx_close = kb_close()
-
-        def keyboard_navi(index_start, index_end, delimiter):
+    def keyboard_navi(self, index_start, index_end, delimiter):
 
             text_arrow_back = "\U0000276E" * 2
             text_arrow_forward = "\U0000276F" * 2
@@ -136,14 +130,7 @@ class TelegramWord(BaseWord, AddonWordGetter):
             nav_row = [b for b in [button_back, button_forward] if b]
             return Keyboa(nav_row, items_in_row=2)()
 
-        def keyboard_data(current_complexes):
-            cpx_items = [{t: cpx.name, cbd: callback_from_info({
-                mark_entity: entity_predy,
-                mark_action: action_predy_send_card,
-                mark_record_id: cpx.id, })} for cpx in current_complexes]
-            return Keyboa(items=cpx_items, alignment=True, items_in_row=4)()
-
-        def keyboard_hide(total_number_of_complexes):
+    def keyboard_hide(self, total_number_of_complexes):
             text_cpx_hide = f"Hide Complex{'es' if total_number_of_complexes > 1 else ''}"
             cbd_predy_kb_cpx_hide = {
                 mark_entity: entity_predy,
@@ -153,7 +140,7 @@ class TelegramWord(BaseWord, AddonWordGetter):
                 t: text_cpx_hide, cbd: callback_from_info(cbd_predy_kb_cpx_hide)}, ]
             return Keyboa(button_predy_kb_cpx_hide)()
 
-        def keyboard_show(total_number_of_complexes: int):
+    def keyboard_show(self, total_number_of_complexes: int):
             text_cpx_show = f"Show Complex{'es' if total_number_of_complexes > 1 else ''} ({total_number_of_complexes})"
             cbd_predy_kb_cpx_show = {
                 mark_entity: entity_predy,
@@ -161,9 +148,10 @@ class TelegramWord(BaseWord, AddonWordGetter):
                 mark_record_id: self.id, }
             button_show = [{
                 t: text_cpx_show, cbd: callback_from_info(cbd_predy_kb_cpx_show)}, ]
-            return Keyboa.combine((Keyboa(button_show)(), kb_cpx_close))
+            return Keyboa.combine((Keyboa(button_show)(), kb_close()))
 
-        def get_delimiter(total_number_of_complexes: int):
+    @staticmethod
+    def get_delimiter(total_number_of_complexes: int):
             from bot import MIN_NUMBER_OF_BUTTONS
             allowed_range = list(range(MIN_NUMBER_OF_BUTTONS, MIN_NUMBER_OF_BUTTONS + 11))
             lst = [(total_number_of_complexes % i, i) for i in allowed_range]
@@ -173,31 +161,43 @@ class TelegramWord(BaseWord, AddonWordGetter):
                     delimiter = i[1]
                     break
             return delimiter
+    @staticmethod
+    def keyboard_data(current_complexes):
+        cpx_items = [{t: cpx.name, cbd: callback_from_info({
+            mark_entity: entity_predy,
+            mark_action: action_predy_send_card,
+            mark_record_id: cpx.id, })} for cpx in current_complexes]
+        return Keyboa(items=cpx_items, alignment=True, items_in_row=4)()
+
+    def keyboard_cpx(self, show_list: bool = False, slice_start: int = 0):
+        """
+        :return:
+        """
 
         total_num_of_cpx = len(self.complexes)
 
         if not total_num_of_cpx:
-            return kb_cpx_close
+            return kb_close()
 
         if not show_list:
-            return keyboard_show(total_num_of_cpx)
+            return self.keyboard_show(total_num_of_cpx)
 
-        current_delimiter = get_delimiter(total_num_of_cpx)
+        current_delimiter = self.get_delimiter(total_num_of_cpx)
 
-        kb_cpx_hide = keyboard_hide(total_num_of_cpx)
+        kb_cpx_hide = self.keyboard_hide(total_num_of_cpx)
 
         last_allowed_element = slice_start + current_delimiter
         slice_end = last_allowed_element if last_allowed_element < total_num_of_cpx else total_num_of_cpx
 
         current_cpx_set = self.complexes[slice_start:slice_end]
-        kb_cpx_data = keyboard_data(current_cpx_set)
+        kb_cpx_data = self.keyboard_data(current_cpx_set)
 
         kb_cpx_nav = None
 
         if total_num_of_cpx > current_delimiter:
-            kb_cpx_nav = keyboard_navi(slice_start, slice_end, current_delimiter)
+            kb_cpx_nav = self.keyboard_navi(slice_start, slice_end, current_delimiter)
 
-        kb_combo = (kb_cpx_hide, kb_cpx_data, kb_cpx_nav, kb_cpx_close)
+        kb_combo = (kb_cpx_hide, kb_cpx_data, kb_cpx_nav, kb_close())
 
         return Keyboa.combine(kb_combo)
 
