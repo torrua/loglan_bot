@@ -24,18 +24,18 @@ def logging_time(func):
 
         start_time = time.time()
         log.debug(
-            "%s - Start time: %s" %
-            (func.__name__, time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(start_time)))
+            "%s - Start time: %s", func.__name__,
+            time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(start_time))
         )
         result = func(*args, **kwargs)
         end_time = time.time()
         log.debug(
-            "%s - End time: %s" %
-            (func.__name__, time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(start_time)))
+            "%s - End time: %s", func.__name__,
+            time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(start_time))
         )
         log.debug(
-            "%s - Duration: %s seconds" %
-            (func.__name__, duration(start_time, end_time))
+            "%s - Duration: %s seconds", func.__name__,
+            duration(start_time, end_time)
         )
         return result
     return wrapper
