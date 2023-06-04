@@ -1,3 +1,7 @@
+"""
+Initialize loglan_bot app
+"""
+
 import os
 
 from flask import Flask
@@ -20,5 +24,6 @@ class CLIConfig:
     """
     Configuration object for remote database
     """
-    SQLALCHEMY_DATABASE_URI = os.environ.get('LOD_DATABASE_URL')
+
+    SQLALCHEMY_DATABASE_URI = os.environ.get("LOD_DATABASE_URL")
     SQLALCHEMY_TRACK_MODIFICATIONS = False

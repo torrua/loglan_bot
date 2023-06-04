@@ -9,6 +9,7 @@ from bot.handlers.messages import bot_text_messages_handler
 from bot.handlers.inline import bot_callback_inline
 from bot.decorators import logging_time
 
+
 @bot.message_handler(commands=["start"])
 @logging_time
 def command_start(message: msg):
@@ -19,7 +20,15 @@ def command_start(message: msg):
     """
     bot_cmd_start(message)
 
-@bot.message_handler(commands=["g", "e", "gle", "gleci", ])
+
+@bot.message_handler(
+    commands=[
+        "g",
+        "e",
+        "gle",
+        "gleci",
+    ]
+)
 @logging_time
 def command_gleci(message: msg):
     """
@@ -30,7 +39,13 @@ def command_gleci(message: msg):
     bot_cmd_gle(message)
 
 
-@bot.message_handler(commands=["l", "log", "logli", ])
+@bot.message_handler(
+    commands=[
+        "l",
+        "log",
+        "logli",
+    ]
+)
 @logging_time
 def command_logli(message: msg):
     """

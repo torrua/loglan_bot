@@ -3,8 +3,15 @@
 Telegram bot command functions
 """
 
-from bot import bot, msg, ADMIN, EN, \
-    MESSAGE_NOT_FOUND, MESSAGE_SPECIFY_LOGLAN_WORD, MESSAGE_SPECIFY_ENGLISH_WORD
+from bot import (
+    bot,
+    msg,
+    ADMIN,
+    EN,
+    MESSAGE_NOT_FOUND,
+    MESSAGE_SPECIFY_LOGLAN_WORD,
+    MESSAGE_SPECIFY_ENGLISH_WORD,
+)
 from bot.decorators import logging_time
 from config.model_telegram import TelegramWord as Word
 from config.model_telegram import kb_close
@@ -19,8 +26,15 @@ def bot_cmd_start(message: msg):
     :return:
     """
     bot.send_message(message.chat.id, "Loi!")
-    new_user_info = "\n".join(sorted([
-        f"{key}: <b>{value}</b>" for key, value in message.from_user.__dict__.items() if value]))
+    new_user_info = "\n".join(
+        sorted(
+            [
+                f"{key}: <b>{value}</b>"
+                for key, value in message.from_user.__dict__.items()
+                if value
+            ]
+        )
+    )
     bot.send_message(ADMIN, new_user_info)
 
 
@@ -44,8 +58,9 @@ def bot_cmd_gle(message: msg):
     with Session() as session:
         send_message_by_key(session, user_request, message.chat.id)
 
+
 @logging_time
-def send_message_by_key(session, user_request: str, user_id: str|int) -> None:
+def send_message_by_key(session, user_request: str, user_id: str | int) -> None:
     """
     :param session:
     :param user_request:
@@ -53,7 +68,9 @@ def send_message_by_key(session, user_request: str, user_id: str|int) -> None:
     :return:
     """
     words_found = Word.translation_by_key(
-        session=session, request=user_request.lower(), language=EN,
+        session=session,
+        request=user_request.lower(),
+        language=EN,
     )
     reply = f"<b>{user_request}:</b>\n\n{words_found}"
 
