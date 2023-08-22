@@ -1,5 +1,5 @@
 callbaker~=1.4.0
-Flask~=2.3.2
+Flask~=2.3.3
 gunicorn~=21.2.0
 keyboa~=3.1.0
 psycopg2-binary~=2.9.7
