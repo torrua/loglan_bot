@@ -1,3 +1,5 @@
+"""Telegram Bot variables for buttons and actions"""
+
 # pylint: disable=C0103
 
 t = "text"

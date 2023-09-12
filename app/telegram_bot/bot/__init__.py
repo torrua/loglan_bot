@@ -32,4 +32,3 @@ msg = types.Message
 bot = TeleBot(TOKEN, parse_mode=DEFAULT_PARSE_MODE)
 
 from app.telegram_bot.bot import processor
-
