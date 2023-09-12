@@ -11,7 +11,7 @@ from app.telegram_bot.bot import bot, APP_SITE, TOKEN
 bot_routes = Blueprint("route", __name__)
 
 
-@bot_routes.route(f"/telegram_bot/{TOKEN}", methods=["POST"])
+@bot_routes.route(f"/bot/{TOKEN}", methods=["POST"])
 def get_message():
     """
     Get all messages
@@ -21,8 +21,8 @@ def get_message():
     return "Ok", 200
 
 
-@bot_routes.route("/telegram_bot/")
-@bot_routes.route("/telegram_bot/heartbeat")
+@bot_routes.route("/bot/about")
+@bot_routes.route("/bot/heartbeat")
 def index():
     """
     Test functionality
@@ -31,18 +31,18 @@ def index():
     return {k: v for k, v in bot.get_me().__dict__.items() if v}, 200
 
 
-@bot_routes.route("/telegram_bot/set")
+@bot_routes.route("/bot/set")
 def webhook():
     """
     Set telegram webhook
     :return:
     """
     bot.remove_webhook()
-    bot.set_webhook(url=f"https://{APP_SITE}/{TOKEN}")
+    bot.set_webhook(url=f"https://{APP_SITE}/bot/{TOKEN}")
     return "⚓ Webhook was set.", 200
 
 
-@bot_routes.route("/telegram_bot/delete")
+@bot_routes.route("/bot/del")
 def delete():
     """
     Delete telegram webhook
