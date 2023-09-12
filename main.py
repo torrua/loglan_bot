@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 """The main module for launching web application"""
 
-from flask import Flask
-from app.telegram_bot.routes import bot_routes
+from app import app
 
-app = Flask(__name__)
-app.register_blueprint(bot_routes)
+app = app
