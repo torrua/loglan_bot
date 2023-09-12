@@ -1,7 +1,7 @@
-#Create a ubuntu base image with python 3 installed.
+# Create a ubuntu base image with python 3 installed.
 FROM python:3.11-alpine
 
-#Set the working directory
+# Set the working directory
 WORKDIR /
 
 # Create and activate a virtual environment
@@ -11,21 +11,21 @@ ENV PATH="/venv/bin:$PATH"
 # Copy requirements.txt and install dependencies
 COPY requirements.txt .
 
-#copy all the files
+# Copy all the files
 COPY /app /app/
 COPY *.py ./
 
 # Clean up
 RUN rm -rf /var/cache/apk/* && \
-    rm -rf /root/.cache \
+rm -rf /root/.cache
 
 RUN ls -la /app/*
+
 EXPOSE 8080
 
+# Install the dependencies
+RUN /venv/bin/python -m pip install --upgrade pip
+RUN /venv/bin/pip install --no-cache-dir -r requirements.txt
 
-#Install the dependencies
-RUN python -m pip install --upgrade pip
-RUN pip install --no-cache-dir -r requirements.txt
-
-#Run the command
+# Run the command
 CMD ["gunicorn", "--bind", "0.0.0.0:8080", "--workers", "2", "main:app"]
