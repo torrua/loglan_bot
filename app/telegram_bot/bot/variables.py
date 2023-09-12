@@ -1,3 +1,5 @@
+# pylint: disable=C0103
+
 t = "text"
 cbd = "callback_data"
 
