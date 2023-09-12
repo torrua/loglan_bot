@@ -2,9 +2,9 @@
 """The main module for launching web application"""
 
 import os
-from bot import bot, APP_SITE, TOKEN
-
+from app.telegram_bot.bot import bot
 
 if __name__ == "__main__":
         bot.remove_webhook()
+        bot.send_message(os.getenv("TELEGRAM_ADMIN_ID"), f"{bot.get_me().to_dict()}")
         bot.polling()

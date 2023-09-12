@@ -7,16 +7,14 @@ WORKDIR /
 
 #copy all the files
 COPY /app /app/
-COPY /bot /bot/
-COPY /config /config/
 COPY *.py ./
 COPY *.txt ./
 
 RUN ls -la /app/*
-RUN ls -la /bot/*
-RUN ls -la /config/*
+
 
 #Install the dependencies
+RUN python -m pip install --upgrade pip
 RUN pip3 install -r requirements.txt
 
 #Run the command

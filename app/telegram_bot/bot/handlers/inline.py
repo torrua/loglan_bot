@@ -1,24 +1,24 @@
 # -*- coding:utf-8 -*-
 """
-Telegram bot inline requests functions
+Telegram telegram_bot inline requests functions
 """
 from callbaker import info_from_callback
 
-from bot import cbq
-from bot.handlers.bib_functions import bib_cancel
-from bot.handlers.bib_functions import (
+from app.telegram_bot.bot import cbq
+from app.telegram_bot.bot.handlers.bib_functions import bib_cancel
+from app.telegram_bot.bot.handlers.bib_functions import (
     bib_predy_send_card,
     bib_predy_kb_cpx_hide,
     bib_predy_kb_cpx_show,
 )
-from bot.decorators import logging_time
+from app.decorators import logging_time
 
-from variables import (
+from app.telegram_bot.bot.variables import (
     action_predy_send_card,
     action_predy_kb_cpx_hide,
     action_predy_kb_cpx_show,
 )
-from variables import cancel, close, mark_entity, mark_action, entity_predy
+from app.telegram_bot.bot.variables import cancel, close, mark_entity, mark_action, entity_predy
 
 
 @logging_time

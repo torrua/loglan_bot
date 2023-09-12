@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=R0401
 
-"""Processing commands received from telegram bot"""
+"""Processing commands received from telegram telegram_bot"""
 
-from bot import bot, msg, cbq
-from bot.handlers.commands import bot_cmd_start, bot_cmd_gle, bot_cmd_log
-from bot.handlers.messages import bot_text_messages_handler
-from bot.handlers.inline import bot_callback_inline
-from bot.decorators import logging_time
+from app.telegram_bot.bot import bot, msg, cbq
+from app.telegram_bot.bot.handlers.commands import bot_cmd_start, bot_cmd_gle, bot_cmd_log
+from app.telegram_bot.bot.handlers.messages import bot_text_messages_handler
+from app.telegram_bot.bot.handlers.inline import bot_callback_inline
+from app.decorators import logging_time
 
 
 @bot.message_handler(commands=["start"])
@@ -61,7 +61,7 @@ def command_logli(message: msg):
 @logging_time
 def cpx_messages_handler(message: msg):
     """
-    All text requests to the bot are processed by this function
+    All text requests to the telegram_bot are processed by this function
     :param message:
     :return:
     """

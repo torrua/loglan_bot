@@ -1,12 +1,12 @@
 # -*- coding:utf-8 -*-
 """
-Telegram bot messages functions
+Telegram telegram_bot messages functions
 """
 
-from bot import bot, msg
-from bot.handlers.commands import send_message_by_key
-from config.model_telegram import TelegramWord as Word
-from engine import Session
+from app.telegram_bot.bot import bot, msg
+from app.telegram_bot.bot.handlers.commands import send_message_by_key
+from app.telegram_bot.bot.models import TelegramWord as Word
+from app.engine import Session
 
 
 def bot_text_messages_handler(message: msg) -> None:

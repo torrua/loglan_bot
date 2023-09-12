@@ -2,15 +2,13 @@
 # pylint: disable=C0103, C0413
 
 """
-Initializing telegram bot
+Initializing telegram telegram_bot
 """
-
+import os
 from os import environ
 from telebot import TeleBot, types
-from config import DEFAULT_LANGUAGE, EN
 
-TOKEN = environ.get("TELEGRAM_BOT_TOKEN")
-APP_SITE = environ.get("APP_SITE")
+EN, RU = "en", "ru"
 DEFAULT_PARSE_MODE = "HTML"
 MESSAGE_NOT_FOUND = "Sorry, but nothing was found for <b>%s</b>."
 MESSAGE_SPECIFY_LOGLAN_WORD = (
@@ -21,11 +19,17 @@ MESSAGE_SPECIFY_ENGLISH_WORD = (
 )
 
 MIN_NUMBER_OF_BUTTONS = 50
-
-bot = TeleBot(TOKEN, parse_mode=DEFAULT_PARSE_MODE)
+TOKEN = environ.get("TELEGRAM_BOT_TOKEN")
+APP_SITE = environ.get("APP_SITE")
 ADMIN = int(environ.get("TELEGRAM_ADMIN_ID"))
+DEFAULT_LANGUAGE = os.getenv("DEFAULT_LANGUAGE", EN)
+DEFAULT_STYLE = os.getenv("DEFAULT_STYLE", "ultra")
+SEPARATOR = "@"
 
 cbq = types.CallbackQuery
 msg = types.Message
 
-from bot import processor
+bot = TeleBot(TOKEN, parse_mode=DEFAULT_PARSE_MODE)
+
+from app.telegram_bot.bot import processor
+

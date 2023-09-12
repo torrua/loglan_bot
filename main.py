@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
 """The main module for launching web application"""
 
-from app import create_app, CLIConfig
-app = create_app(CLIConfig)
+from flask import Flask
+from app.telegram_bot.routes import bot_routes
+
+app = Flask(__name__)
+app.register_blueprint(bot_routes)

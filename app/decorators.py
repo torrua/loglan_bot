@@ -4,7 +4,7 @@ Decorators for Bot functions
 
 import time
 from functools import wraps
-from config import log
+from app.logger import log
 
 
 def logging_time(func):

@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
-"""Processing inline buttons calls received from telegram bot"""
+"""Processing inline buttons calls received from telegram telegram_bot"""
 
 from callbaker import info_from_callback
 
-from bot import bot, cbq
-from bot.decorators import logging_time
-from config.model_telegram import TelegramWord as Word
-from engine import Session
-from variables import mark_record_id, mark_slice_start
+from app.telegram_bot.bot import bot, cbq
+from app.decorators import logging_time
+from app.telegram_bot.bot.models import TelegramWord as Word
+from app.engine import Session
+from app.telegram_bot.bot.variables import mark_record_id, mark_slice_start
 
 
 @logging_time
