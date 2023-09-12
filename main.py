@@ -2,5 +2,6 @@
 """The main module for launching web application"""
 
 from app import app
+from app.logger import log
 
-app = app
+log.debug(app.name)
