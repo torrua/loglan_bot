@@ -7,6 +7,7 @@ from app.telegram_bot.routes import bot_routes
 bootstrap = Bootstrap()
 
 
+
 def create_app():
     """
     Create app
@@ -17,12 +18,12 @@ def create_app():
 
     # bootstrap initialization
     bootstrap.init_app(app)
-    all_blueprints = [*api_blueprints, bot_routes]
     # register all blueprints
+    app.register_blueprint(bot_routes)
     _ = [
-        app.register_blueprint(bp.get("blueprint"), url_prefix=bp.get("url_prefix"))
-        for bp in all_blueprints
-    ]
+            app.register_blueprint(bp.get("blueprint"), url_prefix=bp.get("url_prefix"))
+            for bp in api_blueprints
+        ]
 
     @app.route("/", methods=["GET"])
     @app.route("/index")
