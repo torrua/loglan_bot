@@ -6,3 +6,7 @@ from app.logger import log
 
 app = create_app()
 log.debug(app.name)
+
+
+if __name__ == '__main__':
+    app.run()

@@ -1,11 +1,11 @@
 # -*- coding:utf-8 -*-
 """
-Telegram telegram_bot messages functions
+Telegram bot messages functions
 """
 
-from app.telegram_bot.bot import bot, msg
-from app.telegram_bot.bot.handlers.commands import send_message_by_key
-from app.telegram_bot.bot.models import TelegramWord as Word
+from app.bot.telegram import bot, msg
+from app.bot.telegram.handlers.commands import send_message_by_key
+from app.bot.telegram.models import TelegramWord as Word
 from app.engine import Session
 
 

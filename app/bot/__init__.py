@@ -6,12 +6,12 @@ Providing routes for our application
 from flask import Blueprint, request as rq
 from telebot import types
 
-from app.telegram_bot.bot import bot, APP_SITE, TOKEN
+from app.bot.telegram import bot, TOKEN
 
-bot_routes = Blueprint("route", __name__)
+bot_blueprint = Blueprint("route", __name__, template_folder='templates')
 
 
-@bot_routes.route(f"/bot/{TOKEN}", methods=["POST"])
+@bot_blueprint.route(f"/{TOKEN}", methods=["POST"])
 def get_message():
     """
     Get all messages
@@ -21,8 +21,7 @@ def get_message():
     return "Ok", 200
 
 
-@bot_routes.route("/bot/about")
-@bot_routes.route("/bot/heartbeat")
+@bot_blueprint.route("/about")
 def index():
     """
     Test functionality
@@ -31,18 +30,19 @@ def index():
     return {k: v for k, v in bot.get_me().__dict__.items() if v}, 200
 
 
-@bot_routes.route("/bot/set")
+@bot_blueprint.route("/set")
 def webhook():
     """
     Set telegram webhook
     :return:
     """
+    app_site = rq.host
     bot.remove_webhook()
-    bot.set_webhook(url=f"https://{APP_SITE}/bot/{TOKEN}")
+    bot.set_webhook(url=f"https://{app_site}/bot/{TOKEN}")
     return "⚓ Webhook was set.", 200
 
 
-@bot_routes.route("/bot/del")
+@bot_blueprint.route("/del")
 def delete():
     """
     Delete telegram webhook

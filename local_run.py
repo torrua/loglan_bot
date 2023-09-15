@@ -2,7 +2,7 @@
 """The main module for launching web application"""
 
 import os
-from app.telegram_bot.bot import bot
+from app.bot.telegram import bot
 
 if __name__ == "__main__":
         bot.remove_webhook()

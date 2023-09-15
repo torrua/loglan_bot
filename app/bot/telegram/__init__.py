@@ -2,7 +2,7 @@
 # pylint: disable=C0103, C0413
 
 """
-Initializing telegram telegram_bot
+Initializing telegram bot
 """
 import os
 from os import environ
@@ -20,7 +20,6 @@ MESSAGE_SPECIFY_ENGLISH_WORD = (
 
 MIN_NUMBER_OF_BUTTONS = 50
 TOKEN = environ.get("TELEGRAM_BOT_TOKEN")
-APP_SITE = environ.get("APP_SITE")
 ADMIN = int(environ.get("TELEGRAM_ADMIN_ID"))
 DEFAULT_LANGUAGE = os.getenv("DEFAULT_LANGUAGE", EN)
 DEFAULT_STYLE = os.getenv("DEFAULT_STYLE", "ultra")
@@ -31,4 +30,4 @@ msg = types.Message
 
 bot = TeleBot(TOKEN, parse_mode=DEFAULT_PARSE_MODE)
 
-from app.telegram_bot.bot import processor
+from app.bot.telegram import processor

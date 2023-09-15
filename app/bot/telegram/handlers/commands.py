@@ -1,9 +1,9 @@
 # -*- coding:utf-8 -*-
 """
-Telegram telegram_bot command functions
+Telegram bot command functions
 """
 
-from app.telegram_bot.bot import (
+from app.bot.telegram import (
     bot,
     msg,
     ADMIN,
@@ -13,8 +13,8 @@ from app.telegram_bot.bot import (
     MESSAGE_SPECIFY_ENGLISH_WORD,
 )
 from app.decorators import logging_time
-from app.telegram_bot.bot.models import TelegramWord as Word
-from app.telegram_bot.bot.models import kb_close
+from app.bot.telegram.models import TelegramWord as Word
+from app.bot.telegram.models import kb_close
 from app.engine import Session
 
 

@@ -12,8 +12,8 @@ from loglan_core.definition import BaseDefinition
 from loglan_core.key import BaseKey
 from loglan_core.word import BaseWord
 
-from app.telegram_bot.bot import MIN_NUMBER_OF_BUTTONS
-from app.telegram_bot.bot.variables import (
+from app.bot.telegram import MIN_NUMBER_OF_BUTTONS
+from app.bot.telegram.variables import (
     t,
     cbd,
     mark_action,
