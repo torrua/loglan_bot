@@ -9,12 +9,13 @@ from marshmallow_sqlalchemy.fields import Nested
 from app.api.schemas import ma
 
 
-# TODO from loglan_core.addons.addon_key_getter import AddonKeyGetter
+from loglan_core.addons.key_getter import AddonKeyGetter
 
 
 class Key(
     BaseKey,
-):  # AddonKeyGetter
+    AddonKeyGetter,
+):
     __tablename__ = BaseKey.__tablename__
 
 
