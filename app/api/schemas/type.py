@@ -6,7 +6,7 @@ TypeSchema module
 from loglan_core import Type, Word
 from marshmallow_sqlalchemy.fields import Nested
 
-from api.schemas import ma
+from app.api.schemas import ma
 
 
 class TypeSchema(ma.SQLAlchemyAutoSchema):

@@ -7,8 +7,6 @@ SQLAlchemy~=2.0.20
 pyTelegramBotAPI~=4.13.0
 Loglan-Core~=0.0.4
 
-#
-
 Flask-Bootstrap~=3.3.7.1
 flask-marshmallow~=0.15.0
 Flask-SQLAlchemy~=3.1.1

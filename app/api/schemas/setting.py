@@ -5,7 +5,7 @@ SettingSchema module
 
 from loglan_core import Setting
 
-from api.schemas import ma
+from app.api.schemas import ma
 
 
 class SettingSchema(ma.SQLAlchemyAutoSchema):

@@ -6,7 +6,7 @@ EventSchema module
 from loglan_core import Event, Word
 from marshmallow_sqlalchemy.fields import Nested
 
-from api.schemas import ma
+from app.api.schemas import ma
 
 
 class EventSchema(ma.SQLAlchemyAutoSchema):

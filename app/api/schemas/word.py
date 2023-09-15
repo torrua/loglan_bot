@@ -8,11 +8,11 @@ from loglan_core.addons.word_getter import AddonWordGetter
 from marshmallow import fields
 from marshmallow_sqlalchemy.fields import Nested
 
-from api.schemas import ma
-from api.schemas.author import AuthorSchema
-from api.schemas.definition import DefinitionSchema
-from api.schemas.event import EventSchema
-from api.schemas.type import TypeSchema
+from app.api.schemas import ma
+from app.api.schemas.author import AuthorSchema
+from app.api.schemas.definition import DefinitionSchema
+from app.api.schemas.event import EventSchema
+from app.api.schemas.type import TypeSchema
 
 nested_exclude = {
     "notes",

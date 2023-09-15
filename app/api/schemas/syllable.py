@@ -5,7 +5,7 @@ SyllableSchema module
 
 from loglan_core import Syllable
 
-from api.schemas import ma
+from app.api.schemas import ma
 
 
 class SyllableSchema(ma.SQLAlchemyAutoSchema):

@@ -6,7 +6,7 @@ KeySchema module
 from loglan_core import Key as BaseKey, Definition
 from marshmallow_sqlalchemy.fields import Nested
 
-from api.schemas import ma
+from app.api.schemas import ma
 
 
 # TODO from loglan_core.addons.addon_key_getter import AddonKeyGetter

@@ -6,8 +6,8 @@ DefinitionSchema module
 from loglan_core import Definition, Word, Key
 from marshmallow_sqlalchemy.fields import Nested
 
-from api.schemas import ma
-from api.schemas.key import KeySchema
+from app.api.schemas import ma
+from app.api.schemas.key import KeySchema
 
 
 class DefinitionSchema(ma.SQLAlchemyAutoSchema):
