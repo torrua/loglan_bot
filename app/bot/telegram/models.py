@@ -2,7 +2,6 @@
 """Model of LOD database for Telegram"""
 
 from collections import defaultdict
-from typing import List
 
 from callbaker import callback_from_info
 from keyboa import Keyboa
@@ -88,7 +87,7 @@ class TelegramWord(BaseWord, AddonWordGetter):
         )
         return f"{word_str}\n\n{definitions_str}"
 
-    def get_definitions(self, session) -> List[TelegramDefinition]:
+    def get_definitions(self, session) -> list[TelegramDefinition]:
         """
         Get all definitions of the word
         :param session: Session
