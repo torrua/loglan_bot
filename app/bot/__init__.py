@@ -8,7 +8,7 @@ from telebot import types
 
 from app.bot.telegram import bot, TOKEN
 
-bot_blueprint = Blueprint("route", __name__, template_folder='templates')
+bot_blueprint = Blueprint("route", __name__)
 
 
 @bot_blueprint.route(f"/{TOKEN}", methods=["POST"])
