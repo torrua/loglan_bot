@@ -1,0 +1,5 @@
+[MESSAGES CONTROL]
+disable = E0401, C0114, C0115, C0116, R0903
+
+[FORMAT]
+max-line-length = 100
