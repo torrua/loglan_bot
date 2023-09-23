@@ -3,7 +3,7 @@ Flask~=2.3.3
 gunicorn~=21.2.0
 keyboa~=3.1.0
 psycopg2-binary~=2.9.7
-SQLAlchemy~=2.0.20
+SQLAlchemy~=2.0.21
 pyTelegramBotAPI~=4.13.0
 Loglan-Core~=0.0.5
 
