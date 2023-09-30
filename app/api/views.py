@@ -3,7 +3,6 @@ from distutils.util import strtobool
 
 from flask import request, Blueprint, Response, json
 
-from app.engine import Session
 from app.api.schemas.author import blue_print_export as bp_author
 from app.api.schemas.definition import blue_print_export as bp_definition
 from app.api.schemas.event import blue_print_export as bp_event
@@ -12,6 +11,7 @@ from app.api.schemas.setting import blue_print_export as bp_setting
 from app.api.schemas.syllable import blue_print_export as bp_syllable
 from app.api.schemas.type import blue_print_export as bp_type
 from app.api.schemas.word import blue_print_export as bp_word
+from app.engine import Session
 
 API_PATH = os.getenv("API_PATH", "/api")
 API_VERSION = os.getenv("API_VERSION", "/v1")

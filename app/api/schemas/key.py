@@ -3,17 +3,10 @@
 KeySchema module
 """
 
-from loglan_core import Key as BaseKey, Definition
+from loglan_core import Key, Definition
 from marshmallow_sqlalchemy.fields import Nested
 
 from app.api.schemas import ma
-
-
-
-class Key(
-    BaseKey,
-):
-    __tablename__ = BaseKey.__tablename__
 
 
 class KeySchema(ma.SQLAlchemyAutoSchema):
