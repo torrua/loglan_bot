@@ -4,7 +4,6 @@ WordSchema module
 """
 
 from loglan_core import Word as BaseWord, Definition, Type, Author, Event
-from loglan_core.addons.word_getter import AddonWordGetter
 from marshmallow import fields
 from marshmallow_sqlalchemy.fields import Nested
 
@@ -29,7 +28,7 @@ full_include = {
 }
 
 
-class Word(BaseWord, AddonWordGetter):
+class Word(BaseWord):
     __tablename__ = BaseWord.__tablename__
 
 

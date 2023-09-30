@@ -5,11 +5,12 @@ from collections import defaultdict
 
 from callbaker import callback_from_info
 from keyboa import Keyboa
-from loglan_core.addons.word_getter import AddonWordGetter
+from loglan_core.addons.word_selector import WordSelector
 from loglan_core.connect_tables import t_connect_keys
 from loglan_core.definition import BaseDefinition
 from loglan_core.key import BaseKey
 from loglan_core.word import BaseWord
+from sqlalchemy import select
 
 from app.bot.telegram import MIN_NUMBER_OF_BUTTONS
 from app.bot.telegram.variables import (
@@ -53,7 +54,7 @@ class TelegramDefinition(BaseDefinition):
         return f"{d_usage}{d_grammar}{d_body}{d_case_tags}"
 
 
-class TelegramWord(BaseWord, AddonWordGetter):
+class TelegramWord(BaseWord):
     """Word class extensions for Telegram"""
 
     def export(self, session) -> str:
@@ -109,17 +110,16 @@ class TelegramWord(BaseWord, AddonWordGetter):
         :param language: Key language
         :return: Search results string formatted for sending to Telegram
         """
-        words = (
-            session.query(cls.name, TelegramDefinition)
+        words_request = (
+            select(cls.name, TelegramDefinition)
             .join(BaseDefinition)
             .join(t_connect_keys)
             .join(BaseKey)
             .filter(BaseKey.word == request)
             .filter(BaseKey.language == language)
             .order_by(cls.id, BaseDefinition.position)
-            .all()
         )
-
+        words = session.execute(words_request).all()
         result = defaultdict(list)
 
         for word in words:
@@ -306,7 +306,7 @@ class TelegramWord(BaseWord, AddonWordGetter):
             return [
                 cls.get_by_id(session, request),
             ]
-        return cls.by_name(session, request).all()
+        return session.execute(WordSelector(TelegramWord).by_name(request)).scalars().all()
 
 
 def kb_close():
