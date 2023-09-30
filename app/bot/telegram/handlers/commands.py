@@ -12,9 +12,9 @@ from app.bot.telegram import (
     MESSAGE_SPECIFY_LOGLAN_WORD,
     MESSAGE_SPECIFY_ENGLISH_WORD,
 )
-from app.decorators import logging_time
 from app.bot.telegram.models import TelegramWord as Word
 from app.bot.telegram.models import kb_close
+from app.decorators import logging_time
 from app.engine import Session
 
 

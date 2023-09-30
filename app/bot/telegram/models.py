@@ -290,9 +290,7 @@ class TelegramWord(BaseWord):
         :return:
         """
         bot.send_message(
-            chat_id=user_id,
-            text=self.export(session),
-            reply_markup=self.keyboard_cpx()
+            chat_id=user_id, text=self.export(session), reply_markup=self.keyboard_cpx()
         )
 
     @classmethod
@@ -306,7 +304,9 @@ class TelegramWord(BaseWord):
             return [
                 cls.get_by_id(session, request),
             ]
-        return session.execute(WordSelector(TelegramWord).by_name(request)).scalars().all()
+        return (
+            session.execute(WordSelector(TelegramWord).by_name(request)).scalars().all()
+        )
 
 
 def kb_close():

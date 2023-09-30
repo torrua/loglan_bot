@@ -6,6 +6,7 @@ Initializing telegram bot
 """
 import os
 from os import environ
+
 from telebot import TeleBot, types
 
 EN, RU = "en", "ru"

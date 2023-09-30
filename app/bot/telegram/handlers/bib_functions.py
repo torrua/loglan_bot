@@ -4,10 +4,10 @@
 from callbaker import info_from_callback
 
 from app.bot.telegram import bot, cbq
-from app.decorators import logging_time
 from app.bot.telegram.models import TelegramWord as Word
-from app.engine import Session
 from app.bot.telegram.variables import mark_record_id, mark_slice_start
+from app.decorators import logging_time
+from app.engine import Session
 
 
 @logging_time

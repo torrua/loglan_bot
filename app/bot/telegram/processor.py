@@ -5,8 +5,8 @@
 
 from app.bot.telegram import bot, msg, cbq
 from app.bot.telegram.handlers.commands import bot_cmd_start, bot_cmd_gle, bot_cmd_log
-from app.bot.telegram.handlers.messages import bot_text_messages_handler
 from app.bot.telegram.handlers.inline import bot_callback_inline
+from app.bot.telegram.handlers.messages import bot_text_messages_handler
 from app.decorators import logging_time
 
 
