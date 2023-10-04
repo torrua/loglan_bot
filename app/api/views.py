@@ -1,8 +1,9 @@
 import os
 from distutils.util import strtobool
-
+from sqlalchemy import select
 from flask import request, Blueprint, Response, json
-
+from loglan_core.addons.word_selector import WordSelector
+from loglan_core.addons.key_selector import KeySelector
 from app.api.schemas.author import blue_print_export as bp_author
 from app.api.schemas.definition import blue_print_export as bp_definition
 from app.api.schemas.event import blue_print_export as bp_event
@@ -33,18 +34,21 @@ def universal_get(session, schema_full, schema_nested, model, many: bool = True)
     event_id = args.pop("event_id", None)
     case_sensitive = bool(strtobool(args.pop("case_sensitive", "False")))
     model_args, skipped_args = separate_arguments(model, args)
-    model_query = session.query(model)
+    statement = select(model)
 
     # TODO REFACTORING
     api_section = request.path.strip("/").split("/")[-1]
-    if event_id and (api_section in ["words", "keys"]):
-        model_query = model.by_event(event_id=int(event_id))
+    if event_id:
+        if api_section == "words":
+            statement = WordSelector().by_event(event_id=int(event_id))
+        elif api_section == "keys":
+            statement = KeySelector().by_event(event_id=int(event_id))
 
     if model_args:
         for attr, value in model_args.items():
             if str(value).isdigit():
                 value = int(value)
-                model_query = model_query.filter(getattr(model, attr) == value)
+                statement = statement.filter(getattr(model, attr) == value)
                 continue
 
             value = value.replace("*", "%")
@@ -53,9 +57,9 @@ def universal_get(session, schema_full, schema_nested, model, many: bool = True)
                 name_attr.like(value) if case_sensitive else name_attr.ilike(value)
             )
 
-            model_query = model_query.filter(name_filter)
+            statement = statement.filter(name_filter)
 
-    model_entities = model_query.all() if many else model_query.first()
+    model_entities = session.execute(statement).scalars().all() if many else session.execute(statement).scalar()
     count = (
         len(model_entities)
         if many
