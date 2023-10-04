@@ -280,11 +280,7 @@ class TelegramWord(BaseWord):
         kb_cpx_hide = self._keyboard_hide(total_num_of_cpx)
 
         last_allowed_item = slice_start + current_delimiter
-        slice_end = (
-            last_allowed_item
-            if last_allowed_item < total_num_of_cpx
-            else total_num_of_cpx
-        )
+        slice_end = min(last_allowed_item, total_num_of_cpx)
 
         current_cpx_set = self.complexes[slice_start:slice_end]
         kb_cpx_data = self._keyboard_data(current_cpx_set)
