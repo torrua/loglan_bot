@@ -1,9 +1,11 @@
 import os
 from distutils.util import strtobool
-from sqlalchemy import select
+
 from flask import request, Blueprint, Response, json
-from loglan_core.addons.word_selector import WordSelector
 from loglan_core.addons.key_selector import KeySelector
+from loglan_core.addons.word_selector import WordSelector
+from sqlalchemy import select
+
 from app.api.schemas.author import blue_print_export as bp_author
 from app.api.schemas.definition import blue_print_export as bp_definition
 from app.api.schemas.event import blue_print_export as bp_event
@@ -31,18 +33,34 @@ def universal_get(session, schema_full, schema_nested, model, many: bool = True)
     args = {**request.args}
 
     detailed = bool(strtobool(args.pop("detailed", "False")))
+    statement, skipped_args = get_statement(model, args)
+
+    result = session.execute(statement)
+    model_entities = result.scalars().all() if many else [result.scalar()]
+
+    count = len(model_entities)
+    schema = schema_full if detailed else schema_nested
+    data = schema.dump(model_entities, many=many)
+
+    return Response(
+        mimetype="application/json",
+        response=json.dumps(
+            {
+                "result": True,
+                "data": data,
+                "count": count,
+                "skipped_arguments": skipped_args,
+            }
+        ),
+        status=200,
+    )
+
+
+def get_statement(model, args):
     event_id = args.pop("event_id", None)
     case_sensitive = bool(strtobool(args.pop("case_sensitive", "False")))
     model_args, skipped_args = separate_arguments(model, args)
-    statement = select(model)
-
-    # TODO REFACTORING
-    api_section = request.path.strip("/").split("/")[-1]
-    if event_id:
-        if api_section == "words":
-            statement = WordSelector().by_event(event_id=int(event_id))
-        elif api_section == "keys":
-            statement = KeySelector().by_event(event_id=int(event_id))
+    statement = filter_statement_by_event_id(model, event_id)
 
     if model_args:
         for attr, value in model_args.items():
@@ -59,32 +77,17 @@ def universal_get(session, schema_full, schema_nested, model, many: bool = True)
 
             statement = statement.filter(name_filter)
 
-    model_entities = session.execute(statement).scalars().all() if many else session.execute(statement).scalar()
-    count = (
-        len(model_entities)
-        if many
-        else len(
-            [
-                model_entities,
-            ]
-        )
-    )
+    return statement, skipped_args
 
-    schema = schema_full if detailed else schema_nested
-    data = schema.dump(model_entities, many=many)
 
-    return Response(
-        mimetype="application/json",
-        response=json.dumps(
-            {
-                "result": True,
-                "data": data,
-                "count": count,
-                "skipped_arguments": skipped_args,
-            }
-        ),
-        status=200,
-    )
+def filter_statement_by_event_id(model, event_id):
+    api_section = request.path.strip("/").split("/")[-1]
+    if event_id:
+        if api_section == "words":
+            return WordSelector().by_event(event_id=int(event_id))
+        if api_section == "keys":
+            return KeySelector().by_event(event_id=int(event_id))
+    return select(model)
 
 
 def separate_arguments(model, args):
