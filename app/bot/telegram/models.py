@@ -57,49 +57,65 @@ class TelegramDefinition(BaseDefinition):
 class TelegramWord(BaseWord):
     """Word class extensions for Telegram"""
 
+    def format_affixes(self):
+        if self.affixes:
+            return " ({})".format(" ".join([w.name for w in self.affixes]))
+        return ""
+
+    def format_year(self):
+        return "'" + str(self.year.year)[-2:] + " " if self.year else ""
+
+    def format_origin(self):
+        if self.origin or self.origin_x:
+            return "\n<i>&#60;{}{}&#62;</i>".format(
+                self.origin, " = " + self.origin_x if self.origin_x else ""
+            )
+        return ""
+
+    def format_authors(self):
+        return (
+            "/".join([a.abbreviation for a in self.authors]) + " "
+            if self.authors
+            else ""
+        )
+
+    def format_rank(self):
+        return self.rank + " " if self.rank else ""
+
     def export(self, session) -> str:
         """
         Convert word's data to str for sending as a telegram messages
         :return: List of str with technical info, definitions, used_in part
         """
-
-        # Word
-        list_of_afx = ["" + w.name for w in self.affixes]
-        w_affixes = f" ({' '.join(list_of_afx)})" if list_of_afx else ""
+        w_affixes = self.format_affixes()
         w_match = self.match + " " if self.match else ""
-        w_year = "'" + str(self.year.year)[-2:] + " "
-        w_origin_x = " = " + self.origin_x if self.origin_x else ""
-        w_orig = (
-            "\n<i>&#60;" + self.origin + w_origin_x + "&#62;</i>"
-            if self.origin or w_origin_x
-            else ""
-        )
-        w_authors = "/".join([a.abbreviation for a in self.authors]) + " "
+        w_year = self.format_year()
+        w_orig = self.format_origin()
+        w_authors = self.format_authors()
         w_type = self.type.type + " "
-        w_rank = self.rank + " " if self.rank else ""
+        w_rank = self.format_rank()
+
         word_str = (
             f"<b>{self.name}</b>{w_affixes},"
             f"\n{w_match}{w_type}{w_authors}{w_year}{w_rank}{w_orig}"
         )
 
-        # Definitions TODO maybe extract from method
-        definitions_str = "\n\n".join(
-            [d.export() for d in self.get_definitions(session=session)]
-        )
-        return f"{word_str}\n\n{definitions_str}"
+        # TODO maybe extract Definitions from method
+        return "{}\n\n{}".format(word_str, self.get_definitions(session=session))
 
-    def get_definitions(self, session) -> list[TelegramDefinition]:
+    def get_definitions(self, session) -> str:
         """
         Get all definitions of the word
         :param session: Session
         :return: List of Definition objects ordered by position
         """
-        return (
+        definitions = (
             session.query(TelegramDefinition)
             .filter(BaseDefinition.word_id == self.id)
             .order_by(BaseDefinition.position.asc())
             .all()
         )
+        return "\n\n".join([d.export() for d in definitions])
 
     @classmethod
     def translation_by_key(cls, session, request: str, language: str = None) -> str:
