@@ -58,18 +58,18 @@ class TelegramWord(BaseWord):
     """Word class extensions for Telegram"""
 
     def format_affixes(self):
-        if self.affixes:
-            return " ({})".format(" ".join([w.name for w in self.affixes]))
-        return ""
+        return (
+            f" ({' '.join([w.name for w in self.affixes]).strip()}"
+            if self.affixes
+            else ""
+        )
 
     def format_year(self):
         return "'" + str(self.year.year)[-2:] + " " if self.year else ""
 
     def format_origin(self):
         if self.origin or self.origin_x:
-            return "\n<i>&#60;{}{}&#62;</i>".format(
-                self.origin, " = " + self.origin_x if self.origin_x else ""
-            )
+            return f"\n<i>&#60;{self.origin}{' = ' + self.origin_x if self.origin_x else ''}&#62;</i>"
         return ""
 
     def format_authors(self):
@@ -99,9 +99,7 @@ class TelegramWord(BaseWord):
             f"<b>{self.name}</b>{w_affixes},"
             f"\n{w_match}{w_type}{w_authors}{w_year}{w_rank}{w_orig}"
         )
-
-        # TODO maybe extract Definitions from method
-        return "{}\n\n{}".format(word_str, self.get_definitions(session=session))
+        return f"{word_str}\n\n{self.get_definitions(session=session)}"
 
     def get_definitions(self, session) -> str:
         """
