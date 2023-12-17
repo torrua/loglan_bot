@@ -13,7 +13,7 @@ class TypeSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = Type
         include_fk = True
-        exclude = ("created", "updated", "_words")
+        exclude = ("created", "updated", "relationship_words")
 
     _words = Nested("WordSchema", only=Word.attributes_basic(), many=True)
     words = _words

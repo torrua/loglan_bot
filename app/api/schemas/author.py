@@ -13,7 +13,7 @@ class AuthorSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = Author
         include_fk = True
-        exclude = ("created", "updated", "_contribution")
+        exclude = ("created", "updated", "relationship_contribution")
 
     _contribution = Nested("WordSchema", only=Word.attributes_basic(), many=True)
     contribution = _contribution

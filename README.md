@@ -11,4 +11,3 @@ The [@LoglanBot](http://t.me/LoglanBot) translates words from Loglan to English 
 Use commands `/gle` and `/log` for specific search for an English or Loglan word.
 
 Check current deployment at https://loglanbot-torrua.b4a.run/bot/about
-

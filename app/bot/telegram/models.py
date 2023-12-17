@@ -5,12 +5,9 @@ from collections import defaultdict
 
 from callbaker import callback_from_info
 from keyboa import Keyboa
+from loglan_core.addons.definition_selector import DefinitionSelector
 from loglan_core.addons.word_selector import WordSelector
-from loglan_core.connect_tables import t_connect_keys
-from loglan_core.definition import BaseDefinition
-from loglan_core.key import BaseKey
-from loglan_core.word import BaseWord
-from sqlalchemy import select
+from loglan_core import Word, Definition
 
 from app.bot.telegram import MIN_NUMBER_OF_BUTTONS
 from app.bot.telegram.variables import (
@@ -27,7 +24,7 @@ from app.bot.telegram.variables import (
 )
 
 
-class TelegramDefinition(BaseDefinition):
+class TelegramDefinition(Definition):
     """Definition class extensions for Telegram"""
 
     def export(self):
@@ -54,7 +51,7 @@ class TelegramDefinition(BaseDefinition):
         return f"{d_usage}{d_grammar}{d_body}{d_case_tags}"
 
 
-class TelegramWord(BaseWord):
+class TelegramWord(Word):
     """Word class extensions for Telegram"""
 
     def format_affixes(self):
@@ -107,12 +104,14 @@ class TelegramWord(BaseWord):
         :param session: Session
         :return: List of Definition objects ordered by position
         """
+
         definitions = (
-            session.query(TelegramDefinition)
-            .filter(BaseDefinition.word_id == self.id)
-            .order_by(BaseDefinition.position.asc())
-            .all()
+            DefinitionSelector(class_=TelegramDefinition)
+            .filter(TelegramDefinition.word_id == self.id)
+            .order_by(TelegramDefinition.position.asc())
+            .all(session=session)
         )
+
         return "\n\n".join([d.export() for d in definitions])
 
     @classmethod
@@ -124,21 +123,16 @@ class TelegramWord(BaseWord):
         :param language: Key language
         :return: Search results string formatted for sending to Telegram
         """
-        words_request = (
-            select(cls.name, TelegramDefinition)
-            .join(BaseDefinition)
-            .join(t_connect_keys)
-            .join(BaseKey)
-            .filter(BaseKey.word == request)
-            .filter(BaseKey.language == language)
-            .order_by(cls.id, BaseDefinition.position)
-        )
-        words = session.execute(words_request).all()
-        result = defaultdict(list)
 
-        for word in words:
-            name, definition = word
-            result[name].append(definition.export())
+        result = defaultdict(list)
+        definitions = (
+            DefinitionSelector(class_=TelegramDefinition)
+            .by_key(key=request, language=language)
+            .all(session=session)
+        )
+
+        for definition in definitions:
+            result[definition.source_word.name].append(definition.export())
 
         new = "\n"
         word_items = [
@@ -163,7 +157,6 @@ class TelegramWord(BaseWord):
             mark_action: action_predy_kb_cpx_show,
             mark_record_id: self.id,
         }
-
         if index_start != 0:
             cbd_predy_kb_cpx_back = {
                 **common_data,
@@ -314,9 +307,7 @@ class TelegramWord(BaseWord):
             return [
                 cls.get_by_id(session, request),
             ]
-        return (
-            session.execute(WordSelector(TelegramWord).by_name(request)).scalars().all()
-        )
+        return WordSelector(TelegramWord).by_name(request).all(session)
 
 
 def kb_close():

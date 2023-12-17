@@ -39,13 +39,13 @@ class WordSchema(ma.SQLAlchemyAutoSchema):
         exclude = (
             "created",
             "updated",
-            "_event_end",
-            "_authors",
-            "_definitions",
-            "_derivatives",
-            "_type",
-            "_event_start",
-            "_parents",
+            "relationship_event_end",
+            "relationship_authors",
+            "relationship_definitions",
+            "relationship_derivatives",
+            "relationship_type",
+            "relationship_event_start",
+            "relationship_parents",
         )
         load_instance = True
 
