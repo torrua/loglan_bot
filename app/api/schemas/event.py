@@ -13,7 +13,12 @@ class EventSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = Event
         include_fk = True
-        exclude = ("created", "updated", "relationship_deprecated_words", "relationship_appeared_words")
+        exclude = (
+            "created",
+            "updated",
+            "relationship_deprecated_words",
+            "relationship_appeared_words",
+        )
 
     _appeared_words = Nested("WordSchema", only=Word.attributes_basic(), many=True)
     appeared_words = _appeared_words

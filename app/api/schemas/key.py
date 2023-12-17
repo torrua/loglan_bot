@@ -13,7 +13,11 @@ class KeySchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = Key
         include_fk = True
-        exclude = ("created", "updated", "relationship_definitions")
+        exclude = (
+            "created",
+            "updated",
+            "relationship_definitions",
+        )
 
     _definitions = Nested(
         "DefinitionSchema",

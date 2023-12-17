@@ -14,7 +14,12 @@ class DefinitionSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = Definition
         include_fk = True
-        exclude = ("created", "updated", "relationship_keys", "relationship_source_word")
+        exclude = (
+            "created",
+            "updated",
+            "relationship_keys",
+            "relationship_source_word",
+        )
 
     _source_word = Nested("WordSchema", only=Word.attributes_basic())
     source_word = _source_word

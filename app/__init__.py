@@ -18,16 +18,16 @@ def create_app():
     # bootstrap initialization
     bootstrap.init_app(app)
     # register all blueprints
-    app.register_blueprint(bot_blueprint, url_prefix='/bot')
+    app.register_blueprint(bot_blueprint, url_prefix="/bot")
     _ = [
-            app.register_blueprint(bp.get("blueprint"), url_prefix=bp.get("url_prefix"))
-            for bp in api_blueprints
-        ]
+        app.register_blueprint(bp.get("blueprint"), url_prefix=bp.get("url_prefix"))
+        for bp in api_blueprints
+    ]
     app.debug = True
 
     @app.errorhandler(404)
     def page_not_found(_):
-        return render_template('404.html'), 404
+        return render_template("404.html"), 404
 
     @app.route("/", methods=["GET"])
     @app.route("/index")
