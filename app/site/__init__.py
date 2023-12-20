@@ -98,11 +98,11 @@ def submit_search():
 
 def strtobool(val):
     val = val.lower()
-    if val in ('yes', 'true', 't', 'y', '1'):
+    if val in ("yes", "true", "t", "y", "1"):
         return True
-    if val in ('no', 'false', 'f', 'n', '0'):
+    if val in ("no", "false", "f", "n", "0"):
         return False
-    raise ValueError('Invalid boolean value')
+    raise ValueError("Invalid boolean value")
 
 
 def generate_content(data):
@@ -129,7 +129,9 @@ def generate_content(data):
         )
         with Session() as session:
             word_result = session.execute(word_statement).scalars().all()
-            result = Composer(words=word_result, style=DEFAULT_HTML_STYLE).export_as_html()
+            result = Composer(
+                words=word_result, style=DEFAULT_HTML_STYLE
+            ).export_as_html()
 
         if not result:
             result = (

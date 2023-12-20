@@ -29,11 +29,11 @@ class EnglishItem(Item):
         event_id: BaseEvent | int | str = None,
     ) -> Select:
         return (
-            DefinitionSelector().by_key(
-                key=key, language=language, case_sensitive=case_sensitive
-            )
+            DefinitionSelector()
+            .by_key(key=key, language=language, case_sensitive=case_sensitive)
             .join(BaseWord)
-            .filter(BaseWord.filter_by_event_id(event_id=event_id)).distinct(BaseWord.name)
+            .filter(BaseWord.filter_by_event_id(event_id=event_id))
+            .distinct(BaseWord.name)
             .order_by(BaseWord.name)
         )
 
