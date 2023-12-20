@@ -46,7 +46,6 @@ def home():
         bq["class"] = "blockquote"
 
     for img in article.findAll("img"):
-        # del(img["alt"])
         img["src"] = MAIN_SITE + img["src"]
 
     return render_template("home.html", article="")
@@ -161,8 +160,8 @@ def generate_content(data):
     return jsonify(result=result)
 
 
-@site_blueprint.route("/<string:section>/", methods=["GET", "POST"])
-@site_blueprint.route("/<string:section>/<string:article>", methods=["GET", "POST"])
+@site_blueprint.route("/<string:section>/", methods=["GET"])
+@site_blueprint.route("/<string:section>/<string:article>", methods=["GET"])
 def proxy(section: str = "", article: str = ""):
     url = f"{MAIN_SITE}{section}/{article}"
     content = get_data(url).get("content").body
@@ -171,7 +170,6 @@ def proxy(section: str = "", article: str = ""):
         bq["class"] = "blockquote"
 
     for img in content.findAll("img"):
-        # del(img["alt"])
         img["src"] = MAIN_SITE + section + "/" + img["src"]
 
     name_of_article = content.h1.extract().get_text()

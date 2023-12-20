@@ -28,7 +28,7 @@ def get_data(
         "url_correct": "Введен корректный адрес веб-страницы:\t%s",
         "path_check": "Проверяем, являются ли введенные данные адресом файла \n\t>> Адрес:\t%s",
         "parse": "Пробуем обработать полученные данные",
-        "agent": "Содержиимое строки headers:\n\t>>\t%s",
+        "agent": "Содержимое строки headers:\n\t>>\t%s",
         "success": "Данные с сайта успешно загружены",
     }
 
@@ -39,20 +39,22 @@ def get_data(
         log.debug(m_l["url_correct"], url)
         try:
             log.debug(m_l["get_site"])
-            request_to_site = request.Request(
-                url=url, headers=headers if headers else {}
-            )
-            response = request.urlopen(request_to_site)
-        except (error.URLError, error.HTTPError) as err:
+            if url.lower().startswith('http'):
+                request_to_site = request.Request(
+                    url=url, headers=headers if headers else {}
+                )
+            else:
+                raise ValueError from None
+            with request.urlopen(request_to_site) as response:
+                try:
+                    log.debug(m_l["parse"])
+                    site_data = BeautifulSoup(response, parser)
+                except error.HTTPError as err:
+                    log.error(m_l["error"], *(url, err))
+                    return {rslt: False, cntnt: str(err), msg: 5152}
+        except error.URLError as err:
             log.error(m_l["error"], url, err)
             log.error(m_l["agent"], headers)
-            return {rslt: False, cntnt: str(err), msg: 5152}
-
-        try:
-            log.debug(m_l["parse"])
-            site_data = BeautifulSoup(response, parser)
-        except error.HTTPError as err:
-            log.error(m_l["error"], *(url, err))
             return {rslt: False, cntnt: str(err), msg: 5152}
     else:
         log.debug(m_l["path_check"], url)
