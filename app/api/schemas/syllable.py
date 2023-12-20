@@ -8,7 +8,7 @@ from loglan_core import Syllable
 from app.api.schemas import ma
 
 
-class SyllableSchema(ma.SQLAlchemyAutoSchema):
+class SyllableSchema(ma.SQLAlchemyAutoSchema):  # pylint: disable=too-many-ancestors
     class Meta:
         model = Syllable
         exclude = ("created", "updated")

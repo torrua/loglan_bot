@@ -9,7 +9,7 @@ from marshmallow_sqlalchemy.fields import Nested
 from app.api.schemas import ma
 
 
-class KeySchema(ma.SQLAlchemyAutoSchema):
+class KeySchema(ma.SQLAlchemyAutoSchema):  # pylint: disable=too-many-ancestors
     class Meta:
         model = Key
         include_fk = True

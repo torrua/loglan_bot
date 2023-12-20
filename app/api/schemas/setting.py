@@ -8,7 +8,7 @@ from loglan_core import Setting
 from app.api.schemas import ma
 
 
-class SettingSchema(ma.SQLAlchemyAutoSchema):
+class SettingSchema(ma.SQLAlchemyAutoSchema):  # pylint: disable=too-many-ancestors
     class Meta:
         model = Setting
         exclude = ("created", "updated")
