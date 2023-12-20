@@ -1,2 +1,3 @@
 -r ./app/api/requirements.txt
 -r ./app/bot/requirements.txt
+-r ./app/site/requirements.txt
