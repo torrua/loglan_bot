@@ -1,5 +1,5 @@
 import re
-from urllib import request, error
+import urllib
 
 from bs4 import BeautifulSoup
 
@@ -40,19 +40,19 @@ def get_data(
         try:
             log.debug(m_l["get_site"])
             if url.lower().startswith('http'):
-                request_to_site = request.Request(
+                request_to_site = urllib.request.Request(
                     url=url, headers=headers if headers else {}
                 )
             else:
                 raise ValueError from None
-            with request.urlopen(request_to_site) as response:
+            with urllib.request.urlopen(request_to_site) as response:
                 try:
                     log.debug(m_l["parse"])
                     site_data = BeautifulSoup(response, parser)
-                except error.HTTPError as err:
+                except urllib.error.HTTPError as err:
                     log.error(m_l["error"], *(url, err))
                     return {rslt: False, cntnt: str(err), msg: 5152}
-        except error.URLError as err:
+        except urllib.error.URLError as err:
             log.error(m_l["error"], url, err)
             log.error(m_l["agent"], headers)
             return {rslt: False, cntnt: str(err), msg: 5152}
