@@ -1,11 +1,14 @@
-from app.logger import log
 import re
-
 from urllib import request, error
+
 from bs4 import BeautifulSoup
 
+from app.logger import log
 
-def get_data(url: str, parser: str = "lxml", headers: dict = None) -> dict[str, bool | str | BeautifulSoup]:
+
+def get_data(
+    url: str, parser: str = "lxml", headers: dict = None
+) -> dict[str, bool | str | BeautifulSoup]:
     """
     This function downloads and parses content of URL site
     :url: address of needed site or directory
@@ -26,7 +29,7 @@ def get_data(url: str, parser: str = "lxml", headers: dict = None) -> dict[str, 
         "path_check": "Проверяем, являются ли введенные данные адресом файла \n\t>> Адрес:\t%s",
         "parse": "Пробуем обработать полученные данные",
         "agent": "Содержиимое строки headers:\n\t>>\t%s",
-        "success": "Данные с сайта успешно загружены"
+        "success": "Данные с сайта успешно загружены",
     }
 
     log.info(m_l["start"])
@@ -36,7 +39,9 @@ def get_data(url: str, parser: str = "lxml", headers: dict = None) -> dict[str, 
         log.debug(m_l["url_correct"], url)
         try:
             log.debug(m_l["get_site"])
-            request_to_site = request.Request(url=url, headers=headers if headers else {})
+            request_to_site = request.Request(
+                url=url, headers=headers if headers else {}
+            )
             response = request.urlopen(request_to_site)
         except (error.URLError, error.HTTPError) as err:
             log.error(m_l["error"], url, err)
@@ -50,7 +55,6 @@ def get_data(url: str, parser: str = "lxml", headers: dict = None) -> dict[str, 
             log.error(m_l["error"], *(url, err))
             return {rslt: False, cntnt: str(err), msg: 5152}
     else:
-
         log.debug(m_l["path_check"], url)
         try:
             log.debug(m_l["get_site"])

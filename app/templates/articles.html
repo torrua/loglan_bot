@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    {{ title }}
+{% endblock %}
+
+{% block style %}
+    .articles-items {
+        margin-top: 10px;
+    }
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="container body-content" style="margin-top: 15px; margin-bottom: 20px;">
+        <h2 align="center">Loglan {{ title }}</h2><br>
+        <div class="articles-items">{{ articles|safe }}</div>
+    </div>
+</div>
+{% endblock %}

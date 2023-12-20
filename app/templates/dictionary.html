@@ -1,0 +1,273 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Search
+{% endblock %}
+
+{% block style %}
+	.lt > span {
+		font-size: 24px;
+		font-weight: bold;
+	}
+	wl, .word_line {
+		font-weight: bold;
+		display: block;
+	}
+	.w_name{
+		font-weight: bold;
+	}
+	ws, .words > *:not(:first-child) {
+		margin-top: 20px;
+	}
+	m, d, w, us {
+		display: block;
+	}
+	ms, .meanings > *:not(:first-child) {
+		margin-top: 10px;
+	}
+	ms, .meanings > * {
+		margin-left: 10px;
+	}
+	afx, .m_afx {
+		color: #007F00;
+		font-style: italic;
+	}
+	o, .m_origin, .w_origin {
+		color: #007F00;
+		font-style: italic;
+	}
+	dl, de, .definition {
+		margin-top: 5px;
+		text-align: justify;
+		max-width: 90%;
+		min-width: 400px;
+	}
+	dl, .definition.log {
+		margin-left: 20px;
+	}
+	du, .du {
+		font-weight: bold;
+	}
+	us, .used_in {
+		margin-top: 5px;
+		min-width: 400px;
+	}
+	k {
+		color: #0000FF;
+		font-style: italic;
+	}
+	l {
+		color: #C70039;
+		font-weight: bold;
+	}
+
+    .search {
+      padding-top: 10px;
+    }
+    .word_data  {
+      padding-top: 20px;
+      padding-bottom: 45px;
+    }
+
+	.language-selector, .settings-selector {
+		margin-left: 10px;
+	}
+
+	.btn-outline-secondary.custom-btn {
+		border-color: #ced4da;
+		color: #ced4da;
+	}
+	input.search-bar {
+		font-weight: bold;
+	}
+	.form-control:focus {
+	  border-color: #919191;
+	  box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 8px rgba(0, 0, 0, 0.6);
+	}
+	.search-settings {
+		margin-left: 10px;
+	}
+	.settings-bar {
+		margin-top: 10px;
+	}
+	.btn-settings {
+		margin-left: 10px;
+	}
+	a.m_cpx {
+		text-decoration: none;
+	}
+{% endblock %}
+
+{% block content %}
+<div class="container search">
+  	<form id="search" class="d-flex">
+		<input class="form-control search-bar" type="search" placeholder="Search" autocomplete="off" aria-label="Search" name="word" id="search_field">
+		<div class="btn-group language-selector" role="group" id="language-selector">
+			<input type="radio" class="btn-check" name="search_lang" id="log" value="log" autocomplete="off" checked>
+			<label class="btn btn-outline-secondary custom-btn" for="log" title="Switch To Loglan">L</label>
+			<input type="radio" class="btn-check" name="search_lang" id="eng" value="eng" autocomplete="off">
+			<label class="btn btn-outline-secondary custom-btn" for="eng" title="Switch To English">E</label>
+		</div>
+		<div class="btn-group settings-selector" role="group" id="settings-selector">
+			<input type="checkbox" class="btn-check" id="btn-check-2-outlined" autocomplete="off" onclick="this.blur();"
+				data-bs-toggle="collapse" data-bs-target="#collapse_settings" aria-expanded="false" aria-controls="collapse_settings">
+			<label class="btn btn-outline-secondary custom-btn btn-settings" for="btn-check-2-outlined" title="Settings">⚙</label>
+			<a href="{{url_for('site.how_to_read')}}" class="btn btn-outline-secondary custom-btn" style="outline: none; box-shadow: none;"
+		   		role="button" title="How To Read">&#8239;?&#8239;</a></div><br>
+	</form>
+
+	<div class="collapse settings-bar" id="collapse_settings">
+		<div class="card card-body">
+			<div class="row g-3">
+				<div class="col-9">
+					<form id="settings" class="search-settings">
+						<div class="form-check form-check-inline">
+						  <input class="form-check-input" type="checkbox" id="check_case_sensitive" value="option1">
+						  <label class="form-check-label" for="check_case_sensitive">Case sensitive</label>
+						</div>
+					</form>
+				</div>
+				<div class="col-3">
+					<select class="form-select form-select-sm" aria-label=".form-select-sm" id="event_selector">
+						{% for id, name in events.items() %}
+						<option name="eid" value="{{ id }}">{{ name }}</option>
+						{% endfor %}
+					</select>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="container word_data">
+	<span id="word_data"></span>
+</div>
+
+<script>
+
+    var form = document.getElementById('search');
+    form.addEventListener('submit', addSubmit);
+
+    var log_button = document.getElementById('log');
+    log_button.addEventListener('click', onClickBtn);
+
+    var eng_button = document.getElementById('eng');
+    eng_button.addEventListener('click', onClickBtn);
+
+	var case_box = document.getElementById('check_case_sensitive');
+    case_box.addEventListener('click', subAddSubmit);
+
+	var event_selector = document.getElementById('event_selector');
+    event_selector.addEventListener('change', subAddSubmit);
+
+	window.onpopstate = function(e) {
+		if(e.state) {
+			restoreWordData(e.state.html)
+			restoreSettings(e.state)
+	 	}
+	 }
+
+	loadDefault();
+
+	function restoreWordData(data) {
+		// Show word's data on page and add listeners for Cpx
+		if (!(data))  {data = ""}
+		document.getElementById('word_data').innerHTML = data
+		addListenersToCpx()
+	}
+
+	function restoreSettings(data) {
+		document.getElementById('search_field').value = data.word
+		document.getElementById('event_selector').selectedIndex = data.esi
+		document.getElementById(data.language_id).checked = true
+		document.getElementById("check_case_sensitive").checked = data.case_sensitive
+	}
+
+	function collectState() {
+		// Collect page state and settings to data dictionary
+		var current_state = {
+			'case_sensitive': document.getElementById('check_case_sensitive').checked,
+			'esi': document.getElementById('event_selector').selectedIndex,
+			'event_id': document.getElementById('event_selector').value,
+			'language_id': document.querySelector('.btn-check:checked').value,
+			'word': document.getElementById('search_field').value,
+		}
+		return current_state
+	}
+
+	function sendRequest(data) {
+		var request = new XMLHttpRequest()
+		request.addEventListener('load', applyResponse)
+		request.open('POST', {{ url_for('site.submit_search')|tojson }})
+
+		var form_data = new FormData()
+		for ( var key in data ) { form_data.append(key, data[key])}
+		request.send(form_data)
+	}
+
+	function subAddSubmit() {
+		var current_state = collectState()
+		sendRequest(current_state)
+	}
+
+    function applyResponse() {
+    	// this action runs after pressing the submit button
+    	var data = JSON.parse(this.responseText)
+
+		restoreWordData(data.result)
+
+		var current_state = collectState()
+		var params = new URLSearchParams(current_state).toString()
+
+		current_state['html'] = data.result
+    	window.history.pushState(current_state, "", "?"+params)
+    }
+
+	function addListenersToCpx() {
+		var elements = document.getElementsByClassName("m_cpx")
+		for (var i = 0; i < elements.length; i++) {
+			elements[i].addEventListener('click', pressDjifoa)
+		}
+	}
+
+    function addSubmit(ev) {
+		ev.preventDefault()
+		subAddSubmit()
+    }
+	var pressDjifoa = function() {
+		document.getElementById('search_field').value = this.innerText
+		subAddSubmit()
+	}
+
+    function onClickBtn() {
+    	this.blur()
+    	subAddSubmit()
+    }
+
+	function loadDefault() {
+		if (location.search === '') {
+			var current_state = collectState()
+			window.history.pushState(current_state, "", "")
+		}
+		else {
+			var settings_from_url = collectSettingsFromUrl()
+			restoreSettings(settings_from_url)
+			sendRequest(settings_from_url)
+		}
+	}
+
+	function collectSettingsFromUrl() {
+		var settings_from_url = JSON.parse('{"' + location.search.substring(1).replace(/&/g, '","').replace(/=/g,'":"') + '"}', function(key, value) { return key===""?value:decodeURIComponent(value) })
+
+		if (settings_from_url.case_sensitive) { settings_from_url.case_sensitive = settings_from_url.case_sensitive.toLowerCase() === 'true'}
+		else { settings_from_url.case_sensitive == false }
+
+    	if (!(settings_from_url.esi)) {settings_from_url.esi = 0}
+    	if (!(settings_from_url.language_id)) {settings_from_url.language_id = "log"}
+    	if (!(settings_from_url.event_id)) {settings_from_url.event_id = 6}
+
+		return settings_from_url
+	}
+
+</script>
+{% endblock %}

@@ -1,0 +1,2 @@
+Beautifulsoup4~=4.12
+lxml~=4.9
