@@ -66,7 +66,10 @@ class TelegramWord(Word):
 
     def format_origin(self):
         if self.origin or self.origin_x:
-            return f"\n<i>&#60;{self.origin}{' = ' + self.origin_x if self.origin_x else ''}&#62;</i>"
+            return (
+                f"\n<i>&#60;{self.origin}"
+                f"{' = ' + self.origin_x if self.origin_x else ''}&#62;</i>"
+            )
         return ""
 
     def format_authors(self):
@@ -79,7 +82,7 @@ class TelegramWord(Word):
     def format_rank(self):
         return self.rank + " " if self.rank else ""
 
-    def export(self, session) -> str:
+    def export_as_str(self, session) -> str:
         """
         Convert word's data to str for sending as a telegram messages
         :return: List of str with technical info, definitions, used_in part
@@ -293,7 +296,9 @@ class TelegramWord(Word):
         :return:
         """
         bot.send_message(
-            chat_id=user_id, text=self.export(session), reply_markup=self.keyboard_cpx()
+            chat_id=user_id,
+            text=self.export_as_str(session),
+            reply_markup=self.keyboard_cpx(),
         )
 
     @classmethod

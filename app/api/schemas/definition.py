@@ -10,7 +10,7 @@ from app.api.schemas import ma
 from app.api.schemas.key import KeySchema
 
 
-class DefinitionSchema(ma.SQLAlchemyAutoSchema):
+class DefinitionSchema(ma.SQLAlchemyAutoSchema):  # pylint: disable=too-many-ancestors
     class Meta:
         model = Definition
         include_fk = True

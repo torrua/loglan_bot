@@ -32,7 +32,7 @@ class Word(BaseWord):
     __tablename__ = BaseWord.__tablename__
 
 
-class WordSchema(ma.SQLAlchemyAutoSchema):
+class WordSchema(ma.SQLAlchemyAutoSchema):  # pylint: disable=too-many-ancestors
     class Meta:
         model = Word
         include_fk = True
