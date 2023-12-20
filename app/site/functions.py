@@ -39,7 +39,7 @@ def get_data(
         log.debug(m_l["url_correct"], url)
         try:
             log.debug(m_l["get_site"])
-            if url.lower().startswith('http'):
+            if url.lower().startswith("http"):
                 request_to_site = urllib.request.Request(
                     url=url, headers=headers if headers else {}
                 )
