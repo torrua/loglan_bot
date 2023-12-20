@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    {{ title }} - {{ name_of_article }}
+{% endblock %}
+
+{% block style %}
+
+    p.byline {margin-bottom: 18.0px; text-align: center; text-indent: 0px; }
+    p.ex { margin-left: 5em; text-indent: -1em; white-space:pre-wrap; }
+
+    em em, i em { text-decoration: underline; }
+    span.strike { text-decoration: line-through; }
+
+    span.Apple-tab-span {white-space:pre}
+    ol.ol2 {list-style-type: lower-alpha}
+
+    dl { margin-left: 25px; }
+	dt { float: left; width: 50px; }
+    .file_size { font-size: 0; }
+
+    .article-body {
+        text-align: justify;
+    }
+    .blockquote {
+        font-size: 100%;
+        margin-left: 5%;
+        margin-right: 5%;
+        font-style: italic;
+    }
+	b {
+		color: #C70039;
+		font-weight: bold;
+	}
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="container body-content" style="margin-top: 15px; margin-bottom: 20px;">
+        <h2 align="center"><a href="./" style="text-decoration: none;">← </a>{{ name_of_article }}</h2><br>
+        <div class="article-body">{{ article|safe }}</div>
+    </div>
+</div>
+{% endblock %}
