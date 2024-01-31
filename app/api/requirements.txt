@@ -3,5 +3,5 @@
 Flask-Bootstrap~=3.3.7
 flask-marshmallow~=0.15
 Flask-SQLAlchemy~=3.1
-marshmallow-sqlalchemy~=0.29
+marshmallow-sqlalchemy~=1.0
 marshmallow~=3.20
