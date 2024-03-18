@@ -3,5 +3,5 @@
 python-dotenv~=1.0
 radon~=6.0
 pylint~=3.0
-black~=24.2
+black~=24.3
 mypy~=1.8
