@@ -1,5 +1,5 @@
 Flask~=3.0
-gunicorn~=21.2.0
+gunicorn~=22.0
 psycopg2-binary~=2.9
 SQLAlchemy~=2.0
 Loglan-Core~=0.2
