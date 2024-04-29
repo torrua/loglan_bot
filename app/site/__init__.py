@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # pylint: disable=C0116
 
 """
@@ -122,42 +121,54 @@ def generate_content(data):
     if isinstance(is_case_sensitive, str):
         is_case_sensitive = strtobool(is_case_sensitive)
 
-    if search_language == "log":
-        word_statement = LoglanItem.query_select_words(
-            name=word, event_id=event_id, case_sensitive=is_case_sensitive
-        )
-        with Session() as session:
-            word_result = session.execute(word_statement).scalars().all()
-            result = Composer(
-                words=word_result, style=DEFAULT_HTML_STYLE
-            ).export_as_html()
+    result = search_all(search_language, word, event_id, is_case_sensitive, nothing)
+    return jsonify(result=result)
 
-        if not result:
-            result = (
-                nothing
-                % f"There is no word <b>{word}</b> in Loglan. Try switching to English"
-                f"{' or disable Case sensitive search' if is_case_sensitive else ''}."
-            )
+
+def search_all(search_language, word, event_id, is_case_sensitive, nothing):
+    if search_language == "log":
+        result = search_log(word, event_id, is_case_sensitive, nothing)
 
     elif search_language == "eng":
-        definitions_statement = EnglishItem.select_definitions_by_key(
-            key=word, event_id=event_id, case_sensitive=is_case_sensitive
-        )
-        with Session() as session:
-            definitions_result = session.execute(definitions_statement).scalars().all()
-
-            result = EnglishItem(
-                definitions=definitions_result, key=word, style=DEFAULT_HTML_STYLE
-            ).export_as_html()
-        if not result:
-            result = (
-                nothing
-                % f"There is no word <b>{word}</b> in English. Try switching to Loglan"
-                f"{' or disable Case sensitive search' if is_case_sensitive else ''}."
-            )
+        result = search_eng(word, event_id, is_case_sensitive, nothing)
     else:
         result = nothing % f"Sorry, but nothing was found for <b>{word}</b>."
-    return jsonify(result=result)
+    return result
+
+
+def search_eng(word, event_id, is_case_sensitive, nothing):
+    definitions_statement = EnglishItem.select_definitions_by_key(
+        key=word, event_id=event_id, case_sensitive=is_case_sensitive
+    )
+    with Session() as session:
+        definitions_result = session.execute(definitions_statement).scalars().all()
+
+        result = EnglishItem(
+            definitions=definitions_result, key=word, style=DEFAULT_HTML_STYLE
+        ).export_as_html()
+    if not result:
+        result = (
+            nothing
+            % f"There is no word <b>{word}</b> in English. Try switching to Loglan"
+            f"{' or disable Case sensitive search' if is_case_sensitive else ''}."
+        )
+    return result
+
+
+def search_log(word, event_id, is_case_sensitive, nothing):
+    word_statement = LoglanItem.query_select_words(
+        name=word, event_id=event_id, case_sensitive=is_case_sensitive
+    )
+    with Session() as session:
+        word_result = session.execute(word_statement).scalars().all()
+        result = Composer(words=word_result, style=DEFAULT_HTML_STYLE).export_as_html()
+    if not result:
+        result = (
+            nothing
+            % f"There is no word <b>{word}</b> in Loglan. Try switching to English"
+            f"{' or disable Case sensitive search' if is_case_sensitive else ''}."
+        )
+    return result
 
 
 @site_blueprint.route("/<string:section>/", methods=["GET"])
