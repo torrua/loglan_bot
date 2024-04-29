@@ -11,4 +11,5 @@ The [@LoglanBot](http://t.me/LoglanBot) translates words from Loglan to English 
 
 Use commands `/gle` and `/log` for specific search for an English or Loglan word.
 
-Check current deployment at https://loglanbot-torrua.b4a.run/bot/about
+Check [telegram bot deployment](https://loglanbot-torrua.b4a.run/bot/about)
+Database with LOD dictionary located at [mkdb.sh](https://www.mkdb.sh/) and copied to [neon.tech](https://neon.tech)
