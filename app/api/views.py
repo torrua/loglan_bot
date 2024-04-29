@@ -1,5 +1,4 @@
 import os
-from distutils.util import strtobool
 
 from flask import request, Blueprint, Response, json
 from loglan_core.addons.key_selector import KeySelector
@@ -31,7 +30,7 @@ def universal_get(schema_full, schema_nested, model, many: bool = True):
     """
     args = {**request.args}
 
-    detailed = bool(strtobool(args.pop("detailed", "False")))
+    detailed = True if str(args.pop("detailed", False)).lower() == "true" else False
     statement, skipped_args = get_statement(model, args)
 
     with Session() as app_session:
@@ -58,7 +57,7 @@ def universal_get(schema_full, schema_nested, model, many: bool = True):
 
 def get_statement(model, args):
     event_id = args.pop("event_id", None)
-    case_sensitive = bool(strtobool(args.pop("case_sensitive", "False")))
+    case_sensitive = True if str(args.pop("case_sensitive", False)).lower() == "true" else False
     model_args, skipped_args = separate_arguments(model, args)
     statement = filter_statement_by_event_id(model, event_id)
 

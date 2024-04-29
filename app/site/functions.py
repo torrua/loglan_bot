@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import re
 from urllib.request import Request, urlopen
-from urllib.error import URLError, HTTPError
+from urllib.error import HTTPError
 from bs4 import BeautifulSoup
 
 from app.logger import log
@@ -42,6 +42,6 @@ def get_data(url: str) -> str | BeautifulSoup:
             log.info(m_l["success"])
             return soup
 
-    except (URLError, HTTPError) as err:
+    except HTTPError as err:
         log.error(m_l["error"], url, err)
         return str(err)
