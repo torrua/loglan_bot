@@ -40,7 +40,7 @@ def redirect_columns():
 @site_blueprint.route("/")
 @site_blueprint.route("/home")
 def home():
-    article = get_data(MAIN_SITE).get("content").body.find("div", {"id": "content"})
+    article = get_data(MAIN_SITE).body.find("div", {"id": "content"})
     for bq in article.findAll("blockquote"):
         bq["class"] = "blockquote"
 
@@ -52,7 +52,7 @@ def home():
 
 @site_blueprint.route("/articles")
 def articles():
-    article_block = get_data(MAIN_SITE).get("content")
+    article_block = get_data(MAIN_SITE)
     title = article_block.find("a", {"name": "articles"}).find_parent("h2")
     content = title.find_next("ol")
     return render_template("articles.html", articles=content, title=title.get_text())
@@ -60,7 +60,7 @@ def articles():
 
 @site_blueprint.route("/texts")
 def texts():
-    article_block = get_data(MAIN_SITE).get("content")
+    article_block = get_data(MAIN_SITE)
     title = article_block.find("a", {"name": "texts"}).find_parent("h2")
     content = title.find_next("ol")
     return render_template("articles.html", articles=content, title=title.get_text())
@@ -68,7 +68,7 @@ def texts():
 
 @site_blueprint.route("/columns")
 def columns():
-    article_block = get_data(MAIN_SITE)["content"]
+    article_block = get_data(MAIN_SITE)
     title = article_block.find("a", {"name": "columns"}).find_parent("h2")
     content = title.find_next("ul")
     return render_template("articles.html", articles=content, title=title.get_text())
@@ -175,7 +175,7 @@ def search_log(word, event_id, is_case_sensitive, nothing):
 @site_blueprint.route("/<string:section>/<string:article>", methods=["GET"])
 def proxy(section: str = "", article: str = ""):
     url = f"{MAIN_SITE}{section}/{article}"
-    content = get_data(url).get("content").body
+    content = get_data(url).body
 
     for bq in content.findAll("blockquote"):
         bq["class"] = "blockquote"
