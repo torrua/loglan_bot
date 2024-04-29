@@ -20,10 +20,9 @@ API_PATH = os.getenv("API_PATH", "/api")
 API_VERSION = os.getenv("API_VERSION", "/v1")
 
 
-def universal_get(session, schema_full, schema_nested, model, many: bool = True):
+def universal_get(schema_full, schema_nested, model, many: bool = True):
     """
     Return entity from DB through GET request
-    :param session:
     :param schema_full:
     :param schema_nested:
     :param model:
@@ -35,12 +34,13 @@ def universal_get(session, schema_full, schema_nested, model, many: bool = True)
     detailed = bool(strtobool(args.pop("detailed", "False")))
     statement, skipped_args = get_statement(model, args)
 
-    result = session.execute(statement)
-    model_entities = result.scalars().all() if many else [result.scalar()]
+    with Session() as app_session:
+        result = app_session.execute(statement)
+        model_entities = result.scalars().all() if many else [result.scalar()]
 
-    count = len(model_entities)
-    schema = schema_full if detailed else schema_nested
-    data = schema.dump(model_entities, many=many)
+        count = len(model_entities)
+        schema = schema_full if detailed else schema_nested
+        data = schema.dump(model_entities, many=many)
 
     return Response(
         mimetype="application/json",
@@ -110,7 +110,7 @@ def get_api_properties(entity):
     return blueprint, data
 
 
-def create_blueprint_data(session, entity, schema_nested, schema_full):
+def create_blueprint_data(entity, schema_nested, schema_full):
     api_blueprint, api_data = get_api_properties(entity)
 
     @api_blueprint.route("/", methods=["GET"])
@@ -118,9 +118,7 @@ def create_blueprint_data(session, entity, schema_nested, schema_full):
         """
         Get Entity by Entity's parameters Function
         """
-        with session:
-            return universal_get(session, schema_full, schema_nested, entity)
-
+        return universal_get(schema_full, schema_nested, entity)
     return api_data
 
 
@@ -135,10 +133,9 @@ dictionary_bp_data = [
     bp_word,
 ]
 
-with Session() as app_session:
-    dictionary_api_data = [
-        create_blueprint_data(app_session, *data) for data in dictionary_bp_data
-    ]
+dictionary_api_data = [
+    create_blueprint_data(*data) for data in dictionary_bp_data
+]
 
 blueprints = [
     {"blueprint": api[0], "url_prefix": f"{API_PATH}{API_VERSION}{api[1]}"}
