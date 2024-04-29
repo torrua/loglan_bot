@@ -119,6 +119,7 @@ def create_blueprint_data(entity, schema_nested, schema_full):
         Get Entity by Entity's parameters Function
         """
         return universal_get(schema_full, schema_nested, entity)
+
     return api_data
 
 
@@ -133,9 +134,7 @@ dictionary_bp_data = [
     bp_word,
 ]
 
-dictionary_api_data = [
-    create_blueprint_data(*data) for data in dictionary_bp_data
-]
+dictionary_api_data = [create_blueprint_data(*data) for data in dictionary_bp_data]
 
 blueprints = [
     {"blueprint": api[0], "url_prefix": f"{API_PATH}{API_VERSION}{api[1]}"}

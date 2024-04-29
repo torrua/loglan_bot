@@ -8,5 +8,5 @@ app = create_app()
 log.debug(app.name)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     app.run()
