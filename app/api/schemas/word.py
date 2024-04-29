@@ -3,7 +3,7 @@
 WordSchema module
 """
 
-from loglan_core import Word as BaseWord, Definition, Type, Author, Event
+from loglan_core import Word, Definition, Type, Author, Event
 from marshmallow import fields
 from marshmallow_sqlalchemy.fields import Nested
 
@@ -26,10 +26,6 @@ full_include = {
     "derivatives",
     "parents",
 }
-
-
-class Word(BaseWord):
-    __tablename__ = BaseWord.__tablename__
 
 
 class WordSchema(ma.SQLAlchemyAutoSchema):  # pylint: disable=too-many-ancestors
