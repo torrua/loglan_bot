@@ -30,7 +30,7 @@ def universal_get(schema_full, schema_nested, model, many: bool = True):
     """
     args = {**request.args}
 
-    detailed = True if str(args.pop("detailed", False)).lower() == "true" else False
+    detailed = arg2bool(args.pop("detailed", False))
     statement, skipped_args = get_statement(model, args)
 
     with Session() as app_session:
@@ -57,7 +57,7 @@ def universal_get(schema_full, schema_nested, model, many: bool = True):
 
 def get_statement(model, args):
     event_id = args.pop("event_id", None)
-    case_sensitive = True if str(args.pop("case_sensitive", False)).lower() == "true" else False
+    case_sensitive = arg2bool(args.pop("case_sensitive", False))
     model_args, skipped_args = separate_arguments(model, args)
     statement = filter_statement_by_event_id(model, event_id)
 
@@ -77,6 +77,10 @@ def get_statement(model, args):
             statement = statement.filter(name_filter)
 
     return statement, skipped_args
+
+
+def arg2bool(arg) -> bool:
+    return True if str(arg).lower() == "true" else False
 
 
 def filter_statement_by_event_id(model, event_id):
