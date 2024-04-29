@@ -80,7 +80,7 @@ def get_statement(model, args):
 
 
 def arg2bool(arg) -> bool:
-    return True if str(arg).lower() == "true" else False
+    return str(arg).lower() == "true"
 
 
 def filter_statement_by_event_id(model, event_id):
