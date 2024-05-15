@@ -1,5 +1,5 @@
 -r ../requirements.txt
 
-pyTelegramBotAPI~=4.17
+pyTelegramBotAPI~=4.18
 callbaker~=1.4
 keyboa~=3.1
