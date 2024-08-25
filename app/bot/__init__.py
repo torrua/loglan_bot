@@ -12,41 +12,42 @@ bot_blueprint = Blueprint("route", __name__)
 
 
 @bot_blueprint.route(f"/{TOKEN}", methods=["POST"])
-def get_message():
+async def get_message():
     """
     Get all messages
     :return:
     """
-    bot.process_new_updates([types.Update.de_json(rq.stream.read().decode("utf-8"))])
+    await bot.process_new_updates([types.Update.de_json(rq.stream.read().decode("utf-8"))])
     return "Ok", 200
 
 
 @bot_blueprint.route("/about")
-def index():
+async def index():
     """
     Test functionality
     :return:
     """
-    return {k: v for k, v in bot.get_me().__dict__.items() if v}, 200
+    bot_data = await bot.get_me()
+    return {k: v for k, v in bot_data.to_dict().items() if v}, 200
 
 
 @bot_blueprint.route("/set")
-def webhook():
+async def webhook():
     """
     Set telegram webhook
     :return:
     """
     app_site = rq.host
-    bot.remove_webhook()
-    bot.set_webhook(url=f"https://{app_site}/bot/{TOKEN}")
+    await bot.remove_webhook()
+    await bot.set_webhook(url=f"https://{app_site}/bot/{TOKEN}")
     return "⚓ Webhook was set.", 200
 
 
 @bot_blueprint.route("/del")
-def delete():
+async def delete():
     """
     Delete telegram webhook
     :return:
     """
-    bot.remove_webhook()
+    await bot.remove_webhook()
     return "⚓ Webhook was deleted.", 200
