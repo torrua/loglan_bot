@@ -56,7 +56,7 @@ class TelegramWord(Word):
 
     def format_affixes(self):
         return (
-            f" ({' '.join([w.name for w in self.affixes]).strip()}"
+            f" ({' '.join([w.name for w in self.affixes]).strip()})"
             if self.affixes
             else ""
         )
