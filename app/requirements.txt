@@ -1,5 +1,6 @@
-Flask~=3.0
-gunicorn~=23.0
+Flask[async]~=3.0
 psycopg2-binary~=2.9
 SQLAlchemy~=2.0
 Loglan-Core~=0.2
+aiohttp~=3.10
+waitress~=3.0

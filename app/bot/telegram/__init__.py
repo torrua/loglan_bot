@@ -7,7 +7,8 @@ Initializing telegram bot
 import os
 from os import environ
 
-from telebot import TeleBot, types
+from telebot.async_telebot import AsyncTeleBot
+from telebot import types
 
 EN, RU = "en", "ru"
 DEFAULT_PARSE_MODE = "HTML"
@@ -28,6 +29,6 @@ SEPARATOR = "@"
 cbq = types.CallbackQuery
 msg = types.Message
 
-bot = TeleBot(TOKEN, parse_mode=DEFAULT_PARSE_MODE)
+bot = AsyncTeleBot(TOKEN, parse_mode=DEFAULT_PARSE_MODE)
 
 from app.bot.telegram import processor

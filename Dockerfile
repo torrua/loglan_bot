@@ -28,4 +28,4 @@ RUN /venv/bin/python -m pip install --upgrade pip
 RUN /venv/bin/pip install --no-cache-dir -r requirements.txt
 
 # Run the command
-CMD ["gunicorn", "--bind", "0.0.0.0:8080", "--workers", "2", "main:app"]
+CMD ["python", "main.py"]

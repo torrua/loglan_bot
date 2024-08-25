@@ -288,14 +288,14 @@ class TelegramWord(Word):
 
         return Keyboa.combine(kb_combo)
 
-    def send_card_to_user(self, session, bot, user_id: int | str):
+    async def send_card_to_user(self, session, bot, user_id: int | str):
         """
         :param session:
         :param bot:
         :param user_id:
         :return:
         """
-        bot.send_message(
+        await bot.send_message(
             chat_id=user_id,
             text=self.export_as_str(session),
             reply_markup=self.keyboard_cpx(),

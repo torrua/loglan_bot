@@ -27,7 +27,7 @@ from app.decorators import logging_time
 
 
 @logging_time
-def bot_callback_inline(call: cbq):
+async def bot_callback_inline(call: cbq):
     """
     Основной обработчик событий по нажатым inline кнопкам
     :param call:
@@ -36,7 +36,7 @@ def bot_callback_inline(call: cbq):
 
     # Если сообщение из чата с ботом
     if call.data in [cancel, close]:
-        bib_cancel(call)  # no need to lang input
+        await bib_cancel(call)  # no need to lang input
         return
 
     info = info_from_callback(call.data)
@@ -46,11 +46,11 @@ def bot_callback_inline(call: cbq):
     if not (current_entity and current_action):
         return
 
-    entity_selector_general(call)
+    await entity_selector_general(call)
 
 
 @logging_time
-def entity_selector_general(call: cbq):
+async def entity_selector_general(call: cbq):
     """
     :param call:
     :return:
@@ -59,11 +59,11 @@ def entity_selector_general(call: cbq):
     current_entity = info.get(mark_entity, None)
 
     if current_entity == entity_predy:
-        action_selector_predy(call)
+        await action_selector_predy(call)
 
 
 @logging_time
-def action_selector_predy(call: cbq):
+async def action_selector_predy(call: cbq):
     """
     :param call:
     :return:
@@ -78,4 +78,4 @@ def action_selector_predy(call: cbq):
     }
 
     if action_to_run := actions.get(current_action):
-        action_to_run(call)
+        await action_to_run(call)

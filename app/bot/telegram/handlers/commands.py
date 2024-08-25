@@ -19,13 +19,13 @@ from app.engine import Session
 
 
 @logging_time
-def bot_cmd_start(message: msg):
+async def bot_cmd_start(message: msg):
     """
     Handle start command
     :param message:
     :return:
     """
-    bot.send_message(message.chat.id, "Loi!")
+    await bot.send_message(message.chat.id, "Loi!")
     new_user_info = "\n".join(
         sorted(
             [
@@ -35,11 +35,11 @@ def bot_cmd_start(message: msg):
             ]
         )
     )
-    bot.send_message(ADMIN, new_user_info)
+    await bot.send_message(ADMIN, new_user_info)
 
 
 @logging_time
-def bot_cmd_gle(message: msg):
+async def bot_cmd_gle(message: msg):
     """
     Handle command for english word
     :param message:
@@ -47,7 +47,7 @@ def bot_cmd_gle(message: msg):
     """
 
     if not (arguments := message.text.split()[1:]):
-        bot.send_message(
+        await bot.send_message(
             chat_id=message.chat.id,
             text=MESSAGE_SPECIFY_ENGLISH_WORD,
         )
@@ -56,11 +56,11 @@ def bot_cmd_gle(message: msg):
     user_request = arguments[0]
 
     with Session() as session:
-        send_message_by_key(session, user_request, message.chat.id)
+        await send_message_by_key(session, user_request, message.chat.id)
 
 
 @logging_time
-def send_message_by_key(session, user_request: str, user_id: str | int) -> None:
+async def send_message_by_key(session, user_request: str, user_id: str | int):
     """
     :param session:
     :param user_request:
@@ -74,7 +74,7 @@ def send_message_by_key(session, user_request: str, user_id: str | int) -> None:
     )
     reply = f"<b>{user_request}:</b>\n\n{words_found}"
 
-    bot.send_message(
+    await bot.send_message(
         chat_id=user_id,
         text=reply if words_found else MESSAGE_NOT_FOUND % user_request,
         reply_markup=kb_close() if words_found else None,
@@ -82,7 +82,7 @@ def send_message_by_key(session, user_request: str, user_id: str | int) -> None:
 
 
 @logging_time
-def bot_cmd_log(message: msg):
+async def bot_cmd_log(message: msg):
     """
     Handle command for loglan word
     :param message:
@@ -90,7 +90,7 @@ def bot_cmd_log(message: msg):
     """
 
     if not (arguments := message.text.split()[1:]):
-        bot.send_message(
+        await bot.send_message(
             chat_id=message.chat.id,
             text=MESSAGE_SPECIFY_LOGLAN_WORD,
         )
@@ -98,7 +98,7 @@ def bot_cmd_log(message: msg):
 
     with Session() as session:
         if not (words := Word.by_request(session=session, request=arguments[0])):
-            bot.send_message(
+            await bot.send_message(
                 chat_id=message.chat.id,
                 text=MESSAGE_NOT_FOUND % arguments[0],
             )

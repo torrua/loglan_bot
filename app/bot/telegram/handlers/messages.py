@@ -9,7 +9,7 @@ from app.bot.telegram.models import TelegramWord as Word
 from app.engine import Session
 
 
-def bot_text_messages_handler(message: msg) -> None:
+async def bot_text_messages_handler(message: msg) -> None:
     """
     Handle user's text messages
     :param message:
@@ -20,6 +20,6 @@ def bot_text_messages_handler(message: msg) -> None:
     with Session() as session:
         if words := Word.by_request(session, user_request):
             for word in words:
-                word.send_card_to_user(session, bot, message.chat.id)
+                await word.send_card_to_user(session, bot, message.chat.id)
         else:
-            send_message_by_key(session, user_request, message.chat.id)
+            await send_message_by_key(session, user_request, message.chat.id)

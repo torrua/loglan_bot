@@ -11,17 +11,17 @@ from app.engine import Session
 
 
 @logging_time
-def bib_cancel(call: cbq):
+async def bib_cancel(call: cbq):
     """
     Обработка нажатия кнопки 'Отмена'
     :param call:
     :return:
     """
-    bot.delete_message(call.message.chat.id, call.message.message_id)
+    await bot.delete_message(call.message.chat.id, call.message.message_id)
 
 
 @logging_time
-def bib_predy_send_card(call: cbq):
+async def bib_predy_send_card(call: cbq):
     """
     Обработка нажатия кнопки со словом на логлане
     :param call:
@@ -32,11 +32,11 @@ def bib_predy_send_card(call: cbq):
     with Session() as session:
         words = Word.by_request(session, info[mark_record_id])
         for word in words:
-            word.send_card_to_user(session, bot, uid)
+            await word.send_card_to_user(session, bot, uid)
 
 
 @logging_time
-def bib_predy_kb_cpx_switcher(call: cbq, state: bool):
+async def bib_predy_kb_cpx_switcher(call: cbq, state: bool):
     """
     Обработка нажатия кнопки отображения/скрытия комплексных слов
     :param call:
@@ -50,7 +50,7 @@ def bib_predy_kb_cpx_switcher(call: cbq, state: bool):
         word = Word.get_by_id(session, info[mark_record_id])
         keyboard = word.keyboard_cpx(show_list=state, slice_start=slice_start)
 
-    bot.edit_message_reply_markup(
+    await bot.edit_message_reply_markup(
         chat_id=call.from_user.id,
         message_id=call.message.message_id,
         reply_markup=keyboard,
@@ -58,20 +58,20 @@ def bib_predy_kb_cpx_switcher(call: cbq, state: bool):
 
 
 @logging_time
-def bib_predy_kb_cpx_show(call: cbq):
+async def bib_predy_kb_cpx_show(call: cbq):
     """
     Обработка нажатия кнопки отображения комплексных слов
     :param call:
     :return:
     """
-    bib_predy_kb_cpx_switcher(call, True)
+    await bib_predy_kb_cpx_switcher(call, True)
 
 
 @logging_time
-def bib_predy_kb_cpx_hide(call: cbq):
+async def bib_predy_kb_cpx_hide(call: cbq):
     """
     Обработка нажатия кнопки скрытия комплексных слов
     :param call:
     :return:
     """
-    bib_predy_kb_cpx_switcher(call, False)
+    await bib_predy_kb_cpx_switcher(call, False)
