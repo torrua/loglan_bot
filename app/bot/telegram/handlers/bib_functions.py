@@ -4,6 +4,7 @@
 from callbaker import info_from_callback
 
 from app.bot.telegram import bot, cbq
+from app.bot.telegram.keyboards import WordKeyboard
 from app.bot.telegram.models import TelegramWord as Word
 from app.bot.telegram.variables import mark_record_id, mark_slice_start
 from app.decorators import logging_time
@@ -48,7 +49,7 @@ async def bib_predy_kb_cpx_switcher(call: cbq, state: bool):
 
     with Session() as session:
         word = Word.get_by_id(session, info[mark_record_id])
-        keyboard = word.keyboard_cpx(show_list=state, slice_start=slice_start)
+        keyboard = WordKeyboard(word).keyboard_cpx(show_list=state, slice_start=slice_start)
 
     await bot.edit_message_reply_markup(
         chat_id=call.from_user.id,
