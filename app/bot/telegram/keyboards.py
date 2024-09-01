@@ -3,8 +3,16 @@ from keyboa import Keyboa
 
 from app.bot.telegram import MIN_NUMBER_OF_BUTTONS
 from app.bot.telegram.variables import (
-    mark_entity, entity_predy, mark_action, action_predy_kb_cpx_show, mark_record_id,
-    mark_slice_start, t, cbd, action_predy_kb_cpx_hide, action_predy_send_card,
+    mark_entity,
+    entity_predy,
+    mark_action,
+    action_predy_kb_cpx_show,
+    mark_record_id,
+    mark_slice_start,
+    t,
+    cbd,
+    action_predy_kb_cpx_hide,
+    action_predy_send_card,
 )
 
 
