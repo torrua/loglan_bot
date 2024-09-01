@@ -1,6 +1,6 @@
 """The main module for launching web application"""
 
-from app import create_app
+from app.main import create_app
 from app.logger import log
 from waitress import serve
 
