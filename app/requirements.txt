@@ -1,6 +1,6 @@
 Flask[async]~=3.0
 psycopg2-binary~=2.9
 SQLAlchemy~=2.0
-Loglan-Core~=0.2
+Loglan-Core~=0.3
 aiohttp~=3.10
 waitress~=3.0
