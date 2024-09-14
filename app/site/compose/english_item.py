@@ -21,22 +21,6 @@ class EnglishItem(Item):
         self.key = key
         self.style = style
 
-    @staticmethod
-    def select_definitions_by_key(
-        key: str,
-        language: str = None,
-        case_sensitive: bool = False,
-        event_id: BaseEvent | int | str = None,
-    ) -> Select:
-        return (
-            DefinitionSelector()
-            .by_key(key=key, language=language, case_sensitive=case_sensitive)
-            .join(BaseWord)
-            .filter(BaseWord.filter_by_event_id(event_id=event_id))
-            .distinct(BaseWord.name)
-            .order_by(BaseWord.name)
-        )
-
     def export_as_html(self):
         return "\n".join(
             [self.export_for_english(d, self.key, self.style) for d in self.definitions]

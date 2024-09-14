@@ -2,6 +2,7 @@
 """
 This module contains a HTMLExportWord Model
 """
+from __future__ import annotations
 
 from itertools import groupby
 from typing import Iterator
@@ -190,7 +191,7 @@ class Meaning(Item):
             self.word.match,
             self.word.rank,
             self._ewc.e_source,
-            self.word.type.type,
+            self.word.type.type_,
             self.used_in_as_html(),
             self._ewc.e_year,
             None,
@@ -222,17 +223,6 @@ class LoglanItem(Item):
     def __init__(self, words: list[Word], style: str = DEFAULT_HTML_STYLE):
         self.words = words
         self.style = style
-
-    @staticmethod
-    def query_select_words(
-        name, case_sensitive: bool = False, event_id: Event | int | str = None
-    ) -> Select:
-        words = (
-            WordSelector()
-            .by_name(name=name, case_sensitive=case_sensitive)
-            .by_event(event_id=event_id)
-        )
-        return words
 
     def export_as_html(self) -> str:
         word_template = {

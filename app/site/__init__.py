@@ -7,7 +7,8 @@ App's routes module
 import os
 
 from flask import Blueprint, jsonify, render_template, request, redirect, url_for
-from loglan_core import Event
+from loglan_core import Event, WordSelector, Definition
+from loglan_core.addons.definition_selector import DefinitionSelector
 
 from app.engine import Session
 from app.site.compose.english_item import EnglishItem
@@ -77,8 +78,8 @@ def columns():
 @site_blueprint.route("/dictionary")
 @site_blueprint.route("/dictionary/")
 def dictionary():
-    session = Session()
-    events = session.query(Event).all()
+    with Session() as session:
+        events = session.query(Event).all()
     events = {event.id: event.name for event in reversed(events)}
     content = generate_content(request.args)
     return render_template("dictionary.html", content=content, events=events)
@@ -137,15 +138,20 @@ def search_all(search_language, word, event_id, is_case_sensitive, nothing):
 
 
 def search_eng(word, event_id, is_case_sensitive, nothing):
-    definitions_statement = EnglishItem.select_definitions_by_key(
-        key=word, event_id=event_id, case_sensitive=is_case_sensitive
-    )
+
     with Session() as session:
-        definitions_result = session.execute(definitions_statement).scalars().all()
+        definitions_result = (
+            DefinitionSelector(case_sensitive=is_case_sensitive)
+            .with_relationships("source_word")
+            .by_key(key=word)
+            .by_event(event_id=event_id)
+            .all(session)
+        )
 
         result = EnglishItem(
             definitions=definitions_result, key=word, style=DEFAULT_HTML_STYLE
         ).export_as_html()
+
     if not result:
         result = (
             nothing
@@ -156,11 +162,14 @@ def search_eng(word, event_id, is_case_sensitive, nothing):
 
 
 def search_log(word, event_id, is_case_sensitive, nothing):
-    word_statement = LoglanItem.query_select_words(
-        name=word, event_id=event_id, case_sensitive=is_case_sensitive
-    )
+
     with Session() as session:
-        word_result = session.execute(word_statement).scalars().all()
+        word_result = (
+            WordSelector(case_sensitive=is_case_sensitive)
+            .by_name(name=word)
+            .by_event(event_id=event_id)
+            .all(session)
+        )
         result = Composer(words=word_result, style=DEFAULT_HTML_STYLE).export_as_html()
     if not result:
         result = (
