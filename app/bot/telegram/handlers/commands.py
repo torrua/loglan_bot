@@ -13,8 +13,8 @@ from app.bot.telegram import (
     MESSAGE_SPECIFY_LOGLAN_WORD,
     MESSAGE_SPECIFY_ENGLISH_WORD,
 )
-from app.bot.telegram.models import TelegramWord as Word
-from app.bot.telegram.keyboards import kb_close
+from app.bot.telegram.models import TelegramWord as Word, translation_by_key
+from app.bot.telegram.keyboards import kb_close, WordKeyboard
 from app.decorators import logging_time
 from app.engine import Session
 
@@ -56,20 +56,17 @@ async def bot_cmd_gle(message: msg):
 
     user_request = arguments[0]
 
-    with Session() as session:
-        await send_message_by_key(session, user_request, message.chat.id)
+    await send_message_by_key(user_request, message.chat.id)
 
 
 @logging_time
-async def send_message_by_key(session, user_request: str, user_id: str | int):
+async def send_message_by_key(user_request: str, user_id: str | int):
     """
-    :param session:
     :param user_request:
     :param user_id:
     :return:
     """
-    words_found = Word.translation_by_key(
-        session=session,
+    words_found = translation_by_key(
         request=user_request.lower(),
         language=EN,
     )
@@ -111,4 +108,8 @@ async def bot_cmd_log(message: msg):
             return
 
         for word in words:
-            await word.send_card_to_user(bot=bot, user_id=message.chat.id)
+            await bot.send_message(
+                chat_id=message.chat.id,
+                text=word.export_as_str(),
+                reply_markup=WordKeyboard(word).keyboard_cpx(),
+            )

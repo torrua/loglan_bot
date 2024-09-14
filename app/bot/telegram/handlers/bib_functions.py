@@ -39,7 +39,11 @@ async def bib_predy_send_card(call: cbq):
             .all(session)
         )
         for word in words:
-            await word.send_card_to_user(bot, uid)
+            await bot.send_message(
+                chat_id=uid,
+                text=word.export_as_str(),
+                reply_markup=WordKeyboard(word).keyboard_cpx(),
+            )
 
 
 @logging_time

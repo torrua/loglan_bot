@@ -8,6 +8,7 @@ from loglan_core.addons.word_selector import WordSelector
 from loglan_core import Word, Definition
 
 from app.bot.telegram.keyboards import WordKeyboard
+from app.engine import Session
 
 
 def export(definition: Definition) -> str:
@@ -85,17 +86,17 @@ class TelegramWord(Word):
         definitions = "\n\n".join([export(d) for d in self.definitions])
         return f"{word_str}\n\n{definitions}"
 
-    @classmethod
-    def translation_by_key(cls, session, request: str, language: str = None) -> str:
-        """
-        We get information about loglan words by key in a foreign language
-        :param session: Session
-        :param request: Requested string
-        :param language: Key language
-        :return: Search results string formatted for sending to Telegram
-        """
 
-        result = defaultdict(list)
+def translation_by_key(request: str, language: str = None) -> str:
+    """
+    We get information about loglan words by key in a foreign language
+    :param request: Requested string
+    :param language: Key language
+    :return: Search results string formatted for sending to Telegram
+    """
+
+    result = defaultdict(list)
+    with Session() as session:
         definitions = (
             DefinitionSelector()
             .by_key(key=request, language=language)
@@ -105,21 +106,9 @@ class TelegramWord(Word):
         for definition in definitions:
             result[definition.source_word.name].append(export(definition))
 
-        new = "\n"
-        word_items = [
-            f"/{word_name},\n{new.join(definitions)}\n"
-            for word_name, definitions in result.items()
-        ]
-        return new.join(word_items).strip()
-
-    async def send_card_to_user(self, bot, user_id: int | str):
-        """
-        :param bot:
-        :param user_id:
-        :return:
-        """
-        await bot.send_message(
-            chat_id=user_id,
-            text=self.export_as_str(),
-            reply_markup=WordKeyboard(self).keyboard_cpx(),
-        )
+    new = "\n"
+    word_items = [
+        f"/{word_name},\n{new.join(definitions)}\n"
+        for word_name, definitions in result.items()
+    ]
+    return new.join(word_items).strip()
