@@ -6,7 +6,7 @@ from loglan_core import WordSelector
 
 from app.bot.telegram import bot, cbq
 from app.bot.telegram.keyboards import WordKeyboard
-from app.bot.telegram.models import TelegramWord as Word
+from app.bot.telegram.models import export_as_str
 from app.bot.telegram.variables import mark_record_id, mark_slice_start
 from app.decorators import logging_time
 from app.engine import Session
@@ -33,15 +33,15 @@ async def bib_predy_send_card(call: cbq):
     uid = call.message.chat.id
     with Session() as session:
         words = (
-            WordSelector(Word)
-            .where(Word.id == info[mark_record_id])
+            WordSelector()
+            .filter_by(id=info[mark_record_id])
             .with_relationships()
             .all(session)
         )
         for word in words:
             await bot.send_message(
                 chat_id=uid,
-                text=word.export_as_str(),
+                text=export_as_str(word),
                 reply_markup=WordKeyboard(word).keyboard_cpx(),
             )
 
@@ -59,8 +59,8 @@ async def bib_predy_kb_cpx_switcher(call: cbq, state: bool):
 
     with Session() as session:
         word = (
-            WordSelector(Word)
-            .where(Word.id == info[mark_record_id])
+            WordSelector()
+            .filter_by(id=info[mark_record_id])
             .with_relationships()
             .scalar(session)
         )

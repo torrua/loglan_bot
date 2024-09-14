@@ -13,8 +13,8 @@ from app.bot.telegram import (
     MESSAGE_SPECIFY_LOGLAN_WORD,
     MESSAGE_SPECIFY_ENGLISH_WORD,
 )
-from app.bot.telegram.models import TelegramWord as Word, translation_by_key
 from app.bot.telegram.keyboards import kb_close, WordKeyboard
+from app.bot.telegram.models import translation_by_key, export_as_str
 from app.decorators import logging_time
 from app.engine import Session
 
@@ -94,9 +94,7 @@ async def bot_cmd_log(message: msg):
         )
 
     with Session() as session:
-        words = (
-            WordSelector(Word).with_relationships().by_name(arguments[0]).all(session)
-        )
+        words = WordSelector().with_relationships().by_name(arguments[0]).all(session)
 
     if not words:
         return await bot.send_message(
@@ -107,6 +105,6 @@ async def bot_cmd_log(message: msg):
     for word in words:
         await bot.send_message(
             chat_id=message.chat.id,
-            text=word.export_as_str(),
+            text=export_as_str(word),
             reply_markup=WordKeyboard(word).keyboard_cpx(),
         )
