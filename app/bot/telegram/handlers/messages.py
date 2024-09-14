@@ -2,6 +2,7 @@
 """
 Telegram bot messages functions
 """
+from loglan_core import WordSelector
 
 from app.bot.telegram import bot, msg
 from app.bot.telegram.handlers.commands import send_message_by_key
@@ -18,8 +19,13 @@ async def bot_text_messages_handler(message: msg) -> None:
 
     user_request = message.text.removeprefix("/")
     with Session() as session:
-        if words := Word.by_request(session, user_request):
+        if (
+            words := WordSelector(Word)
+            .by_name(user_request)
+            .with_relationships()
+            .all(session)
+        ):
             for word in words:
-                await word.send_card_to_user(session, bot, message.chat.id)
+                await word.send_card_to_user(bot, message.chat.id)
         else:
             await send_message_by_key(session, user_request, message.chat.id)

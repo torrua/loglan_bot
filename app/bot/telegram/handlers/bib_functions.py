@@ -2,6 +2,7 @@
 """Processing inline buttons calls received from telegram bot"""
 
 from callbaker import info_from_callback
+from loglan_core import WordSelector
 
 from app.bot.telegram import bot, cbq
 from app.bot.telegram.keyboards import WordKeyboard
@@ -31,9 +32,14 @@ async def bib_predy_send_card(call: cbq):
     info = info_from_callback(call.data)
     uid = call.message.chat.id
     with Session() as session:
-        words = Word.by_request(session, info[mark_record_id])
+        words = (
+            WordSelector(Word)
+            .where(Word.id == info[mark_record_id])
+            .with_relationships()
+            .all(session)
+        )
         for word in words:
-            await word.send_card_to_user(session, bot, uid)
+            await word.send_card_to_user(bot, uid)
 
 
 @logging_time
@@ -48,7 +54,13 @@ async def bib_predy_kb_cpx_switcher(call: cbq, state: bool):
     slice_start = info.pop(mark_slice_start, 0)
 
     with Session() as session:
-        word = Word.get_by_id(session, info[mark_record_id])
+        word = (
+            WordSelector(Word)
+            .where(Word.id == info[mark_record_id])
+            .with_relationships()
+            .scalar(session)
+        )
+
         keyboard = WordKeyboard(word).keyboard_cpx(
             show_list=state, slice_start=slice_start
         )

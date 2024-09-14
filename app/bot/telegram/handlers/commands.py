@@ -2,6 +2,7 @@
 """
 Telegram bot command functions
 """
+from loglan_core import WordSelector
 
 from app.bot.telegram import (
     bot,
@@ -97,7 +98,12 @@ async def bot_cmd_log(message: msg):
         return
 
     with Session() as session:
-        if not (words := Word.by_request(session=session, request=arguments[0])):
+        if not (
+            words := WordSelector(Word)
+            .by_name(arguments[0])
+            .with_relationships()
+            .all(session)
+        ):
             await bot.send_message(
                 chat_id=message.chat.id,
                 text=MESSAGE_NOT_FOUND % arguments[0],
@@ -105,4 +111,4 @@ async def bot_cmd_log(message: msg):
             return
 
         for word in words:
-            word.send_card_to_user(session=session, bot=bot, user_id=message.chat.id)
+            await word.send_card_to_user(bot=bot, user_id=message.chat.id)
