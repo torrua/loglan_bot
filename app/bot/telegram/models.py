@@ -4,10 +4,8 @@
 from collections import defaultdict
 
 from loglan_core.addons.definition_selector import DefinitionSelector
-from loglan_core.addons.word_selector import WordSelector
 from loglan_core import Word, Definition
 
-from app.bot.telegram.keyboards import WordKeyboard
 from app.engine import Session
 
 

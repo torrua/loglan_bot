@@ -20,6 +20,26 @@ from app.engine import Session
 
 
 @logging_time
+async def send_message_by_key(user_request: str, user_id: int):
+    """
+    :param user_request:
+    :param user_id:
+    :return:
+    """
+    words_found = translation_by_key(
+        request=user_request.lower(),
+        language=EN,
+    )
+    reply = f"<b>{user_request}:</b>\n\n{words_found}"
+
+    await bot.send_message(
+        chat_id=user_id,
+        text=reply if words_found else MESSAGE_NOT_FOUND % user_request,
+        reply_markup=kb_close() if words_found else None,
+    )
+
+
+@logging_time
 async def bot_cmd_start(message: msg):
     """
     Handle start command
@@ -60,26 +80,6 @@ async def bot_cmd_gle(message: msg):
 
 
 @logging_time
-async def send_message_by_key(user_request: str, user_id: str | int):
-    """
-    :param user_request:
-    :param user_id:
-    :return:
-    """
-    words_found = translation_by_key(
-        request=user_request.lower(),
-        language=EN,
-    )
-    reply = f"<b>{user_request}:</b>\n\n{words_found}"
-
-    await bot.send_message(
-        chat_id=user_id,
-        text=reply if words_found else MESSAGE_NOT_FOUND % user_request,
-        reply_markup=kb_close() if words_found else None,
-    )
-
-
-@logging_time
 async def bot_cmd_log(message: msg):
     """
     Handle command for loglan word
@@ -88,28 +88,25 @@ async def bot_cmd_log(message: msg):
     """
 
     if not (arguments := message.text.split()[1:]):
-        await bot.send_message(
+        return await bot.send_message(
             chat_id=message.chat.id,
             text=MESSAGE_SPECIFY_LOGLAN_WORD,
         )
-        return
 
     with Session() as session:
-        if not (
-            words := WordSelector(Word)
-            .by_name(arguments[0])
-            .with_relationships()
-            .all(session)
-        ):
-            await bot.send_message(
-                chat_id=message.chat.id,
-                text=MESSAGE_NOT_FOUND % arguments[0],
-            )
-            return
+        words = (
+            WordSelector(Word).with_relationships().by_name(arguments[0]).all(session)
+        )
 
-        for word in words:
-            await bot.send_message(
-                chat_id=message.chat.id,
-                text=word.export_as_str(),
-                reply_markup=WordKeyboard(word).keyboard_cpx(),
-            )
+    if not words:
+        return await bot.send_message(
+            chat_id=message.chat.id,
+            text=MESSAGE_NOT_FOUND % arguments[0],
+        )
+
+    for word in words:
+        await bot.send_message(
+            chat_id=message.chat.id,
+            text=word.export_as_str(),
+            reply_markup=WordKeyboard(word).keyboard_cpx(),
+        )
