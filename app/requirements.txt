@@ -4,3 +4,4 @@ SQLAlchemy~=2.0
 Loglan-Core~=0.4
 aiohttp~=3.10
 waitress~=3.0
+asyncpg~=0.29
