@@ -12,7 +12,7 @@ from loglan_core.addons.definition_selector import DefinitionSelector
 
 from app.engine import Session
 from app.site.compose.english_item import EnglishItem
-from app.site.compose.loglan_item import LoglanItem, Composer
+from app.site.compose.loglan_item import Composer
 from app.site.functions import get_data
 
 site_blueprint = Blueprint(
