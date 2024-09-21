@@ -1,8 +1,9 @@
 from __future__ import annotations
 
 import re
-from urllib.request import Request, urlopen
 from urllib.error import HTTPError
+from urllib.request import Request, urlopen
+
 from bs4 import BeautifulSoup
 
 from app.logger import log

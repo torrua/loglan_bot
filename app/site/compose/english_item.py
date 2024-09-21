@@ -1,10 +1,8 @@
-# -*- coding: utf-8 -*-
+"""
+This module contains a EnglishItem Model
+"""
 
 from loglan_core.definition import BaseDefinition
-from loglan_core.addons.definition_selector import DefinitionSelector
-from loglan_core.event import BaseEvent
-from loglan_core.word import BaseWord
-from sqlalchemy.sql.selectable import Select
 
 from app.site.compose import DEFAULT_HTML_STYLE, Item
 from app.site.compose.definition_formatter import DefinitionFormatter
