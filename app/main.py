@@ -2,7 +2,7 @@ from flask import Flask, render_template
 from flask_bootstrap import Bootstrap
 
 from app.bot import bot_blueprint
-from app.site import site_blueprint
+from app.site.routes import site_blueprint
 
 bootstrap = Bootstrap()
 
