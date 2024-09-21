@@ -1,10 +1,8 @@
-# -*- coding: utf-8 -*-
+"""
+This module contains a EnglishItem Model
+"""
 
 from loglan_core.definition import BaseDefinition
-from loglan_core.addons.definition_selector import DefinitionSelector
-from loglan_core.event import BaseEvent
-from loglan_core.word import BaseWord
-from sqlalchemy.sql.selectable import Select
 
 from app.site.compose import DEFAULT_HTML_STYLE, Item
 from app.site.compose.definition_formatter import DefinitionFormatter
@@ -20,22 +18,6 @@ class EnglishItem(Item):
         self.definitions = definitions
         self.key = key
         self.style = style
-
-    @staticmethod
-    def select_definitions_by_key(
-        key: str,
-        language: str = None,
-        case_sensitive: bool = False,
-        event_id: BaseEvent | int | str = None,
-    ) -> Select:
-        return (
-            DefinitionSelector()
-            .by_key(key=key, language=language, case_sensitive=case_sensitive)
-            .join(BaseWord)
-            .filter(BaseWord.filter_by_event_id(event_id=event_id))
-            .distinct(BaseWord.name)
-            .order_by(BaseWord.name)
-        )
 
     def export_as_html(self):
         return "\n".join(

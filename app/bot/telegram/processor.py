@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # pylint: disable=R0401
 
 """Processing commands received from telegram bot"""

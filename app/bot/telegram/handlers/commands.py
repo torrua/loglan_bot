@@ -2,6 +2,7 @@
 """
 Telegram bot command functions
 """
+from loglan_core import WordSelector
 
 from app.bot.telegram import (
     bot,
@@ -12,10 +13,30 @@ from app.bot.telegram import (
     MESSAGE_SPECIFY_LOGLAN_WORD,
     MESSAGE_SPECIFY_ENGLISH_WORD,
 )
-from app.bot.telegram.models import TelegramWord as Word
-from app.bot.telegram.keyboards import kb_close
+from app.bot.telegram.keyboards import kb_close, WordKeyboard
+from app.bot.telegram.models import translation_by_key, export_as_str
 from app.decorators import logging_time
 from app.engine import Session
+
+
+@logging_time
+async def send_message_by_key(user_request: str, user_id: int):
+    """
+    :param user_request:
+    :param user_id:
+    :return:
+    """
+    words_found = translation_by_key(
+        request=user_request.lower(),
+        language=EN,
+    )
+    reply = f"<b>{user_request}:</b>\n\n{words_found}"
+
+    await bot.send_message(
+        chat_id=user_id,
+        text=reply if words_found else MESSAGE_NOT_FOUND % user_request,
+        reply_markup=kb_close() if words_found else None,
+    )
 
 
 @logging_time
@@ -55,30 +76,7 @@ async def bot_cmd_gle(message: msg):
 
     user_request = arguments[0]
 
-    with Session() as session:
-        await send_message_by_key(session, user_request, message.chat.id)
-
-
-@logging_time
-async def send_message_by_key(session, user_request: str, user_id: str | int):
-    """
-    :param session:
-    :param user_request:
-    :param user_id:
-    :return:
-    """
-    words_found = Word.translation_by_key(
-        session=session,
-        request=user_request.lower(),
-        language=EN,
-    )
-    reply = f"<b>{user_request}:</b>\n\n{words_found}"
-
-    await bot.send_message(
-        chat_id=user_id,
-        text=reply if words_found else MESSAGE_NOT_FOUND % user_request,
-        reply_markup=kb_close() if words_found else None,
-    )
+    await send_message_by_key(user_request, message.chat.id)
 
 
 @logging_time
@@ -90,19 +88,23 @@ async def bot_cmd_log(message: msg):
     """
 
     if not (arguments := message.text.split()[1:]):
-        await bot.send_message(
+        return await bot.send_message(
             chat_id=message.chat.id,
             text=MESSAGE_SPECIFY_LOGLAN_WORD,
         )
-        return
 
     with Session() as session:
-        if not (words := Word.by_request(session=session, request=arguments[0])):
-            await bot.send_message(
-                chat_id=message.chat.id,
-                text=MESSAGE_NOT_FOUND % arguments[0],
-            )
-            return
+        words = WordSelector().with_relationships().by_name(arguments[0]).all(session)
 
-        for word in words:
-            word.send_card_to_user(session=session, bot=bot, user_id=message.chat.id)
+    if not words:
+        return await bot.send_message(
+            chat_id=message.chat.id,
+            text=MESSAGE_NOT_FOUND % arguments[0],
+        )
+
+    for word in words:
+        await bot.send_message(
+            chat_id=message.chat.id,
+            text=export_as_str(word),
+            reply_markup=WordKeyboard(word).keyboard_cpx(),
+        )

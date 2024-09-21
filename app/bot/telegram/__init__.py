@@ -7,8 +7,8 @@ Initializing telegram bot
 import os
 from os import environ
 
-from telebot.async_telebot import AsyncTeleBot
 from telebot import types
+from telebot.async_telebot import AsyncTeleBot
 
 EN, RU = "en", "ru"
 DEFAULT_PARSE_MODE = "HTML"
