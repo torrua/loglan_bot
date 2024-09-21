@@ -3,10 +3,11 @@ import os
 from flask import Blueprint, redirect, url_for, render_template, request, jsonify
 from loglan_core import WordSelector, Event
 from loglan_core.addons.definition_selector import DefinitionSelector
+
+from app.engine import Session
 from app.site.compose.english_item import EnglishItem
 from app.site.compose.loglan_item import Composer
 from app.site.functions import get_data
-from app.engine import Session
 
 site_blueprint = Blueprint(
     "site",
