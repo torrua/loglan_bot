@@ -15,7 +15,11 @@ from app.site.compose.english_item import EnglishItem
 from app.site.compose.loglan_item import LoglanItem, Composer
 from app.site.functions import get_data
 
-site_blueprint = Blueprint("site", __name__, template_folder="site/templates")
+site_blueprint = Blueprint(
+    "site",
+    __name__,
+    template_folder="site/templates",
+)
 
 DEFAULT_SEARCH_LANGUAGE = os.getenv("DEFAULT_SEARCH_LANGUAGE", "log")
 DEFAULT_HTML_STYLE = os.getenv("DEFAULT_HTML_STYLE", "normal")
@@ -48,7 +52,10 @@ def home():
     for img in article.findAll("img"):
         img["src"] = MAIN_SITE + img["src"]
 
-    return render_template("home.html", article="")
+    return render_template(
+        "home.html",
+        article="",
+    )
 
 
 @site_blueprint.route("/articles")
@@ -56,7 +63,11 @@ def articles():
     article_block = get_data(MAIN_SITE)
     title = article_block.find("a", {"name": "articles"}).find_parent("h2")
     content = title.find_next("ol")
-    return render_template("articles.html", articles=content, title=title.get_text())
+    return render_template(
+        "articles.html",
+        articles=content,
+        title=title.get_text(),
+    )
 
 
 @site_blueprint.route("/texts")
@@ -64,7 +75,11 @@ def texts():
     article_block = get_data(MAIN_SITE)
     title = article_block.find("a", {"name": "texts"}).find_parent("h2")
     content = title.find_next("ol")
-    return render_template("articles.html", articles=content, title=title.get_text())
+    return render_template(
+        "articles.html",
+        articles=content,
+        title=title.get_text(),
+    )
 
 
 @site_blueprint.route("/columns")
@@ -72,7 +87,11 @@ def columns():
     article_block = get_data(MAIN_SITE)
     title = article_block.find("a", {"name": "columns"}).find_parent("h2")
     content = title.find_next("ul")
-    return render_template("articles.html", articles=content, title=title.get_text())
+    return render_template(
+        "articles.html",
+        articles=content,
+        title=title.get_text(),
+    )
 
 
 @site_blueprint.route("/dictionary")
@@ -82,7 +101,11 @@ def dictionary():
         events = session.query(Event).all()
     events = {event.id: event.name for event in reversed(events)}
     content = generate_content(request.args)
-    return render_template("dictionary.html", content=content, events=events)
+    return render_template(
+        "dictionary.html",
+        content=content,
+        events=events,
+    )
 
 
 @site_blueprint.route("/how_to_read")
@@ -194,5 +217,8 @@ def proxy(section: str = "", article: str = ""):
 
     name_of_article = content.h1.extract().get_text()
     return render_template(
-        "article.html", name_of_article=name_of_article, article=content, title=section
+        "article.html",
+        name_of_article=name_of_article,
+        article=content,
+        title=section,
     )
