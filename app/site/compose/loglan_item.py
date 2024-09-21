@@ -1,16 +1,14 @@
-# -*- coding: utf-8 -*-
 """
 This module contains a HTMLExportWord Model
 """
+
 from __future__ import annotations
 
 from itertools import groupby
 from typing import Iterator
 
-from loglan_core import Word, Event, Definition
+from loglan_core import Word, Definition
 from loglan_core.addons.exporter import ExportWordConverter
-from loglan_core.addons.word_selector import WordSelector
-from sqlalchemy import Select
 
 from app.site.compose import DEFAULT_HTML_STYLE, Item
 from app.site.compose.definition_formatter import DefinitionFormatter

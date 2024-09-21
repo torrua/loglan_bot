@@ -7,7 +7,7 @@ App's routes module
 import os
 
 from flask import Blueprint, jsonify, render_template, request, redirect, url_for
-from loglan_core import Event, WordSelector, Definition
+from loglan_core import Event, WordSelector
 from loglan_core.addons.definition_selector import DefinitionSelector
 
 from app.engine import Session

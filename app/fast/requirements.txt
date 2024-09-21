@@ -1,7 +1,0 @@
--r ../requirements.txt
-
-uvicorn
-fastapi
-pydantic
-starlette
-asyncpg

@@ -2,7 +2,6 @@ from flask import Flask, render_template
 
 from flask_bootstrap import Bootstrap
 
-from app.api.views import blueprints as api_blueprints
 from app.bot import bot_blueprint
 from app.site import site_blueprint
 
@@ -14,31 +13,28 @@ def create_app():
     Create app
     """
 
-    # app initialization
-    app = Flask(__name__)
+    new_app = Flask(__name__)
+    bootstrap.init_app(new_app)
+    new_app.register_blueprint(bot_blueprint, url_prefix="/bot")
+    new_app.register_blueprint(site_blueprint, url_prefix="/site")
+    new_app.debug = True
 
-    # bootstrap initialization
-    bootstrap.init_app(app)
-    # register all blueprints
-    app.register_blueprint(bot_blueprint, url_prefix="/bot")
-    app.register_blueprint(site_blueprint, url_prefix="/site")
-
-    _ = [
-        app.register_blueprint(bp.get("blueprint"), url_prefix=bp.get("url_prefix"))
-        for bp in api_blueprints
-    ]
-    app.debug = True
-
-    @app.errorhandler(404)
+    @new_app.errorhandler(404)
     def page_not_found(_):
         return render_template("404.html"), 404
 
-    @app.route("/", methods=["GET"])
-    @app.route("/index")
+    @new_app.route("/", methods=["GET"])
+    @new_app.route("/index")
     def index():
         """
         example endpoint
         """
         return render_template("index.html")
 
-    return app
+    return new_app
+
+
+app = create_app()
+
+if __name__ == "__main__":
+    app.run()

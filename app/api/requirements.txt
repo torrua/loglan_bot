@@ -1,7 +1,0 @@
--r ../requirements.txt
-
-Flask-Bootstrap~=3.3
-flask-marshmallow~=1.2
-Flask-SQLAlchemy~=3.1
-marshmallow-sqlalchemy~=1.1
-marshmallow~=3.22
