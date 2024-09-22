@@ -5,6 +5,8 @@ from collections import defaultdict
 
 from loglan_core import Definition
 from loglan_core.addons.definition_selector import DefinitionSelector
+from loglan_core.definition import BaseDefinition
+from loglan_core.addons.utils import filter_key_by_word_cs, filter_key_by_language
 
 from app.engine import Session
 
@@ -95,16 +97,20 @@ def translation_by_key(request: str, language: str = None) -> str:
     :return: Search results string formatted for sending to Telegram
     """
 
+    filter_key = filter_key_by_word_cs(request)
+    filter_language = filter_key_by_language(language)
+
     result = defaultdict(list)
     with Session() as session:
         definitions_result = (
             DefinitionSelector()
-            .by_key(key=request, language=language)
             .with_relationships("source_word")
+            # .by_key(key=request, language=language) TODO Remove distinct from CORE
             .get_statement()
-            .distinct()
+            .join(BaseDefinition.keys)
+            .where(filter_key, filter_language)
         )
-        definitions = session.scalars(definitions_result).all()
+        definitions = session.execute(definitions_result).scalars().unique().all()
         for definition in definitions:
             result[definition.source_word.name].append(export(definition))
 

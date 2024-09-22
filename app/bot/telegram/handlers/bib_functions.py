@@ -31,22 +31,19 @@ async def bib_predy_send_card(call: cbq):
     """
     info = info_from_callback(call.data)
     uid = call.message.chat.id
+
     with Session() as session:
-        words_stmt = (
+        word = (
             WordSelector()
             .filter_by(id=info[mark_record_id])
             .with_relationships()
-            .get_statement()
-            .distinct()
+            .scalar(session)
         )
-        words = session.execute(words_stmt).scalars().all()
-
-        for word in words:
-            await bot.send_message(
-                chat_id=uid,
-                text=export_as_str(word),
-                reply_markup=WordKeyboard(word).keyboard_cpx(),
-            )
+        await bot.send_message(
+            chat_id=uid,
+            text=export_as_str(word),
+            reply_markup=WordKeyboard(word).keyboard_cpx(),
+        )
 
 
 @logging_time
@@ -61,7 +58,12 @@ async def bib_predy_kb_cpx_switcher(call: cbq, state: bool):
     slice_start = info.pop(mark_slice_start, 0)
 
     with Session() as session:
-        word = WordSelector().with_relationships().scalar(session)
+        word = (
+            WordSelector()
+            .filter_by(id=info[mark_record_id])
+            .with_relationships()
+            .scalar(session)
+        )
 
         keyboard = WordKeyboard(word).keyboard_cpx(
             show_list=state, slice_start=slice_start

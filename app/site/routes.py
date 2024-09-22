@@ -162,9 +162,8 @@ def search_eng(word, event_id, is_case_sensitive, nothing):
             .by_key(key=word)
             .by_event(event_id=event_id)
             .get_statement()
-            .distinct()
         )
-        definitions = session.scalars(definitions_result).all()
+        definitions = session.scalars(definitions_result).unique().all()
         result = EnglishItem(
             definitions=definitions, key=word, style=DEFAULT_HTML_STYLE
         ).export_as_html()
