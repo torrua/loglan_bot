@@ -1,6 +1,11 @@
 # Create a ubuntu base image with python 3 installed.
 FROM python:3.12-alpine
 
+# Install tzdata Set / the timezone / Configure the timezone
+RUN apt-get update && apt-get install -y tzdata
+ENV TZ=Asia/Jakarta
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+
 # Set the working directory
 WORKDIR /
 
