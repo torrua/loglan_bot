@@ -2,7 +2,7 @@
 FROM python:3.12-alpine
 
 # Install tzdata Set / the timezone / Configure the timezone
-RUN apt-get update && apt-get install -y tzdata
+RUN apk add --no-cache tzdata
 ENV TZ=Asia/Jakarta
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
