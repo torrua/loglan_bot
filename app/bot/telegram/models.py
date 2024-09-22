@@ -102,8 +102,9 @@ def translation_by_key(request: str, language: str = None) -> str:
             .by_key(key=request, language=language)
             .with_relationships("source_word")
             .get_statement()
+            .distinct()
         )
-        definitions = session.scalars(definitions_result).unique().all()
+        definitions = session.scalars(definitions_result).all()
         for definition in definitions:
             result[definition.source_word.name].append(export(definition))
 

@@ -22,9 +22,13 @@ async def bot_text_messages_handler(message: msg) -> None:
     with Session() as session:
 
         words_stmt = (
-            WordSelector().by_name(user_request).with_relationships().get_statement()
+            WordSelector()
+            .by_name(user_request)
+            .with_relationships()
+            .get_statement()
+            .distinct()
         )
-        words = session.execute(words_stmt).scalars().unique().all()
+        words = session.execute(words_stmt).scalars().all()
 
     if words:
         for word in words:

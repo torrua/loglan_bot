@@ -37,8 +37,9 @@ async def bib_predy_send_card(call: cbq):
             .filter_by(id=info[mark_record_id])
             .with_relationships()
             .get_statement()
+            .distinct()
         )
-        words = session.execute(words_stmt).scalars().unique().all()
+        words = session.execute(words_stmt).scalars().all()
 
         for word in words:
             await bot.send_message(
