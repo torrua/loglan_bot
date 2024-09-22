@@ -94,7 +94,10 @@ async def bot_cmd_log(message: msg):
         )
 
     with Session() as session:
-        words = WordSelector().with_relationships().by_name(arguments[0]).all(session)
+        words_stmt = (
+            WordSelector().by_name(arguments[0]).with_relationships().get_statement()
+        )
+        words = session.execute(words_stmt).scalars().unique().all()
 
     if not words:
         return await bot.send_message(
