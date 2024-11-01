@@ -21,10 +21,12 @@ async def bot_text_messages_handler(message: msg) -> None:
     user_request = message.text.removeprefix("/")
     with Session() as session:
 
-        words_stmt = (
-            WordSelector().by_name(user_request).with_relationships().get_statement()
+        words = (
+            WordSelector()
+            .by_name(user_request)
+            .with_relationships()
+            .all(session, unique=True)
         )
-        words = session.execute(words_stmt).scalars().unique().all()
 
     if words:
         for word in words:

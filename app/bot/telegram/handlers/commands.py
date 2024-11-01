@@ -1,7 +1,7 @@
-# -*- coding:utf-8 -*-
 """
 Telegram bot command functions
 """
+
 from loglan_core import WordSelector
 
 from app.bot.telegram import (
@@ -94,11 +94,12 @@ async def bot_cmd_log(message: msg):
         )
 
     with Session() as session:
-        words_stmt = (
-            WordSelector().by_name(arguments[0]).with_relationships().get_statement()
+        words = (
+            WordSelector()
+            .by_name(arguments[0])
+            .with_relationships()
+            .all(session, unique=True)
         )
-        words = session.execute(words_stmt).scalars().unique().all()
-
     if not words:
         return await bot.send_message(
             chat_id=message.chat.id,

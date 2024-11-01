@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Processing inline buttons calls received from telegram bot"""
 
 from callbaker import info_from_callback
