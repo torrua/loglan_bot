@@ -6,7 +6,7 @@ from collections import defaultdict
 from loglan_core import Definition
 from loglan_core.addons.definition_selector import DefinitionSelector
 
-from app.engine import Session
+from app.engine import async_session_maker
 
 
 def export(definition: Definition) -> str:
@@ -87,7 +87,7 @@ def export_as_str(word) -> str:
     return f"{word_str}\n\n{w_definitions}"
 
 
-def translation_by_key(request: str, language: str = None) -> str:
+async def translation_by_key(request: str, language: str = None) -> str:
     """
     We get information about loglan words by key in a foreign language
     :param request: Requested string
@@ -96,12 +96,12 @@ def translation_by_key(request: str, language: str = None) -> str:
     """
 
     result = defaultdict(list)
-    with Session() as session:
-        definitions = (
+    async with async_session_maker() as session:
+        definitions = await (
             DefinitionSelector()
             .by_key(key=request, language=language)
             .with_relationships("source_word")
-        ).all(session)
+        ).all_async(session)
         for definition in definitions:
             result[definition.source_word.name].append(export(definition))
 

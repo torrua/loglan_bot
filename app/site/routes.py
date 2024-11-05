@@ -4,7 +4,7 @@ from flask import Blueprint, redirect, url_for, render_template, request, jsonif
 from loglan_core import WordSelector, Event
 from loglan_core.addons.definition_selector import DefinitionSelector
 
-from app.engine import Session
+from app.engine import async_session_maker
 from app.site.compose.english_item import EnglishItem
 from app.site.compose.loglan_item import Composer
 from app.site.functions import get_data
@@ -89,11 +89,11 @@ def columns():
 
 @site_blueprint.route("/dictionary")
 @site_blueprint.route("/dictionary/")
-def dictionary():
-    with Session() as session:
+async def dictionary():
+    with async_session_maker() as session:
         events = session.query(Event).all()
     events = {event.id: event.name for event in reversed(events)}
-    content = generate_content(request.args)
+    content = await generate_content(request.args)
     return render_template(
         "dictionary.html",
         content=content,
@@ -107,8 +107,8 @@ def how_to_read():
 
 
 @site_blueprint.route("/submit_search", methods=["POST"])
-def submit_search():
-    return generate_content(request.form)
+async def submit_search():
+    return await generate_content(request.form)
 
 
 def strtobool(val):
@@ -120,7 +120,7 @@ def strtobool(val):
     raise ValueError("Invalid boolean value")
 
 
-def generate_content(data):
+async def generate_content(data):
     word = data.get("word", str())
     search_language = data.get("language_id", DEFAULT_SEARCH_LANGUAGE)
     event_id = data.get("event_id", 1)
@@ -138,32 +138,33 @@ def generate_content(data):
     if isinstance(is_case_sensitive, str):
         is_case_sensitive = strtobool(is_case_sensitive)
 
-    result = search_all(search_language, word, event_id, is_case_sensitive, nothing)
+    result = await search_all(
+        search_language, word, event_id, is_case_sensitive, nothing
+    )
     return jsonify(result=result)
 
 
-def search_all(search_language, word, event_id, is_case_sensitive, nothing):
+async def search_all(search_language, word, event_id, is_case_sensitive, nothing):
     if search_language == "log":
-        result = search_log(word, event_id, is_case_sensitive, nothing)
+        result = await search_log(word, event_id, is_case_sensitive, nothing)
 
     elif search_language == "eng":
-        result = search_eng(word, event_id, is_case_sensitive, nothing)
+        result = await search_eng(word, event_id, is_case_sensitive, nothing)
     else:
         result = nothing % f"Sorry, but nothing was found for <b>{word}</b>."
     return result
 
 
-def search_eng(word, event_id, is_case_sensitive, nothing):
+async def search_eng(word, event_id, is_case_sensitive, nothing):
 
-    with Session() as session:
-        definitions_result = (
+    async with async_session_maker() as session:
+        definitions = await (
             DefinitionSelector(case_sensitive=is_case_sensitive)
             .with_relationships("source_word")
             .by_key(key=word)
             .by_event(event_id=event_id)
-            .get_statement()
+            .all_async(session, unique=True)
         )
-        definitions = session.scalars(definitions_result).unique().all()
         result = EnglishItem(
             definitions=definitions, key=word, style=DEFAULT_HTML_STYLE
         ).export_as_html()
@@ -177,14 +178,14 @@ def search_eng(word, event_id, is_case_sensitive, nothing):
     return result
 
 
-def search_log(word, event_id, is_case_sensitive, nothing):
+async def search_log(word, event_id, is_case_sensitive, nothing):
 
-    with Session() as session:
-        word_result = (
+    async with async_session_maker() as session:
+        word_result = await (
             WordSelector(case_sensitive=is_case_sensitive)
             .by_name(name=word)
             .by_event(event_id=event_id)
-            .all(session)
+            .all_async(session)
         )
         result = Composer(words=word_result, style=DEFAULT_HTML_STYLE).export_as_html()
     if not result:

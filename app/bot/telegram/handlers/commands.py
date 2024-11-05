@@ -16,7 +16,7 @@ from app.bot.telegram import (
 from app.bot.telegram.keyboards import kb_close, WordKeyboard
 from app.bot.telegram.models import translation_by_key, export_as_str
 from app.decorators import logging_time
-from app.engine import Session
+from app.engine import async_session_maker
 
 
 @logging_time
@@ -26,7 +26,7 @@ async def send_message_by_key(user_request: str, user_id: int):
     :param user_id:
     :return:
     """
-    words_found = translation_by_key(
+    words_found = await translation_by_key(
         request=user_request.lower(),
         language=EN,
     )
@@ -93,12 +93,12 @@ async def bot_cmd_log(message: msg):
             text=MESSAGE_SPECIFY_LOGLAN_WORD,
         )
 
-    with Session() as session:
-        words = (
+    async with async_session_maker() as session:
+        words = await (
             WordSelector()
             .by_name(arguments[0])
             .with_relationships()
-            .all(session, unique=True)
+            .all_async(session, unique=True)
         )
     if not words:
         return await bot.send_message(

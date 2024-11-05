@@ -8,7 +8,7 @@ from app.bot.telegram.keyboards import WordKeyboard
 from app.bot.telegram.models import export_as_str
 from app.bot.telegram.variables import mark_record_id, mark_slice_start
 from app.decorators import logging_time
-from app.engine import Session
+from app.engine import async_session_maker
 
 
 @logging_time
@@ -31,12 +31,12 @@ async def bib_predy_send_card(call: cbq):
     info = info_from_callback(call.data)
     uid = call.message.chat.id
 
-    with Session() as session:
-        word = (
+    async with async_session_maker() as session:
+        word = await (
             WordSelector()
             .filter_by(id=info[mark_record_id])
             .with_relationships()
-            .scalar(session)
+            .scalar_async(session)
         )
         await bot.send_message(
             chat_id=uid,
@@ -56,12 +56,12 @@ async def bib_predy_kb_cpx_switcher(call: cbq, state: bool):
     info = info_from_callback(call.data)
     slice_start = info.pop(mark_slice_start, 0)
 
-    with Session() as session:
-        word = (
+    async with async_session_maker() as session:
+        word = await (
             WordSelector()
             .filter_by(id=info[mark_record_id])
             .with_relationships()
-            .scalar(session)
+            .scalar_async(session)
         )
 
         keyboard = WordKeyboard(word).keyboard_cpx(

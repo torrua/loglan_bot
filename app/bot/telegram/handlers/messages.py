@@ -8,7 +8,7 @@ from app.bot.telegram import bot, msg
 from app.bot.telegram.handlers.commands import send_message_by_key
 from app.bot.telegram.keyboards import WordKeyboard
 from app.bot.telegram.models import export_as_str
-from app.engine import Session
+from app.engine import async_session_maker
 
 
 async def bot_text_messages_handler(message: msg) -> None:
@@ -19,13 +19,13 @@ async def bot_text_messages_handler(message: msg) -> None:
     """
 
     user_request = message.text.removeprefix("/")
-    with Session() as session:
+    async with async_session_maker() as session:
 
-        words = (
+        words = await (
             WordSelector()
             .by_name(user_request)
             .with_relationships()
-            .all(session, unique=True)
+            .all_async(session, unique=True)
         )
 
     if words:
