@@ -28,4 +28,4 @@ RUN /venv/bin/python -m pip install --upgrade pip
 RUN /venv/bin/pip install --no-cache-dir -r requirements.txt
 
 # Run the command
-CMD ["python", "main.py"]
+CMD ["hypercorn", "-b", "0.0.0.0:8000", "main:app"]

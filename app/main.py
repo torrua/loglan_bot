@@ -1,7 +1,7 @@
 from quart import Quart, render_template
 
-from app.bot import bot_blueprint
-from app.site.routes import site_blueprint
+from .bot import bot_blueprint
+from .site.routes import site_blueprint
 
 
 def create_app():
