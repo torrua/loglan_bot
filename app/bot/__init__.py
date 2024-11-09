@@ -1,9 +1,8 @@
-# -*- coding:utf-8 -*-
 """
 Providing routes for our application
 """
 
-from flask import Blueprint, request as rq
+from quart import Blueprint, request as rq
 from telebot import types
 
 from app.bot.telegram import bot, TOKEN

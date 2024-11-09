@@ -1,4 +1,4 @@
-Flask[async]>=3.0
+Quart>=0.19.8
 psycopg2-binary>=2.9
 SQLAlchemy[asyncio]>=2.0
 Loglan-Core>=0.5.0

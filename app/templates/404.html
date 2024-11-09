@@ -1,13 +1,57 @@
-{% extends "bootstrap/base.html" %}
-{% block title %}fonifo{% endblock %}
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon"
+      type="image/png"
+      href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAADJ0lEQVQ4T21TWUwTURQ9701bpmWAAq2tUlCQQhBRjPrhEomoARMVExdI1A+/MIS6JeKX30YSNaL4YeKHGrcS14AmKmpEMCYajUsEWdQWQaoVSwfaaWfmaYcl1vj+7rn3nHffPfcR/Ofs3XvDLMuRVYTQWeNpVWc08hfq6ysG/i0nfwPV1RedvKBvAUOO0Wob5a3JRjDg5/tuPQgDCOlUJLWisbHq4yRvSqCmxl2u59UWoWCUKmICTOlFsCyeB0WKovv8Lczc2YefzywIdgoKZFrW0LClNSaiCdTUuHN1Caxr2mofTSocQeSHAUPN+cipXA/GgJ5z1+HY0Q2doCDwKhX+tnQ1JLK8M2eqejWB3fuufEyaIzqnrRnSOvv1Mg1hTwEyy0u0eOBBOwyON0hZMKzFvns2BDuT3jUcqywidXXXHOGI7M3e9QmUV7SC2C2hvnw41paCECDQ9Rkjng7YN3zW8rLI4cvZbDCZ5ZLa2qtHTJmRAxmVnql5MBXov5AL29ISJDpskENheFsegimjSFs+iMRcEd6Ls1h40HCUuFzuGynzgxutq7/FOeRvs8KgW4G04vxxnDGI/T4MtD5F1o5e+GMDfZvcTFyuppspxYEK66rx92uuRygGmmYitWAJzAUTqzCR+/78FQI9PaC8hIiPbya1tVcOm7KiBzO2eogajRGzIQ1RJM22Y0bpMhCOgskKGGOgep0mMzb4A1/vd0RlMXyI7N9/OVNm1JNd/Qmhfh7B14XIKFsJquO0YskfgKf5EVRZhW1JMaThEQhZ0+G90y5RUPuEje4uwSnmRX8ZYXYuROpc5zh5eASe262wlHrBFA7B91bw0wMYfmEGU+nVkyc2V8UtktGWTrPWl4JQAiUkoa/pLiwrvRDyglPzCbw2w/8kXY2Gaf7p01t7pqzbs+fSPNCE+4mZNsFessg0+LgDBnsv0pb5NLIyxsHfZoHYJahKhFt36tSWuzE87jO5XG4r0XFHoLLtjCn65EIRRK9CGjIyyacjhEM3VZTy48e39U22FCcwCdbV3ZoxNhbZRQgrin1BxtgHk4lrrK/f1B+3LH+C3+k0TOAiD2BKAAAAAElFTkSuQmCC"/>
 
-{% block navbar %}
-<div class="navbar navbar-fixed-top">
-  <!-- ... -->
-</div>
-{% endblock %}
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" crossorigin="anonymous">
+  </head>
+  <title>{% block title %}fonifo{% endblock %}</title>
 
-{% block content %}
-<div class="mx-3 px-3" style="margin-left: 25px"><h1>404</h1><br>
-Levi pidri, jio tu na begco pei, no dzabi. Soi ceokra!<br></div>
-{% endblock %}
+  <style>
+    body {
+	  font-family: 'Georgia', serif;
+	  display: flex;
+	  flex-direction: column;
+	  min-height: 100vh;
+	}
+    .header {
+      text-align: center;
+    }
+    .content {
+      flex: 1 0 auto;
+    }
+    .footer {
+      font-size: 14px;
+      margin-right: 10px;
+      padding-left: 15px;
+    }
+
+    {% block style %}{% endblock %}
+  </style>
+
+  <body>
+    <div class="content">
+      {% block content %}
+      <div class="mx-3 px-3" style="margin-left: 25px"><h1>404</h1><br>
+      Levi pidri, jio tu na begco pei, no dzabi. Soi ceokra!<br></div>
+      {% endblock %}
+    </div>
+    <footer>
+      <nav class="navbar navbar-expand-lg bg-light">
+        <ul class="navbar-nav">
+          <li class="nav-item">
+            <div class="container-fluent footer">Copyright © <script type="text/javascript">var year = new Date();document.write(year.getFullYear());</script> by <a href="http://www.loglan.org/">The Loglan Institute</a> & <a href="https://github.com/torrua">torrua</a>. All rights reserved.</div>
+          </li>
+        </ul>
+      </nav>
+    </footer>
+
+    <!-- Bootstrap Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-gtEjrD/SeCtmISkJkNUaaKMoLD0//ElJ19smozuHV6z3Iehds+3Ulb9Bn9Plx0x4" crossorigin="anonymous"></script>
+  </body>
+</html>

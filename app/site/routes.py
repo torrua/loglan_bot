@@ -1,8 +1,7 @@
 import os
 
-from flask import Blueprint, redirect, url_for, render_template, request, jsonify
-from loglan_core import WordSelector, Event
-from loglan_core.addons.definition_selector import DefinitionSelector
+from quart import Blueprint, redirect, url_for, render_template, request, jsonify
+from loglan_core import WordSelector, Event, BaseSelector, DefinitionSelector
 
 from app.engine import async_session_maker
 from app.site.compose.english_item import EnglishItem
@@ -37,7 +36,7 @@ def redirect_columns():
 
 @site_blueprint.route("/")
 @site_blueprint.route("/home")
-def home():
+async def home():
     article = get_data(MAIN_SITE).body.find("div", {"id": "content"})
     for bq in article.findAll("blockquote"):
         bq["class"] = "blockquote"
@@ -45,18 +44,18 @@ def home():
     for img in article.findAll("img"):
         img["src"] = MAIN_SITE + img["src"]
 
-    return render_template(
+    return await render_template(
         "home.html",
         article="",
     )
 
 
 @site_blueprint.route("/articles")
-def articles():
+async def articles():
     article_block = get_data(MAIN_SITE)
     title = article_block.find("a", {"name": "articles"}).find_parent("h2")
     content = title.find_next("ol")
-    return render_template(
+    return await render_template(
         "articles.html",
         articles=content,
         title=title.get_text(),
@@ -64,11 +63,11 @@ def articles():
 
 
 @site_blueprint.route("/texts")
-def texts():
+async def texts():
     article_block = get_data(MAIN_SITE)
     title = article_block.find("a", {"name": "texts"}).find_parent("h2")
     content = title.find_next("ol")
-    return render_template(
+    return await render_template(
         "articles.html",
         articles=content,
         title=title.get_text(),
@@ -76,11 +75,11 @@ def texts():
 
 
 @site_blueprint.route("/columns")
-def columns():
+async def columns():
     article_block = get_data(MAIN_SITE)
     title = article_block.find("a", {"name": "columns"}).find_parent("h2")
     content = title.find_next("ul")
-    return render_template(
+    return await render_template(
         "articles.html",
         articles=content,
         title=title.get_text(),
@@ -90,11 +89,11 @@ def columns():
 @site_blueprint.route("/dictionary")
 @site_blueprint.route("/dictionary/")
 async def dictionary():
-    with async_session_maker() as session:
-        events = session.query(Event).all()
-    events = {event.id: event.name for event in reversed(events)}
+    async with async_session_maker() as session:
+        events = await BaseSelector(model=Event).all_async(session)
+    events = {int(event.id): event.name for event in reversed(events)}
     content = await generate_content(request.args)
-    return render_template(
+    return await render_template(
         "dictionary.html",
         content=content,
         events=events,
@@ -102,13 +101,15 @@ async def dictionary():
 
 
 @site_blueprint.route("/how_to_read")
-def how_to_read():
-    return render_template("reading.html")
+async def how_to_read():
+    return await render_template("reading.html")
 
 
 @site_blueprint.route("/submit_search", methods=["POST"])
 async def submit_search():
-    return await generate_content(request.form)
+
+    res = await request.form
+    return await generate_content(res)
 
 
 def strtobool(val):
@@ -123,7 +124,7 @@ def strtobool(val):
 async def generate_content(data):
     word = data.get("word", str())
     search_language = data.get("language_id", DEFAULT_SEARCH_LANGUAGE)
-    event_id = data.get("event_id", 1)
+    event_id = int(data.get("event_id", 1))
     is_case_sensitive = data.get("case_sensitive", False)
 
     if not word or not data:
@@ -162,7 +163,7 @@ async def search_eng(word, event_id, is_case_sensitive, nothing):
             DefinitionSelector(case_sensitive=is_case_sensitive)
             .with_relationships("source_word")
             .by_key(key=word)
-            .by_event(event_id=event_id)
+            .by_event(event_id=int(event_id))
             .all_async(session, unique=True)
         )
         result = EnglishItem(
@@ -178,14 +179,15 @@ async def search_eng(word, event_id, is_case_sensitive, nothing):
     return result
 
 
-async def search_log(word, event_id, is_case_sensitive, nothing):
+async def search_log(word: str, event_id: int, is_case_sensitive: bool, nothing):
 
     async with async_session_maker() as session:
         word_result = await (
-            WordSelector(case_sensitive=is_case_sensitive)
-            .by_name(name=word)
-            .by_event(event_id=event_id)
-            .all_async(session)
+            WordSelector(case_sensitive=bool(is_case_sensitive))
+            .with_relationships()
+            .by_name(name=str(word))
+            .by_event(event_id=int(event_id))
+            .all_async(session, unique=True)
         )
         result = Composer(words=word_result, style=DEFAULT_HTML_STYLE).export_as_html()
     if not result:
@@ -199,7 +201,7 @@ async def search_log(word, event_id, is_case_sensitive, nothing):
 
 @site_blueprint.route("/<string:section>/", methods=["GET"])
 @site_blueprint.route("/<string:section>/<string:article>", methods=["GET"])
-def proxy(section: str = "", article: str = ""):
+async def proxy(section: str = "", article: str = ""):
     url = f"{MAIN_SITE}{section}/{article}"
     content = get_data(url).body
 
@@ -210,7 +212,7 @@ def proxy(section: str = "", article: str = ""):
         img["src"] = MAIN_SITE + section + "/" + img["src"]
 
     name_of_article = content.h1.extract().get_text()
-    return render_template(
+    return await render_template(
         "article.html",
         name_of_article=name_of_article,
         article=content,
