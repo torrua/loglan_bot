@@ -6,7 +6,7 @@
 
 [![Pylint Bot](https://github.com/torrua/loglan_bot/actions/workflows/pylint_bot.yml/badge.svg)](https://github.com/torrua/loglan_bot/actions/workflows/pylint_bot.yml)
 
-This async project mainly based on Quart, Hypercorn, SQLAlchemy, PyTelegramBotAPI and Keyboa libraries.
+This async project mainly based on Loglan-Core, Quart, Hypercorn, SQLAlchemy, PyTelegramBotAPI and Keyboa libraries.
 
 The Telegram [@LoglanBot](http://t.me/LoglanBot) translates words from Loglan to English and back. Just send a word and get the results.
 
