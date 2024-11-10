@@ -16,7 +16,7 @@ async def get_message():
     Get all messages
     :return:
     """
-    await bot.process_new_updates([types.Update.de_json(await rq.body)])
+    await bot.process_new_updates([types.Update.de_json(await rq.get_json())])
     return "Ok", 200
 
 
