@@ -20,13 +20,18 @@ class WordKeyboard:
     def __init__(self, word):
         self.word = word
 
-    def _keyboard_navi(self, index_start: int, index_end: int, delimiter: int):
+    def _keyboard_navi(self, index_start: int, total_num: int):
         """
         :param index_start:
-        :param index_end:
-        :param delimiter:
         :return:
         """
+
+        delimiter = self._get_delimiter(total_num)
+        if total_num <= delimiter:
+            return None
+
+        index_end = self.get_slice_end(index_start, total_num)
+
         text_arrow_back = "\U0000276E" * 2
         text_arrow_forward = "\U0000276F" * 2
         button_back, button_forward = None, None
@@ -75,14 +80,14 @@ class WordKeyboard:
         ]
         return Keyboa(button_predy_kb_cpx_hide)()
 
-    def _keyboard_show(self, total_number_of_complexes: int):
+    def _keyboard_show(self, total_number_of_items: int):
         """
-        :param total_number_of_complexes:
+        :param total_number_of_items:
         :return:
         """
         text_cpx_show = (
-            f"Show Complex{'es' if total_number_of_complexes > 1 else ''}"
-            f" ({total_number_of_complexes})"
+            f"Show Complex{'es' if total_number_of_items > 1 else ''}"
+            f" ({total_number_of_items})"
         )
         cbd_predy_kb_cpx_show = {
             mark_entity: entity_predy,
@@ -95,13 +100,13 @@ class WordKeyboard:
         return Keyboa.combine((Keyboa(button_show)(), kb_close()))
 
     @staticmethod
-    def _get_delimiter(total_number_of_complexes: int):
+    def _get_delimiter(total_number_of_items: int):
         """
-        :param total_number_of_complexes:
+        :param total_number_of_items:
         :return:
         """
         allowed_range = list(range(MIN_NUMBER_OF_BUTTONS, MIN_NUMBER_OF_BUTTONS + 11))
-        lst = [(total_number_of_complexes % i, i) for i in allowed_range]
+        lst = [(total_number_of_items % i, i) for i in allowed_range]
         delimiter = min(lst, key=lambda x: abs(x[0] - MIN_NUMBER_OF_BUTTONS))[1]
         for i in lst:
             if i[0] == 0:
@@ -110,25 +115,25 @@ class WordKeyboard:
         return delimiter
 
     @staticmethod
-    def _keyboard_data(current_complexes: list):
+    def _keyboard_data(items: list):
         """
-        :param current_complexes:
+        :param items:
         :return:
         """
-        cpx_items = [
+        kb_items = [
             {
-                t: cpx.name,
+                t: item.name,
                 cbd: callback_from_info(
                     {
                         mark_entity: entity_predy,
                         mark_action: action_predy_send_card,
-                        mark_record_id: cpx.id,
+                        mark_record_id: item.id,
                     }
                 ),
             }
-            for cpx in current_complexes
+            for item in items
         ]
-        return Keyboa(items=cpx_items, alignment=True, items_in_row=4)()
+        return Keyboa(items=kb_items, alignment=True, items_in_row=4)()
 
     def keyboard_cpx(self, show_list: bool = False, slice_start: int = 0):
         """
@@ -137,32 +142,33 @@ class WordKeyboard:
         :return:
         """
 
-        total_num_of_cpx = len(self.word.complexes)
+        all_items = self.word.complexes
 
-        if not total_num_of_cpx:
+        total_num = len(all_items)
+
+        if not total_num:
             return kb_close()
 
         if not show_list:
-            return self._keyboard_show(total_num_of_cpx)
+            return self._keyboard_show(total_num)
 
-        current_delimiter = self._get_delimiter(total_num_of_cpx)
+        slice_end = self.get_slice_end(slice_start, total_num)
+        current_item_set = all_items[slice_start:slice_end]
 
-        kb_cpx_hide = self._keyboard_hide(total_num_of_cpx)
+        kb_cpx_data = self._keyboard_data(current_item_set)
 
-        last_allowed_item = slice_start + current_delimiter
-        slice_end = min(last_allowed_item, total_num_of_cpx)
-
-        current_cpx_set = self.word.complexes[slice_start:slice_end]
-        kb_cpx_data = self._keyboard_data(current_cpx_set)
-
-        kb_cpx_nav = None
-
-        if total_num_of_cpx > current_delimiter:
-            kb_cpx_nav = self._keyboard_navi(slice_start, slice_end, current_delimiter)
+        kb_cpx_nav = self._keyboard_navi(slice_start, total_num)
+        kb_cpx_hide = self._keyboard_hide(total_num)
 
         kb_combo = (kb_cpx_hide, kb_cpx_data, kb_cpx_nav, kb_close())
 
         return Keyboa.combine(kb_combo)
+
+    def get_slice_end(self, slice_start, total_num):
+        current_delimiter = self._get_delimiter(total_num)
+        last_allowed_item = slice_start + current_delimiter
+        slice_end = min(last_allowed_item, total_num)
+        return slice_end
 
 
 def kb_close():
