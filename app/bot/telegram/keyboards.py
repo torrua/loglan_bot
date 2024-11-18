@@ -154,7 +154,7 @@ class WordKeyboard:
         :return:
         """
 
-        if not len(self.get_items()):
+        if self.get_items():
             return kb_close()
 
         if not show_list:
