@@ -20,12 +20,16 @@ class WordKeyboard:
     def __init__(self, word):
         self.word = word
 
-    def _keyboard_navi(self, index_start: int, total_num: int):
+    def get_items(self):
+        return self.word.complexes
+
+    def _keyboard_navi(self, index_start: int):
         """
         :param index_start:
         :return:
         """
 
+        total_num = len(self.get_items())
         delimiter = self._get_delimiter(total_num)
         if total_num <= delimiter:
             return None
@@ -64,12 +68,13 @@ class WordKeyboard:
         nav_row = [b for b in [button_back, button_forward] if b]
         return Keyboa(nav_row, items_in_row=2)()
 
-    def _keyboard_hide(self, total_number_of_complexes: int):
+    def _keyboard_hide(self):
         """
-        :param total_number_of_complexes:
         :return:
         """
-        text_cpx_hide = f"Hide Complex{'es' if total_number_of_complexes > 1 else ''}"
+        total_num = len(self.get_items())
+
+        text_cpx_hide = f"Hide Complex{'es' if total_num > 1 else ''}"
         cbd_predy_kb_cpx_hide = {
             mark_entity: entity_predy,
             mark_action: action_predy_kb_cpx_hide,
@@ -80,15 +85,13 @@ class WordKeyboard:
         ]
         return Keyboa(button_predy_kb_cpx_hide)()
 
-    def _keyboard_show(self, total_number_of_items: int):
+    def _keyboard_show(self):
         """
-        :param total_number_of_items:
         :return:
         """
-        text_cpx_show = (
-            f"Show Complex{'es' if total_number_of_items > 1 else ''}"
-            f" ({total_number_of_items})"
-        )
+        total_num = len(self.get_items())
+
+        text_cpx_show = f"Show Complex{'es' if total_num > 1 else ''}" f" ({total_num})"
         cbd_predy_kb_cpx_show = {
             mark_entity: entity_predy,
             mark_action: action_predy_kb_cpx_show,
@@ -114,12 +117,15 @@ class WordKeyboard:
                 break
         return delimiter
 
-    @staticmethod
-    def _keyboard_data(items: list):
+    def _keyboard_data(self, slice_start: int):
         """
-        :param items:
+        :param slice_start:
         :return:
         """
+        items = self.get_items()
+        slice_end = self.get_slice_end(slice_start, len(items))
+        current_item_set = items[slice_start:slice_end]
+
         kb_items = [
             {
                 t: item.name,
@@ -131,7 +137,7 @@ class WordKeyboard:
                     }
                 ),
             }
-            for item in items
+            for item in current_item_set
         ]
         return Keyboa(items=kb_items, alignment=True, items_in_row=4)()
 
@@ -142,26 +148,19 @@ class WordKeyboard:
         :return:
         """
 
-        all_items = self.word.complexes
-
-        total_num = len(all_items)
-
-        if not total_num:
+        if not len(self.get_items()):
             return kb_close()
 
         if not show_list:
-            return self._keyboard_show(total_num)
+            return self._keyboard_show()
 
-        slice_end = self.get_slice_end(slice_start, total_num)
-        current_item_set = all_items[slice_start:slice_end]
+        return self._keyboard_complete(slice_start)
 
-        kb_cpx_data = self._keyboard_data(current_item_set)
-
-        kb_cpx_nav = self._keyboard_navi(slice_start, total_num)
-        kb_cpx_hide = self._keyboard_hide(total_num)
-
-        kb_combo = (kb_cpx_hide, kb_cpx_data, kb_cpx_nav, kb_close())
-
+    def _keyboard_complete(self, slice_start):
+        kb_data = self._keyboard_data(slice_start)
+        kb_navi = self._keyboard_navi(slice_start)
+        kb_hide = self._keyboard_hide()
+        kb_combo = (kb_hide, kb_data, kb_navi, kb_close())
         return Keyboa.combine(kb_combo)
 
     def get_slice_end(self, slice_start, total_num):
