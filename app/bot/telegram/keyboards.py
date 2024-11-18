@@ -21,7 +21,14 @@ class WordKeyboard:
         self.word = word
 
     def get_items(self):
+        if self.word.type.parentable:
+            return self.word.parents
         return self.word.complexes
+
+    def get_title(self):
+        if self.word.type.parentable:
+            return "Parent" + f"{'s' if len(self.word.parents) > 1 else ''}"
+        return "Complex" + f"{'es' if len(self.word.complexes) > 1 else ''}"
 
     def _keyboard_navi(self, index_start: int):
         """
@@ -72,16 +79,15 @@ class WordKeyboard:
         """
         :return:
         """
-        total_num = len(self.get_items())
 
-        text_cpx_hide = f"Hide Complex{'es' if total_num > 1 else ''}"
+        text_hide = f"Hide {self.get_title()}"
         cbd_predy_kb_cpx_hide = {
             mark_entity: entity_predy,
             mark_action: action_predy_kb_cpx_hide,
             mark_record_id: self.word.id,
         }
         button_predy_kb_cpx_hide = [
-            {t: text_cpx_hide, cbd: callback_from_info(cbd_predy_kb_cpx_hide)},
+            {t: text_hide, cbd: callback_from_info(cbd_predy_kb_cpx_hide)},
         ]
         return Keyboa(button_predy_kb_cpx_hide)()
 
@@ -90,8 +96,8 @@ class WordKeyboard:
         :return:
         """
         total_num = len(self.get_items())
-
-        text_cpx_show = f"Show Complex{'es' if total_num > 1 else ''}" f" ({total_num})"
+        number = f" ({total_num})" if total_num > 1 else ""
+        text_cpx_show = f"Show {self.get_title()}{number}"
         cbd_predy_kb_cpx_show = {
             mark_entity: entity_predy,
             mark_action: action_predy_kb_cpx_show,
@@ -156,14 +162,14 @@ class WordKeyboard:
 
         return self._keyboard_complete(slice_start)
 
-    def _keyboard_complete(self, slice_start):
+    def _keyboard_complete(self, slice_start: int):
         kb_data = self._keyboard_data(slice_start)
         kb_navi = self._keyboard_navi(slice_start)
         kb_hide = self._keyboard_hide()
         kb_combo = (kb_hide, kb_data, kb_navi, kb_close())
         return Keyboa.combine(kb_combo)
 
-    def get_slice_end(self, slice_start, total_num):
+    def get_slice_end(self, slice_start: int, total_num: int) -> int:
         current_delimiter = self._get_delimiter(total_num)
         last_allowed_item = slice_start + current_delimiter
         slice_end = min(last_allowed_item, total_num)
