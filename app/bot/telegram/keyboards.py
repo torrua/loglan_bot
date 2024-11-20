@@ -15,6 +15,7 @@ from app.bot.telegram.variables import (
     action_predy_send_card,
 )
 
+
 class WordKeyboard:
     def __init__(self, word):
         self.word = word
