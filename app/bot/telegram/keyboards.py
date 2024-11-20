@@ -15,12 +15,12 @@ from app.bot.telegram.variables import (
     action_predy_send_card,
 )
 
-
 class WordKeyboard:
     def __init__(self, word):
         self.word = word
+        self.items = self._get_items()
 
-    def get_items(self):
+    def _get_items(self):
         if self.word.type.parentable:
             return self.word.parents
         return self.word.complexes
@@ -36,7 +36,7 @@ class WordKeyboard:
         :return:
         """
 
-        total_num = len(self.get_items())
+        total_num = len(self.items)
         delimiter = self._get_delimiter(total_num)
         if total_num <= delimiter:
             return None
@@ -95,7 +95,7 @@ class WordKeyboard:
         """
         :return:
         """
-        total_num = len(self.get_items())
+        total_num = len(self.items)
         number = f" ({total_num})" if total_num > 1 else ""
         text_cpx_show = f"Show {self.get_title()}{number}"
         cbd_predy_kb_cpx_show = {
@@ -128,9 +128,8 @@ class WordKeyboard:
         :param slice_start:
         :return:
         """
-        items = self.get_items()
-        slice_end = self.get_slice_end(slice_start, len(items))
-        current_item_set = items[slice_start:slice_end]
+        slice_end = self.get_slice_end(slice_start, len(self.items))
+        current_item_set = self.items[slice_start:slice_end]
 
         kb_items = [
             {
@@ -147,21 +146,6 @@ class WordKeyboard:
         ]
         return Keyboa(items=kb_items, alignment=True, items_in_row=4)()
 
-    def keyboard_cpx(self, show_list: bool = False, slice_start: int = 0):
-        """
-        :param show_list:
-        :param slice_start:
-        :return:
-        """
-
-        if self.get_items():
-            return kb_close()
-
-        if not show_list:
-            return self._keyboard_show()
-
-        return self._keyboard_complete(slice_start)
-
     def _keyboard_complete(self, slice_start: int):
         kb_data = self._keyboard_data(slice_start)
         kb_navi = self._keyboard_navi(slice_start)
@@ -174,6 +158,21 @@ class WordKeyboard:
         last_allowed_item = slice_start + current_delimiter
         slice_end = min(last_allowed_item, total_num)
         return slice_end
+
+    def keyboard_cpx(self, show_list: bool = False, slice_start: int = 0):
+        """
+        :param show_list:
+        :param slice_start:
+        :return:
+        """
+
+        if not self.items:
+            return kb_close()
+
+        if not show_list:
+            return self._keyboard_show()
+
+        return self._keyboard_complete(slice_start)
 
 
 def kb_close():
