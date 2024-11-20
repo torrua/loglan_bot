@@ -145,7 +145,7 @@ class WordKeyboard:
             }
             for item in current_item_set
         ]
-        return Keyboa(items=kb_items, alignment=True, items_in_row=4)()
+        return Keyboa(items=kb_items, items_in_row=3)()
 
     def _keyboard_complete(self, slice_start: int):
         kb_data = self._keyboard_data(slice_start)
