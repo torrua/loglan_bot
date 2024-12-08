@@ -37,15 +37,14 @@ class WordKeyboard:
         :return:
         """
 
-        total_num = len(self.items)
-        delimiter = self._get_delimiter(total_num)
-        if total_num <= delimiter:
+        delimiter = self._get_delimiter()
+        if len(self.items) <= delimiter:
             return None
 
-        index_end = self.get_slice_end(index_start, total_num)
+        index_end = self.get_slice_end(index_start)
 
-        text_arrow_back = "\U0000276E" * 2
-        text_arrow_forward = "\U0000276F" * 2
+        text_arrow_back = "❮❮"
+        text_arrow_forward = "❯❯"
         button_back, button_forward = None, None
 
         common_data = {
@@ -53,6 +52,7 @@ class WordKeyboard:
             mark_action: action_predy_kb_cpx_show,
             mark_record_id: self.word.id,
         }
+
         if index_start != 0:
             cbd_predy_kb_cpx_back = {
                 **common_data,
@@ -109,14 +109,12 @@ class WordKeyboard:
         ]
         return Keyboa.combine((Keyboa(button_show)(), kb_close()))
 
-    @staticmethod
-    def _get_delimiter(total_number_of_items: int):
+    def _get_delimiter(self):
         """
-        :param total_number_of_items:
         :return:
         """
         allowed_range = list(range(MIN_NUMBER_OF_BUTTONS, MIN_NUMBER_OF_BUTTONS + 11))
-        lst = [(total_number_of_items % i, i) for i in allowed_range]
+        lst = [(len(self.items) % i, i) for i in allowed_range]
         delimiter = min(lst, key=lambda x: abs(x[0] - MIN_NUMBER_OF_BUTTONS))[1]
         for i in lst:
             if i[0] == 0:
@@ -129,7 +127,7 @@ class WordKeyboard:
         :param slice_start:
         :return:
         """
-        slice_end = self.get_slice_end(slice_start, len(self.items))
+        slice_end = self.get_slice_end(slice_start)
         current_item_set = self.items[slice_start:slice_end]
 
         kb_items = [
@@ -154,10 +152,9 @@ class WordKeyboard:
         kb_combo = (kb_hide, kb_data, kb_navi, kb_close())
         return Keyboa.combine(kb_combo)
 
-    def get_slice_end(self, slice_start: int, total_num: int) -> int:
-        current_delimiter = self._get_delimiter(total_num)
-        last_allowed_item = slice_start + current_delimiter
-        slice_end = min(last_allowed_item, total_num)
+    def get_slice_end(self, slice_start: int) -> int:
+        last_allowed_item = slice_start + self._get_delimiter()
+        slice_end = min(last_allowed_item, len(self.items))
         return slice_end
 
     def keyboard_cpx(self, show_list: bool = False, slice_start: int = 0):
