@@ -63,7 +63,7 @@ class WordKeyboard:
                 cbd: callback_from_info(cbd_predy_kb_cpx_back),
             }
 
-        if index_end != len(self.word.complexes):
+        if index_end != len(self.items):
             cbd_predy_kb_cpx_forward = {
                 **common_data,
                 mark_slice_start: index_end,
