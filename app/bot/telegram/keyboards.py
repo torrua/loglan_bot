@@ -117,6 +117,31 @@ def kb_close():
     return Keyboa({t: "Close", cbd: "close"})()
 
 
+def keyboard_hide(title: str, word_id: int):
+    """
+    :return:
+    """
+
+    text_hide = f"Hide {title}"
+    cbd_predy_kb_cpx_hide = {
+        mark_entity: entity_predy,
+        mark_action: action_predy_kb_cpx_hide,
+        mark_record_id: word_id,
+    }
+    button_predy_kb_cpx_hide = [
+        {t: text_hide, cbd: callback_from_info(cbd_predy_kb_cpx_hide)},
+    ]
+    return Keyboa(button_predy_kb_cpx_hide)()
+
+
+def keyboard_complete(slice_start: int, items: list, word_id: int, title: str):
+    kb_data = keyboard_data(slice_start, items)
+    kb_navi = keyboard_navi(slice_start, len(items), word_id, action_predy_kb_cpx_show)
+    kb_hide = keyboard_hide(title, word_id)
+    kb_combo = (kb_hide, kb_data, kb_navi, kb_close())
+    return Keyboa.combine(kb_combo)
+
+
 class WordKeyboard:
 
     def __init__(self, word):
@@ -133,22 +158,6 @@ class WordKeyboard:
             return "Parent" + f"{'s' if len(self.word.parents) > 1 else ''}"
         return "Complex" + f"{'es' if len(self.word.complexes) > 1 else ''}"
 
-    def _keyboard_hide(self):
-        """
-        :return:
-        """
-
-        text_hide = f"Hide {self.get_title()}"
-        cbd_predy_kb_cpx_hide = {
-            mark_entity: entity_predy,
-            mark_action: action_predy_kb_cpx_hide,
-            mark_record_id: self.word.id,
-        }
-        button_predy_kb_cpx_hide = [
-            {t: text_hide, cbd: callback_from_info(cbd_predy_kb_cpx_hide)},
-        ]
-        return Keyboa(button_predy_kb_cpx_hide)()
-
     def _keyboard_show(self):
         """
         :return:
@@ -156,6 +165,7 @@ class WordKeyboard:
         total_num = len(self.items)
         number = f" ({total_num})" if total_num > 1 else ""
         text_cpx_show = f"Show {self.get_title()}{number}"
+
         cbd_predy_kb_cpx_show = {
             mark_entity: entity_predy,
             mark_action: action_predy_kb_cpx_show,
@@ -165,15 +175,6 @@ class WordKeyboard:
             {t: text_cpx_show, cbd: callback_from_info(cbd_predy_kb_cpx_show)},
         ]
         return Keyboa.combine((Keyboa(button_show)(), kb_close()))
-
-    def _keyboard_complete(self, slice_start: int, items: list, word_id: int):
-        kb_data = keyboard_data(slice_start, items)
-        kb_navi = keyboard_navi(
-            slice_start, len(items), word_id, action_predy_kb_cpx_show
-        )
-        kb_hide = self._keyboard_hide()
-        kb_combo = (kb_hide, kb_data, kb_navi, kb_close())
-        return Keyboa.combine(kb_combo)
 
     def keyboard_cpx(self, show_list: bool = False, slice_start: int = 0):
         """
@@ -188,4 +189,6 @@ class WordKeyboard:
         if not show_list:
             return self._keyboard_show()
 
-        return self._keyboard_complete(slice_start, self.items, self.word.id)
+        return keyboard_complete(
+            slice_start, self.items, self.word.id, self.get_title()
+        )
