@@ -142,6 +142,24 @@ def keyboard_complete(slice_start: int, items: list, word_id: int, title: str):
     return Keyboa.combine(kb_combo)
 
 
+def keyboard_show(number_of_items: int, title: str, word_id: int, action_mark: str):
+    """
+    :return:
+    """
+    number = f" ({number_of_items})" if number_of_items > 1 else ""
+    text_cpx_show = f"Show {title}{number}"
+
+    cbd_predy_kb_cpx_show = {
+        mark_entity: entity_predy,
+        mark_action: action_mark,
+        mark_record_id: word_id,
+    }
+    button_show = [
+        {t: text_cpx_show, cbd: callback_from_info(cbd_predy_kb_cpx_show)},
+    ]
+    return Keyboa.combine((Keyboa(button_show)(), kb_close()))
+
+
 class WordKeyboard:
 
     def __init__(self, word):
@@ -158,24 +176,6 @@ class WordKeyboard:
             return "Parent" + f"{'s' if len(self.word.parents) > 1 else ''}"
         return "Complex" + f"{'es' if len(self.word.complexes) > 1 else ''}"
 
-    def _keyboard_show(self):
-        """
-        :return:
-        """
-        total_num = len(self.items)
-        number = f" ({total_num})" if total_num > 1 else ""
-        text_cpx_show = f"Show {self.get_title()}{number}"
-
-        cbd_predy_kb_cpx_show = {
-            mark_entity: entity_predy,
-            mark_action: action_predy_kb_cpx_show,
-            mark_record_id: self.word.id,
-        }
-        button_show = [
-            {t: text_cpx_show, cbd: callback_from_info(cbd_predy_kb_cpx_show)},
-        ]
-        return Keyboa.combine((Keyboa(button_show)(), kb_close()))
-
     def keyboard_cpx(self, show_list: bool = False, slice_start: int = 0):
         """
         :param show_list:
@@ -187,7 +187,12 @@ class WordKeyboard:
             return kb_close()
 
         if not show_list:
-            return self._keyboard_show()
+            return keyboard_show(
+                len(self.items),
+                self.get_title(),
+                self.word.id,
+                action_predy_kb_cpx_show,
+            )
 
         return keyboard_complete(
             slice_start, self.items, self.word.id, self.get_title()
