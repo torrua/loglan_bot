@@ -6,7 +6,7 @@ from loglan_core import WordSelector
 from app.bot.telegram import bot, cbq
 from app.bot.telegram.keyboards import WordKeyboard
 from app.bot.telegram.models import export_as_str
-from app.bot.telegram.variables import mark_record_id, mark_slice_start, mark_action
+from app.bot.telegram.variables import Mark
 from app.decorators import logging_time
 from app.engine import async_session_maker
 
@@ -34,7 +34,7 @@ async def bib_predy_send_card(call: cbq):
     async with async_session_maker() as session:
         word = await (
             WordSelector()
-            .filter_by(id=info[mark_record_id])
+            .filter_by(id=info[Mark.record_id])
             .with_relationships()
             .scalar_async(session)
         )
@@ -53,13 +53,13 @@ async def bib_predy_kb_cpx_switcher(call: cbq):
     :return:
     """
     info = info_from_callback(call.data)
-    slice_start = info.pop(mark_slice_start, 0)
-    action = info.pop(mark_action, "")
+    slice_start = info.pop(Mark.slice_start, 0)
+    action = info.pop(Mark.action, "")
 
     async with async_session_maker() as session:
         word = await (
             WordSelector()
-            .filter_by(id=info[mark_record_id])
+            .filter_by(id=info[Mark.record_id])
             .with_relationships()
             .scalar_async(session)
         )

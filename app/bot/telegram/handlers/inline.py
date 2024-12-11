@@ -15,8 +15,7 @@ from app.bot.telegram.variables import (
     Action,
     cancel,
     close,
-    mark_entity,
-    mark_action,
+    Mark,
     entity_predy,
 )
 from app.decorators import logging_time
@@ -36,8 +35,8 @@ async def bot_callback_inline(call: cbq):
         return
 
     info = info_from_callback(call.data)
-    current_entity = info.get(mark_entity, None)
-    current_action = info.get(mark_action, None)
+    current_entity = info.get(Mark.entity, None)
+    current_action = info.get(Mark.action, None)
 
     if not (current_entity and current_action):
         return
@@ -52,7 +51,7 @@ async def entity_selector_general(call: cbq):
     :return:
     """
     info = info_from_callback(call.data)
-    current_entity = info.get(mark_entity, None)
+    current_entity = info.get(Mark.entity, None)
 
     if current_entity == entity_predy:
         await action_selector_predy(call)
@@ -65,15 +64,11 @@ async def action_selector_predy(call: cbq):
     :return:
     """
     info = info_from_callback(call.data)
-    current_action = info.get(mark_action, None)
+    current_action = info.get(Mark.action, None)
 
     actions = {
         Action.send_card: bib_predy_send_card,
-        Action.kb_cpx_hide: bib_predy_kb_cpx_switcher,
-        Action.kb_cpx_show: bib_predy_kb_cpx_switcher,
-        Action.kb_afx_hide: bib_predy_kb_cpx_switcher,
-        Action.kb_afx_show: bib_predy_kb_cpx_switcher,
     }
 
-    if action_to_run := actions.get(current_action):  # TODO Add default keyboard
+    if action_to_run := actions.get(current_action, bib_predy_kb_cpx_switcher):
         await action_to_run(call)
