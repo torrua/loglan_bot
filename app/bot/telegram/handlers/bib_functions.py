@@ -6,7 +6,7 @@ from loglan_core import WordSelector
 from app.bot.telegram import bot, cbq
 from app.bot.telegram.keyboards import WordKeyboard
 from app.bot.telegram.models import export_as_str
-from app.bot.telegram.variables import mark_record_id, mark_slice_start
+from app.bot.telegram.variables import Mark
 from app.decorators import logging_time
 from app.engine import async_session_maker
 
@@ -24,7 +24,7 @@ async def bib_cancel(call: cbq):
 @logging_time
 async def bib_predy_send_card(call: cbq):
     """
-    Обработка нажатия кнопки со словом на логлане
+    Обработка нажатия кнопки со logpua
     :param call:
     :return:
     """
@@ -34,7 +34,7 @@ async def bib_predy_send_card(call: cbq):
     async with async_session_maker() as session:
         word = await (
             WordSelector()
-            .filter_by(id=info[mark_record_id])
+            .filter_by(id=info[Mark.record_id])
             .with_relationships()
             .scalar_async(session)
         )
@@ -46,26 +46,26 @@ async def bib_predy_send_card(call: cbq):
 
 
 @logging_time
-async def bib_predy_kb_cpx_switcher(call: cbq, state: bool):
+async def bib_predy_kb_cpx_switcher(call: cbq):
     """
     Обработка нажатия кнопки отображения/скрытия комплексных слов
     :param call:
-    :param state:
     :return:
     """
     info = info_from_callback(call.data)
-    slice_start = info.pop(mark_slice_start, 0)
+    slice_start = info.pop(Mark.slice_start, 0)
+    action = info.pop(Mark.action, "")
 
     async with async_session_maker() as session:
         word = await (
             WordSelector()
-            .filter_by(id=info[mark_record_id])
+            .filter_by(id=info[Mark.record_id])
             .with_relationships()
             .scalar_async(session)
         )
 
         keyboard = WordKeyboard(word).keyboard_cpx(
-            show_list=state, slice_start=slice_start
+            action=action, slice_start=slice_start
         )
 
     await bot.edit_message_reply_markup(
@@ -73,23 +73,3 @@ async def bib_predy_kb_cpx_switcher(call: cbq, state: bool):
         message_id=call.message.message_id,
         reply_markup=keyboard,
     )
-
-
-@logging_time
-async def bib_predy_kb_cpx_show(call: cbq):
-    """
-    Обработка нажатия кнопки отображения комплексных слов
-    :param call:
-    :return:
-    """
-    await bib_predy_kb_cpx_switcher(call, True)
-
-
-@logging_time
-async def bib_predy_kb_cpx_hide(call: cbq):
-    """
-    Обработка нажатия кнопки скрытия комплексных слов
-    :param call:
-    :return:
-    """
-    await bib_predy_kb_cpx_switcher(call, False)
