@@ -6,13 +6,11 @@ from app.bot.telegram.variables import (
     mark_entity,
     entity_predy,
     mark_action,
-    action_predy_kb_cpx_show,
     mark_record_id,
     mark_slice_start,
     t,
     cbd,
-    action_predy_kb_cpx_hide,
-    action_predy_send_card,
+    Action,
 )
 
 
@@ -49,7 +47,7 @@ def keyboard_data(slice_start: int, items: list):
             cbd: callback_from_info(
                 {
                     mark_entity: entity_predy,
-                    mark_action: action_predy_send_card,
+                    mark_action: Action.send_card,
                     mark_record_id: item.id,
                 }
             ),
@@ -117,47 +115,20 @@ def kb_close():
     return Keyboa({t: "Close", cbd: "close"})()
 
 
-def keyboard_hide(title: str, word_id: int):
+def keyboard_show_hide(title: str, word_id: int, action_mark: str):
     """
     :return:
     """
 
-    text_hide = f"Hide {title}"
-    cbd_predy_kb_cpx_hide = {
-        mark_entity: entity_predy,
-        mark_action: action_predy_kb_cpx_hide,
-        mark_record_id: word_id,
-    }
-    button_predy_kb_cpx_hide = [
-        {t: text_hide, cbd: callback_from_info(cbd_predy_kb_cpx_hide)},
-    ]
-    return Keyboa(button_predy_kb_cpx_hide)()
-
-
-def keyboard_complete(slice_start: int, items: list, word_id: int, title: str):
-    kb_data = keyboard_data(slice_start, items)
-    kb_navi = keyboard_navi(slice_start, len(items), word_id, action_predy_kb_cpx_show)
-    kb_hide = keyboard_hide(title, word_id)
-    kb_combo = (kb_hide, kb_data, kb_navi, kb_close())
-    return Keyboa.combine(kb_combo)
-
-
-def keyboard_show(number_of_items: int, title: str, word_id: int, action_mark: str):
-    """
-    :return:
-    """
-    number = f" ({number_of_items})" if number_of_items > 1 else ""
-    text_cpx_show = f"Show {title}{number}"
-
-    cbd_predy_kb_cpx_show = {
+    cbd_predy = {
         mark_entity: entity_predy,
         mark_action: action_mark,
         mark_record_id: word_id,
     }
-    button_show = [
-        {t: text_cpx_show, cbd: callback_from_info(cbd_predy_kb_cpx_show)},
+    button = [
+        {t: title, cbd: callback_from_info(cbd_predy)},
     ]
-    return Keyboa.combine((Keyboa(button_show)(), kb_close()))
+    return Keyboa(button)()
 
 
 class WordKeyboard:
@@ -171,29 +142,85 @@ class WordKeyboard:
             return self.word.parents
         return self.word.complexes
 
-    def get_title(self):
-        if self.word.type.parentable:
-            return "Parent" + f"{'s' if len(self.word.parents) > 1 else ''}"
-        return "Complex" + f"{'es' if len(self.word.complexes) > 1 else ''}"
+    def get_title(self, show: bool, items_type: str):
+        show_text = "Show" if show else "Hide"
 
-    def keyboard_cpx(self, show_list: bool = False, slice_start: int = 0):
+        match items_type:
+            case "parent":
+                return (
+                    f"{show_text} Parent"
+                    + f"{f's ({len(self.word.parents)})' if len(self.word.parents) > 1 else ''}"
+                )
+            case "djifoa":
+                return (
+                    f"{show_text} Djifoa"
+                    + f"{f' ({len(self.word.affixes)})' if len(self.word.affixes) > 1 else ''}"
+                )
+            case "complex":
+                return (
+                    f"{show_text} Complex"
+                    + f"{f'es ({len(self.word.complexes)})' if len(self.word.complexes) > 1 else ''}"
+                )
+            case _:
+                return show_text
+
+    def keyboard_cpx(self, action: str = "", slice_start: int = 0):
         """
-        :param show_list:
+        :param action:
         :param slice_start:
         :return:
         """
+        print(action)
 
-        if not self.items:
-            return kb_close()
+        match action:
+            case Action.kb_cpx_show:
+                title_djifoa = self.get_title(show=True, items_type="djifoa")
+                kb_hide_djifoa = keyboard_show_hide(
+                    title_djifoa, self.word.id, Action.kb_cpx_hide
+                )
 
-        if not show_list:
-            return keyboard_show(
-                len(self.items),
-                self.get_title(),
-                self.word.id,
-                action_predy_kb_cpx_show,
-            )
+                title_cpx = self.get_title(show=False, items_type="complex")
+                kb_hide_cpx = keyboard_show_hide(
+                    title_cpx, self.word.id, Action.kb_cpx_hide
+                )
+                kb_data = keyboard_data(slice_start, self.word.complexes)
 
-        return keyboard_complete(
-            slice_start, self.items, self.word.id, self.get_title()
-        )
+                kb_navi = keyboard_navi(
+                    slice_start,
+                    len(self.word.complexes),
+                    self.word.id,
+                    Action.kb_cpx_show,
+                )
+                kb_combo = (kb_hide_djifoa, kb_hide_cpx, kb_data, kb_navi, kb_close())
+                return Keyboa.combine(kb_combo)
+
+            case Action.kb_cpx_hide:
+                title_djifoa = self.get_title(show=True, items_type="djifoa")
+                kb_hide_djifoa = keyboard_show_hide(
+                    title_djifoa, self.word.id, Action.kb_cpx_show
+                )
+
+                title_cpx = self.get_title(show=True, items_type="complex")
+                kb_hide_cpx = keyboard_show_hide(
+                    title_cpx, self.word.id, Action.kb_cpx_show
+                )
+                kb_combo = (kb_hide_djifoa, kb_hide_cpx, kb_close())
+                return Keyboa.combine(kb_combo)
+
+            case Action.kb_afx_show:
+                print("apkas")
+            case Action.kb_afx_hide:
+                print("apkah")
+            case _:
+
+                title_djifoa = self.get_title(show=True, items_type="djifoa")
+                kb_hide_djifoa = keyboard_show_hide(
+                    title_djifoa, self.word.id, Action.kb_cpx_show
+                )
+
+                title_cpx = self.get_title(show=True, items_type="complex")
+                kb_hide_cpx = keyboard_show_hide(
+                    title_cpx, self.word.id, Action.kb_cpx_show
+                )
+
+                return Keyboa.combine((kb_hide_djifoa, kb_hide_cpx, kb_close()))

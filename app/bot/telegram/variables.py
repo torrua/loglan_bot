@@ -19,7 +19,11 @@ mark_slice_start = "ss"
 # entities
 entity_predy = "ep"
 
+
 # actions
-action_predy_send_card = "apsc"
-action_predy_kb_cpx_show = "apkcs"
-action_predy_kb_cpx_hide = "apkch"
+class Action:
+    send_card = "apsc"
+    kb_cpx_show = "apkcs"
+    kb_cpx_hide = "apkch"
+    kb_afx_show = "apkas"
+    kb_afx_hide = "apkah"

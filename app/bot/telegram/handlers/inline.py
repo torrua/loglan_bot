@@ -8,15 +8,11 @@ from app.bot.telegram import cbq
 from app.bot.telegram.handlers.bib_functions import bib_cancel
 from app.bot.telegram.handlers.bib_functions import (
     bib_predy_send_card,
-    bib_predy_kb_cpx_hide,
-    bib_predy_kb_cpx_show,
+    bib_predy_kb_cpx_switcher,
 )
+
 from app.bot.telegram.variables import (
-    action_predy_send_card,
-    action_predy_kb_cpx_hide,
-    action_predy_kb_cpx_show,
-)
-from app.bot.telegram.variables import (
+    Action,
     cancel,
     close,
     mark_entity,
@@ -72,10 +68,12 @@ async def action_selector_predy(call: cbq):
     current_action = info.get(mark_action, None)
 
     actions = {
-        action_predy_send_card: bib_predy_send_card,
-        action_predy_kb_cpx_hide: bib_predy_kb_cpx_hide,
-        action_predy_kb_cpx_show: bib_predy_kb_cpx_show,
+        Action.send_card: bib_predy_send_card,
+        Action.kb_cpx_hide: bib_predy_kb_cpx_switcher,
+        Action.kb_cpx_show: bib_predy_kb_cpx_switcher,
+        Action.kb_afx_hide: bib_predy_kb_cpx_switcher,
+        Action.kb_afx_show: bib_predy_kb_cpx_switcher,
     }
 
-    if action_to_run := actions.get(current_action):
+    if action_to_run := actions.get(current_action):  # TODO Add default keyboard
         await action_to_run(call)
