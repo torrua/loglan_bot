@@ -128,16 +128,24 @@ def keyboard_show_hide(title: str, word_id: int, action_mark: str):
     return Keyboa(button)()
 
 
+def combine_and_close(func):
+    def wrapper(self, *args, **kwargs):
+        # Call the original function to get the kb_combo list
+        kb_combo = func(self, *args, **kwargs)
+
+        # Append kb_close() to the list
+        kb_combo.append(kb_close())
+
+        # Combine the keyboard buttons
+        return Keyboa.combine(tuple(kb_combo))
+
+    return wrapper
+
+
 class WordKeyboard:
 
     def __init__(self, word):
         self.word = word
-        self.items = self._get_items()
-
-    def _get_items(self):
-        if self.word.type.parentable:
-            return self.word.parents
-        return self.word.complexes
 
     def get_title(self, show: bool, items_type: str):
         show_text = "Show" if show else "Hide"
@@ -167,57 +175,78 @@ class WordKeyboard:
         :param slice_start:
         :return:
         """
-        print(action)
 
         match action:
             case Action.kb_cpx_show:
-                title_djifoa = self.get_title(show=True, items_type="djifoa")
-                kb_hide_djifoa = keyboard_show_hide(
-                    title_djifoa, self.word.id, Action.kb_afx_show
-                )
-
-                title_cpx = self.get_title(show=False, items_type="complex")
-                kb_hide_cpx = keyboard_show_hide(
-                    title_cpx, self.word.id, Action.kb_cpx_hide
-                )
-                kb_data = keyboard_data(slice_start, self.word.complexes)
-
-                kb_navi = keyboard_navi(
-                    slice_start,
-                    len(self.word.complexes),
-                    self.word.id,
-                    Action.kb_cpx_show,
-                )
-                kb_combo = (kb_hide_djifoa, kb_hide_cpx, kb_data, kb_navi, kb_close())
-                return Keyboa.combine(kb_combo)
+                return self.get_kb_cpx_show(slice_start)
 
             case Action.kb_afx_show:
-                title_djifoa = self.get_title(show=False, items_type="djifoa")
-                kb_hide_djifoa = keyboard_show_hide(
-                    title_djifoa, self.word.id, Action.kb_afx_hide
-                )
-
-                title_cpx = self.get_title(show=True, items_type="complex")
-                kb_hide_cpx = keyboard_show_hide(
-                    title_cpx, self.word.id, Action.kb_cpx_show
-                )
-                kb_data = keyboard_data(0, self.word.affixes)
-
-                kb_combo = (kb_hide_djifoa, kb_data, kb_hide_cpx, kb_close())
-                return Keyboa.combine(kb_combo)
+                return self.get_kb_afx_show()
 
             case Action.kb_pnt_show:
-                title_parents = self.get_title(show=False, items_type="parent")
-                kb_hide_parents = keyboard_show_hide(
-                    title_parents, self.word.id, Action.kb_pnt_hide
-                )
-                kb_data = keyboard_data(0, self.word.parents)
-
-                kb_combo = (kb_hide_parents, kb_data, kb_close())
-                return Keyboa.combine(kb_combo)
+                return self.get_kb_pnt_show()
 
             case _:
                 return self.get_default_keyboard()
+
+    @combine_and_close
+    def get_kb_pnt_show(self):
+        kb_combo = []
+
+        title_parents = self.get_title(show=False, items_type="parent")
+        kb_hide_parents = keyboard_show_hide(
+            title_parents, self.word.id, Action.kb_pnt_hide
+        )
+        kb_data = keyboard_data(0, self.word.parents)
+        kb_combo.extend([kb_hide_parents, kb_data])
+
+        return kb_combo
+
+    @combine_and_close
+    def get_kb_cpx_show(self, slice_start):
+        kb_combo = []
+        if self.word.affixes:
+            title_djifoa = self.get_title(show=True, items_type="djifoa")
+            kb_hide_djifoa = keyboard_show_hide(
+                title_djifoa, self.word.id, Action.kb_afx_show
+            )
+            kb_combo.append(kb_hide_djifoa)
+
+        if self.word.complexes:
+            title_cpx = self.get_title(show=False, items_type="complex")
+            kb_hide_cpx = keyboard_show_hide(
+                title_cpx, self.word.id, Action.kb_cpx_hide
+            )
+            kb_data = keyboard_data(slice_start, self.word.complexes)
+
+            kb_navi = keyboard_navi(
+                slice_start,
+                len(self.word.complexes),
+                self.word.id,
+                Action.kb_cpx_show,
+            )
+            kb_combo.extend([kb_hide_cpx, kb_data, kb_navi])
+
+        return kb_combo
+
+    @combine_and_close
+    def get_kb_afx_show(self):
+        kb_combo = []
+        if self.word.affixes:
+            title_djifoa = self.get_title(show=False, items_type="djifoa")
+            kb_hide_djifoa = keyboard_show_hide(
+                title_djifoa, self.word.id, Action.kb_afx_hide
+            )
+            kb_data = keyboard_data(0, self.word.affixes)
+            kb_combo.extend([kb_hide_djifoa, kb_data])
+        if self.word.complexes:
+            title_cpx = self.get_title(show=True, items_type="complex")
+            kb_hide_cpx = keyboard_show_hide(
+                title_cpx, self.word.id, Action.kb_cpx_show
+            )
+            kb_combo.append(kb_hide_cpx)
+
+        return kb_combo
 
     def get_default_keyboard(self):
         if self.word.type.parentable:
@@ -225,20 +254,30 @@ class WordKeyboard:
         else:
             return self.get_default_kb_for_predy()
 
+    @combine_and_close
     def get_default_kb_for_predy(self):
-        title_djifoa = self.get_title(show=True, items_type="djifoa")
-        kb_hide_djifoa = keyboard_show_hide(
-            title_djifoa, self.word.id, Action.kb_afx_show
-        )
-        title_cpx = self.get_title(show=True, items_type="complex")
-        kb_hide_cpx = keyboard_show_hide(title_cpx, self.word.id, Action.kb_cpx_show)
-        kb_combo = (kb_hide_djifoa, kb_hide_cpx, kb_close())
-        return Keyboa.combine(kb_combo)
+        kb_combo = []
 
+        if self.word.affixes:
+            title_djifoa = self.get_title(show=True, items_type="djifoa")
+            kb_hide_djifoa = keyboard_show_hide(
+                title_djifoa, self.word.id, Action.kb_afx_show
+            )
+            kb_combo.append(kb_hide_djifoa)
+
+        if self.word.complexes:
+            title_cpx = self.get_title(show=True, items_type="complex")
+            kb_hide_cpx = keyboard_show_hide(
+                title_cpx, self.word.id, Action.kb_cpx_show
+            )
+            kb_combo.append(kb_hide_cpx)
+
+        return kb_combo
+
+    @combine_and_close
     def get_default_kb_for_parentable(self):
         title_parent = self.get_title(show=True, items_type="parent")
         kb_hide_parent = keyboard_show_hide(
             title_parent, self.word.id, Action.kb_pnt_show
         )
-        kb_combo = (kb_hide_parent, kb_close())
-        return Keyboa.combine(kb_combo)
+        return [kb_hide_parent]
