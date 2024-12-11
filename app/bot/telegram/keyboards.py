@@ -130,13 +130,8 @@ def keyboard_show_hide(title: str, word_id: int, action_mark: str):
 
 def combine_and_close(func):
     def wrapper(self, *args, **kwargs):
-        # Call the original function to get the kb_combo list
         kb_combo = func(self, *args, **kwargs)
-
-        # Append kb_close() to the list
         kb_combo.append(kb_close())
-
-        # Combine the keyboard buttons
         return Keyboa.combine(tuple(kb_combo))
 
     return wrapper
@@ -248,12 +243,6 @@ class WordKeyboard:
 
         return kb_combo
 
-    def get_default_keyboard(self):
-        if self.word.type.parentable:
-            return self.get_default_kb_for_parentable()
-        else:
-            return self.get_default_kb_for_predy()
-
     @combine_and_close
     def get_default_kb_for_predy(self):
         kb_combo = []
@@ -281,3 +270,9 @@ class WordKeyboard:
             title_parent, self.word.id, Action.kb_pnt_show
         )
         return [kb_hide_parent]
+
+    def get_default_keyboard(self):
+        if self.word.type.parentable:
+            return self.get_default_kb_for_parentable()
+        else:
+            return self.get_default_kb_for_predy()
