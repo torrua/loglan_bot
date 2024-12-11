@@ -176,7 +176,7 @@ class WordKeyboard:
             case Action.kb_cpx_show:
                 title_djifoa = self.get_title(show=True, items_type="djifoa")
                 kb_hide_djifoa = keyboard_show_hide(
-                    title_djifoa, self.word.id, Action.kb_cpx_hide
+                    title_djifoa, self.word.id, Action.kb_afx_hide
                 )
 
                 title_cpx = self.get_title(show=False, items_type="complex")
@@ -197,7 +197,7 @@ class WordKeyboard:
             case Action.kb_cpx_hide:
                 title_djifoa = self.get_title(show=True, items_type="djifoa")
                 kb_hide_djifoa = keyboard_show_hide(
-                    title_djifoa, self.word.id, Action.kb_cpx_show
+                    title_djifoa, self.word.id, Action.kb_afx_show
                 )
 
                 title_cpx = self.get_title(show=True, items_type="complex")
@@ -208,14 +208,27 @@ class WordKeyboard:
                 return Keyboa.combine(kb_combo)
 
             case Action.kb_afx_show:
-                print("apkas")
+                title_djifoa = self.get_title(show=False, items_type="djifoa")
+                kb_hide_djifoa = keyboard_show_hide(
+                    title_djifoa, self.word.id, Action.kb_afx_hide
+                )
+
+                title_cpx = self.get_title(show=True, items_type="complex")
+                kb_hide_cpx = keyboard_show_hide(
+                    title_cpx, self.word.id, Action.kb_cpx_show
+                )
+                kb_data = keyboard_data(0, self.word.affixes)
+
+                kb_combo = (kb_hide_djifoa, kb_data, kb_hide_cpx, kb_close())
+                return Keyboa.combine(kb_combo)
+
             case Action.kb_afx_hide:
                 print("apkah")
             case _:
 
                 title_djifoa = self.get_title(show=True, items_type="djifoa")
                 kb_hide_djifoa = keyboard_show_hide(
-                    title_djifoa, self.word.id, Action.kb_cpx_show
+                    title_djifoa, self.word.id, Action.kb_afx_show
                 )
 
                 title_cpx = self.get_title(show=True, items_type="complex")
