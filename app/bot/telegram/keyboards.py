@@ -29,31 +29,6 @@ def get_slice_end(slice_start: int, number_of_items: int) -> int:
     return slice_end
 
 
-def keyboard_data(slice_start: int, items: list):
-    """
-    :param items:
-    :param slice_start:
-    :return:
-    """
-    slice_end = get_slice_end(slice_start, len(items))
-    current_item_set = items[slice_start:slice_end]
-
-    kb_items = [
-        {
-            t: item.name,
-            cbd: callback_from_info(
-                {
-                    Mark.entity: entity_predy,
-                    Mark.action: Action.send_card,
-                    Mark.record_id: item.id,
-                }
-            ),
-        }
-        for item in current_item_set
-    ]
-    return Keyboa(items=kb_items, items_in_row=3)()
-
-
 def keyboard_navi(
     index_start: int, number_of_items: int, word_id: int, action_mark: str
 ):
@@ -131,8 +106,9 @@ def keyboard_show_hide(title: str, word_id: int, action_mark: str):
 def combine_and_close(func):
     def wrapper(self, *args, **kwargs):
         kb_combo = func(self, *args, **kwargs)
-        kb_combo.append(kb_close())
-        return Keyboa.combine(tuple(kb_combo))
+        kbs = [i for i in kb_combo if i]
+        kbs.append(kb_close())
+        return Keyboa.combine(tuple(kbs))
 
     return wrapper
 
@@ -142,21 +118,56 @@ class WordKeyboard:
     def __init__(self, word):
         self.word = word
 
+    def keyboard_data(self, action: str, slice_start: int = 0):
+        """
+        :param action:
+        :param slice_start:
+        :return:
+        """
+        items_dict = {
+            "p": self.word.parents,
+            "d": self.word.affixes,
+            "c": self.word.complexes,
+        }
+
+        items = items_dict.get(action[0])
+        if not items:
+            return None
+
+        slice_end = get_slice_end(slice_start, len(items))
+        current_item_set = items[slice_start:slice_end]
+
+        kb_items = [
+            {
+                t: item.name,
+                cbd: callback_from_info(
+                    {
+                        Mark.entity: entity_predy,
+                        Mark.action: Action.send_card,
+                        Mark.record_id: item.id,
+                    }
+                ),
+            }
+            for item in current_item_set
+        ]
+
+        return Keyboa(items=kb_items, items_in_row=3)()
+
     def get_title(self, show: bool, items_type: str):
         show_text = "Show" if show else "Hide"
 
         title_formats = {
-            "parent": (
+            "p": (
                 f"{show_text} Parent ({len(self.word.parents)})"
                 if len(self.word.parents) > 1
                 else f"{show_text} Parent"
             ),
-            "djifoa": (
+            "d": (
                 f"{show_text} Djifoa ({len(self.word.affixes)})"
                 if len(self.word.affixes)
                 else f"{show_text} Djifoa"
             ),
-            "complex": (
+            "c": (
                 f"{show_text} Complex ({len(self.word.complexes)})"
                 if len(self.word.complexes) > 1
                 else f"{show_text} Complex"
@@ -164,6 +175,36 @@ class WordKeyboard:
         }
 
         return title_formats.get(items_type, show_text)
+
+    def keyboard_show_hide(self, title: str, action_mark: str):
+        """
+        :return:
+        """
+
+        cbd_predy = {
+            Mark.entity: entity_predy,
+            Mark.action: action_mark,
+            Mark.record_id: self.word.id,
+        }
+        button = [
+            {t: title, cbd: callback_from_info(cbd_predy)},
+        ]
+        return Keyboa(button)()
+
+    def get_title_kb(self, action: str):
+        show = action.endswith("s")
+        items_type = action[0]
+        items = {
+            "p": self.word.parents,
+            "d": self.word.affixes,
+            "c": self.word.complexes,
+        }
+
+        if not items.get(items_type):
+            return None
+
+        title = self.get_title(show, items_type)
+        return keyboard_show_hide(title, self.word.id, action)
 
     def keyboard_cpx(self, action: str = "", slice_start: int = 0):
         """
@@ -176,104 +217,46 @@ class WordKeyboard:
             case Action.kb_cpx_show:
                 return self.get_kb_cpx_show(slice_start)
 
-            case Action.kb_afx_show:
-                return self.get_kb_afx_show()
+            case Action.kb_dji_show:
+                return self.get_kb_dji_show()
 
             case Action.kb_pnt_show:
                 return self.get_kb_pnt_show()
 
             case _:
-                return self.get_default_keyboard()
+                return self.get_default_kb()
 
     @combine_and_close
     def get_kb_pnt_show(self):
-        kb_combo = []
+        kb_title = self.get_title_kb(action=Action.kb_pnt_hide)
+        kb_data = self.keyboard_data(action=Action.kb_pnt_hide)
+        return [kb_title, kb_data]
 
-        title_parents = self.get_title(show=False, items_type="parent")
-        kb_hide_parents = keyboard_show_hide(
-            title_parents, self.word.id, Action.kb_pnt_hide
+    @combine_and_close
+    def get_kb_cpx_show(self, slice_start: int = 0):
+        kb_title_dji = self.get_title_kb(action=Action.kb_dji_show)
+        kb_title_cpx = self.get_title_kb(action=Action.kb_cpx_hide)
+        kb_data_cpx = self.keyboard_data(
+            action=Action.kb_cpx_hide,
+            slice_start=slice_start,
         )
-        kb_data = keyboard_data(0, self.word.parents)
-        kb_combo.extend([kb_hide_parents, kb_data])
 
-        return kb_combo
-
-    @combine_and_close
-    def get_kb_cpx_show(self, slice_start):
-        kb_combo = []
-        if self.word.affixes:
-            title_djifoa = self.get_title(show=True, items_type="djifoa")
-            kb_hide_djifoa = keyboard_show_hide(
-                title_djifoa, self.word.id, Action.kb_afx_show
-            )
-            kb_combo.append(kb_hide_djifoa)
-
-        if self.word.complexes:
-            title_cpx = self.get_title(show=False, items_type="complex")
-            kb_hide_cpx = keyboard_show_hide(
-                title_cpx, self.word.id, Action.kb_cpx_hide
-            )
-            kb_data = keyboard_data(slice_start, self.word.complexes)
-
-            kb_navi = keyboard_navi(
-                slice_start,
-                len(self.word.complexes),
-                self.word.id,
-                Action.kb_cpx_show,
-            )
-            kb_combo.extend([kb_hide_cpx, kb_data, kb_navi])
-
-        return kb_combo
-
-    @combine_and_close
-    def get_kb_afx_show(self):
-        kb_combo = []
-        if self.word.affixes:
-            title_djifoa = self.get_title(show=False, items_type="djifoa")
-            kb_hide_djifoa = keyboard_show_hide(
-                title_djifoa, self.word.id, Action.kb_afx_hide
-            )
-            kb_data = keyboard_data(0, self.word.affixes)
-            kb_combo.extend([kb_hide_djifoa, kb_data])
-        if self.word.complexes:
-            title_cpx = self.get_title(show=True, items_type="complex")
-            kb_hide_cpx = keyboard_show_hide(
-                title_cpx, self.word.id, Action.kb_cpx_show
-            )
-            kb_combo.append(kb_hide_cpx)
-
-        return kb_combo
-
-    @combine_and_close
-    def get_default_kb_for_predy(self):
-        kb_combo = []
-
-        if self.word.affixes:
-            title_djifoa = self.get_title(show=True, items_type="djifoa")
-            kb_hide_djifoa = keyboard_show_hide(
-                title_djifoa, self.word.id, Action.kb_afx_show
-            )
-            kb_combo.append(kb_hide_djifoa)
-
-        if self.word.complexes:
-            title_cpx = self.get_title(show=True, items_type="complex")
-            kb_hide_cpx = keyboard_show_hide(
-                title_cpx, self.word.id, Action.kb_cpx_show
-            )
-            kb_combo.append(kb_hide_cpx)
-
-        return kb_combo
-
-    @combine_and_close
-    def get_default_kb_for_parentable(self):
-        title_parent = self.get_title(show=True, items_type="parent")
-        kb_hide_parent = keyboard_show_hide(
-            title_parent, self.word.id, Action.kb_pnt_show
+        kb_navi = keyboard_navi(
+            slice_start,
+            len(self.word.complexes),
+            self.word.id,
+            Action.kb_cpx_show,
         )
-        return [kb_hide_parent]
+        return [kb_title_dji, kb_title_cpx, kb_data_cpx, kb_navi]
 
-    def get_default_keyboard(self):
-        if self.word.type.parentable:
-            return self.get_default_kb_for_parentable()
-        else:
-            return self.get_default_kb_for_predy()
+    @combine_and_close
+    def get_kb_dji_show(self):
+        kb_title_dji = self.get_title_kb(action=Action.kb_dji_hide)
+        kb_data = self.keyboard_data(action=Action.kb_dji_hide)
+        kb_title_cpx = self.get_title_kb(action=Action.kb_cpx_show)
+        return [kb_title_dji, kb_data, kb_title_cpx]
+
+    @combine_and_close
+    def get_default_kb(self):
+        actions = [Action.kb_dji_show, Action.kb_cpx_show, Action.kb_pnt_show]
+        return [self.get_title_kb(action=action) for action in actions]
