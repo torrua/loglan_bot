@@ -145,24 +145,25 @@ class WordKeyboard:
     def get_title(self, show: bool, items_type: str):
         show_text = "Show" if show else "Hide"
 
-        match items_type:
-            case "parent":
-                return (
-                    f"{show_text} Parent"
-                    + f"{f's ({len(self.word.parents)})' if len(self.word.parents) > 1 else ''}"
-                )
-            case "djifoa":
-                return (
-                    f"{show_text} Djifoa"
-                    + f"{f' ({len(self.word.affixes)})' if len(self.word.affixes) else ''}"
-                )
-            case "complex":
-                return (
-                    f"{show_text} Complex"
-                    + f"{f'es ({len(self.word.complexes)})' if len(self.word.complexes) > 1 else ''}"
-                )
-            case _:
-                return show_text
+        title_formats = {
+            "parent": (
+                f"{show_text} Parent ({len(self.word.parents)})"
+                if len(self.word.parents) > 1
+                else f"{show_text} Parent"
+            ),
+            "djifoa": (
+                f"{show_text} Djifoa ({len(self.word.affixes)})"
+                if len(self.word.affixes)
+                else f"{show_text} Djifoa"
+            ),
+            "complex": (
+                f"{show_text} Complex ({len(self.word.complexes)})"
+                if len(self.word.complexes) > 1
+                else f"{show_text} Complex"
+            ),
+        }
+
+        return title_formats.get(items_type, show_text)
 
     def keyboard_cpx(self, action: str = "", slice_start: int = 0):
         """
