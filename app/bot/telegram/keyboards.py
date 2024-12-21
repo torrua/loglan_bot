@@ -87,22 +87,6 @@ def kb_close():
     return Keyboa({t: "Close", cbd: "close"})()
 
 
-def keyboard_show_hide(title: str, word_id: int, action_mark: str):
-    """
-    :return:
-    """
-
-    cbd_predy = {
-        Mark.entity: entity_predy,
-        Mark.action: action_mark,
-        Mark.record_id: word_id,
-    }
-    button = [
-        {t: title, cbd: callback_from_info(cbd_predy)},
-    ]
-    return Keyboa(button)()
-
-
 def combine_and_close(func):
     def wrapper(self, *args, **kwargs):
         kb_combo = func(self, *args, **kwargs)
@@ -191,7 +175,7 @@ class WordKeyboard:
         ]
         return Keyboa(button)()
 
-    def get_title_kb(self, action: str):
+    def keyboard_title(self, action: str):
         show = action.endswith("s")
         items_type = action[0]
         items = {
@@ -204,7 +188,7 @@ class WordKeyboard:
             return None
 
         title = self.get_title(show, items_type)
-        return keyboard_show_hide(title, self.word.id, action)
+        return self.keyboard_show_hide(title, action)
 
     def keyboard_cpx(self, action: str = "", slice_start: int = 0):
         """
@@ -228,14 +212,14 @@ class WordKeyboard:
 
     @combine_and_close
     def get_kb_pnt_show(self):
-        kb_title = self.get_title_kb(action=Action.kb_pnt_hide)
+        kb_title = self.keyboard_title(action=Action.kb_pnt_hide)
         kb_data = self.keyboard_data(action=Action.kb_pnt_hide)
         return [kb_title, kb_data]
 
     @combine_and_close
     def get_kb_cpx_show(self, slice_start: int = 0):
-        kb_title_dji = self.get_title_kb(action=Action.kb_dji_show)
-        kb_title_cpx = self.get_title_kb(action=Action.kb_cpx_hide)
+        kb_title_dji = self.keyboard_title(action=Action.kb_dji_show)
+        kb_title_cpx = self.keyboard_title(action=Action.kb_cpx_hide)
         kb_data_cpx = self.keyboard_data(
             action=Action.kb_cpx_hide,
             slice_start=slice_start,
@@ -251,12 +235,12 @@ class WordKeyboard:
 
     @combine_and_close
     def get_kb_dji_show(self):
-        kb_title_dji = self.get_title_kb(action=Action.kb_dji_hide)
+        kb_title_dji = self.keyboard_title(action=Action.kb_dji_hide)
         kb_data = self.keyboard_data(action=Action.kb_dji_hide)
-        kb_title_cpx = self.get_title_kb(action=Action.kb_cpx_show)
+        kb_title_cpx = self.keyboard_title(action=Action.kb_cpx_show)
         return [kb_title_dji, kb_data, kb_title_cpx]
 
     @combine_and_close
     def get_default_kb(self):
         actions = [Action.kb_dji_show, Action.kb_cpx_show, Action.kb_pnt_show]
-        return [self.get_title_kb(action=action) for action in actions]
+        return [self.keyboard_title(action=action) for action in actions]
