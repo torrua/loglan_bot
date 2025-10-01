@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 HTML Export extensions of LOD database models
 """
