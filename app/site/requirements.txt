@@ -1,4 +1,4 @@
 -r ../requirements.txt
 
-lxml~=5.4
-Beautifulsoup4~=4.13
+Beautifulsoup4~=4.14
+lxml~=6.0
