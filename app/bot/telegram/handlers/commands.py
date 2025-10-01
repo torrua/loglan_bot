@@ -3,7 +3,6 @@ Telegram bot command functions
 """
 
 from loglan_core import WordSelector
-
 from app.bot.telegram import (
     bot,
     msg,
@@ -105,7 +104,11 @@ async def bot_cmd_log(message: msg):
             chat_id=message.chat.id,
             text=MESSAGE_NOT_FOUND % arguments[0],
         )
+    await send_messages_with_words(message, words)
+    return None
 
+
+async def send_messages_with_words(message: msg, words):
     for word in words:
         await bot.send_message(
             chat_id=message.chat.id,
