@@ -31,7 +31,7 @@ def get_data(url: str) -> str | BeautifulSoup:
     log.debug(m_l["url_check"])
 
     if not re.match(pattern_http, url):
-        return ""
+        raise ValueError()
 
     log.debug(m_l["url_correct"], url)
     log.debug(m_l["get_site"])
@@ -45,4 +45,4 @@ def get_data(url: str) -> str | BeautifulSoup:
 
     except HTTPError as err:
         log.error(m_l["error"], url, err)
-        return str(err)
+        raise err
