@@ -1,8 +1,12 @@
 # Create a ubuntu base image with python 3 installed.
-FROM python:3.12-alpine
+FROM python:3.12-slim
 
 # Set the working directory
 WORKDIR /
+
+# Отключаем создание лишних файлов питоном
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
 
 # Create and activate a virtual environment
 RUN python -m venv /venv
