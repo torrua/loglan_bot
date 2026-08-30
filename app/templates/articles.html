@@ -1,57 +1,58 @@
 {% extends 'base.html' %}
 
 {% block title %}
-    Loglan {{ title }}
+    {{ title }}
 {% endblock %}
 
 {% block style %}
     .articles-header {
-        background: #f8f9fa;
-        border-radius: 8px;
-        padding: 24px;
-        margin-bottom: 24px;
+        border-bottom: 1px solid #e2e8f0;
+        padding-bottom: 1rem;
+        margin-bottom: 1.5rem;
+    }
+    .articles-header h2 {
+        font-family: 'Georgia', serif;
+        font-weight: 400;
+        color: #1e293b;
     }
     .article-card {
-        transition: transform 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
-        border: 1px solid #e9ecef;
-    }
-    .article-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+        border: 1px solid #e2e8f0;
+        border-radius: 6px;
+        background-color: #ffffff;
     }
     .article-title-link {
-        color: #212529;
+        color: #1e293b;
         text-decoration: none;
-        font-weight: bold;
-        font-size: 1.15rem;
+        font-weight: 600;
+        font-size: 1.05rem;
     }
     .article-title-link:hover {
-        color: #0d6efd;
+        color: #0f172a;
         text-decoration: underline;
     }
 {% endblock %}
 
 {% block content %}
 <div class="container my-4">
-    <div class="articles-header text-center shadow-sm">
-        <h1 class="h2 mb-2">Loglan {{ title }}</h1>
-        <p class="text-muted mb-0">{{ section_description }}</p>
+    <div class="articles-header">
+        <h2 class="h3 mb-2">Loglan {{ title }}</h2>
+        <p class="text-muted small mb-0">{{ section_description }}</p>
     </div>
 
     {% if items %}
     <div class="row g-3">
         {% for item in items %}
         <div class="col-12">
-            <div class="card article-card h-100">
-                <div class="card-body">
-                    <div class="d-flex w-100 justify-content-between align-items-start mb-2">
+            <div class="card article-card p-2">
+                <div class="card-body py-2">
+                    <div class="d-flex w-100 justify-content-between align-items-start mb-1">
                         <a href="{{ item.url }}" class="article-title-link">{{ item.title }}</a>
                         {% if item.author %}
-                        <span class="badge bg-light text-dark border ms-2">✍️ {{ item.author }}</span>
+                        <span class="text-muted small ms-2">By {{ item.author }}</span>
                         {% endif %}
                     </div>
-                    <p class="card-text text-secondary mb-3">{{ item.description }}</p>
-                    <a href="{{ item.url }}" class="btn btn-sm btn-outline-primary">Read Article →</a>
+                    <p class="card-text text-secondary small mb-2">{{ item.description }}</p>
+                    <a href="{{ item.url }}" class="btn btn-sm btn-link text-decoration-none p-0 text-dark">Read article →</a>
                 </div>
             </div>
         </div>
@@ -59,7 +60,7 @@
     </div>
     {% else %}
     <div class="alert alert-secondary text-center my-4" role="alert">
-        <p class="mb-0">No articles currently available in this section or external resource is temporarily unavailable.</p>
+        <p class="mb-0 small">No materials currently available in this section.</p>
     </div>
     {% endif %}
 </div>

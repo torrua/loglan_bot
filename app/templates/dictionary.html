@@ -1,20 +1,23 @@
 {% extends 'base.html' %}
 
 {% block title %}
-    Search
+    Dictionary Search
 {% endblock %}
 
 {% block style %}
 	.lt > span {
-		font-size: 24px;
-		font-weight: bold;
+		font-size: 22px;
+		font-weight: 600;
+        color: #1e293b;
 	}
 	wl, .word_line {
-		font-weight: bold;
+		font-weight: 600;
 		display: block;
+        color: #1e293b;
 	}
 	.w_name{
-		font-weight: bold;
+		font-weight: 600;
+        color: #1e293b;
 	}
 	ws, .words > *:not(:first-child) {
 		margin-top: 20px;
@@ -29,40 +32,40 @@
 		margin-left: 10px;
 	}
 	afx, .m_afx {
-		color: #007F00;
+		color: #475569;
 		font-style: italic;
 	}
 	o, .m_origin, .w_origin {
-		color: #007F00;
+		color: #475569;
 		font-style: italic;
 	}
 	dl, de, .definition {
 		margin-top: 5px;
 		text-align: justify;
 		max-width: 90%;
-		min-width: 400px;
+		min-width: 320px;
 	}
 	dl, .definition.log {
 		margin-left: 20px;
 	}
 	du, .du {
-		font-weight: bold;
+		font-weight: 600;
 	}
 	us, .used_in {
 		margin-top: 5px;
-		min-width: 400px;
+		min-width: 320px;
 	}
 	k {
-		color: #0000FF;
+		color: #1e3a8a;
 		font-style: italic;
 	}
 	l {
-		color: #C70039;
-		font-weight: bold;
+		color: #0f172a;
+		font-weight: 600;
 	}
 
     .search {
-      padding-top: 10px;
+      padding-top: 15px;
     }
     .word_data  {
       padding-top: 20px;
@@ -70,19 +73,25 @@
     }
 
 	.language-selector, .settings-selector {
-		margin-left: 10px;
+		margin-left: 8px;
 	}
 
 	.btn-outline-secondary.custom-btn {
-		border-color: #ced4da;
-		color: #ced4da;
+		border-color: #cbd5e1;
+		color: #475569;
 	}
+    .btn-outline-secondary.custom-btn:hover {
+        background-color: #f1f5f9;
+        color: #0f172a;
+        border-color: #94a3b8;
+    }
 	input.search-bar {
-		font-weight: bold;
+		font-weight: 500;
+        border-color: #cbd5e1;
 	}
 	.form-control:focus {
-	  border-color: #919191;
-	  box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 8px rgba(0, 0, 0, 0.6);
+	  border-color: #64748b;
+	  box-shadow: 0 0 0 0.2rem rgba(100, 116, 139, 0.15);
 	}
 	.search-settings {
 		margin-left: 10px;
@@ -91,43 +100,47 @@
 		margin-top: 10px;
 	}
 	.btn-settings {
-		margin-left: 10px;
+		margin-left: 8px;
 	}
 	a.m_cpx {
 		text-decoration: none;
+        color: #2563eb;
 	}
+    a.m_cpx:hover {
+        text-decoration: underline;
+    }
 {% endblock %}
 
 {% block content %}
 <div class="container search">
   	<form id="search" class="d-flex">
-		<input class="form-control search-bar" type="search" placeholder="Search" autocomplete="off" aria-label="Search" name="word" id="search_field">
+		<input class="form-control search-bar" type="search" placeholder="Search dictionary..." autocomplete="off" aria-label="Search" name="word" id="search_field">
 		<div class="btn-group language-selector" role="group" id="language-selector">
 			<input type="radio" class="btn-check" name="search_lang" id="log" value="log" autocomplete="off" checked>
-			<label class="btn btn-outline-secondary custom-btn" for="log" title="Switch To Loglan">L</label>
+			<label class="btn btn-outline-secondary custom-btn" for="log" title="Switch To Loglan">Loglan</label>
 			<input type="radio" class="btn-check" name="search_lang" id="eng" value="eng" autocomplete="off">
-			<label class="btn btn-outline-secondary custom-btn" for="eng" title="Switch To English">E</label>
+			<label class="btn btn-outline-secondary custom-btn" for="eng" title="Switch To English">English</label>
 		</div>
 		<div class="btn-group settings-selector" role="group" id="settings-selector">
 			<input type="checkbox" class="btn-check" id="btn-check-2-outlined" autocomplete="off" onclick="this.blur();"
 				data-bs-toggle="collapse" data-bs-target="#collapse_settings" aria-expanded="false" aria-controls="collapse_settings">
-			<label class="btn btn-outline-secondary custom-btn btn-settings" for="btn-check-2-outlined" title="Settings">⚙</label>
+			<label class="btn btn-outline-secondary custom-btn btn-settings" for="btn-check-2-outlined" title="Settings">Options</label>
 			<a href="{{url_for('site.how_to_read')}}" class="btn btn-outline-secondary custom-btn" style="outline: none; box-shadow: none;"
-		   		role="button" title="How To Read">&#8239;?&#8239;</a></div><br>
+		   		role="button" title="How To Read">Guide</a></div><br>
 	</form>
 
 	<div class="collapse settings-bar" id="collapse_settings">
-		<div class="card card-body">
-			<div class="row g-3">
-				<div class="col-9">
+		<div class="card card-body border-light shadow-none bg-light">
+			<div class="row g-3 align-items-center">
+				<div class="col-sm-8">
 					<form id="settings" class="search-settings">
 						<div class="form-check form-check-inline">
 						  <input class="form-check-input" type="checkbox" id="check_case_sensitive" value="option1">
-						  <label class="form-check-label" for="check_case_sensitive">Case sensitive</label>
+						  <label class="form-check-label small" for="check_case_sensitive">Case sensitive search</label>
 						</div>
 					</form>
 				</div>
-				<div class="col-3">
+				<div class="col-sm-4">
 					<select class="form-select form-select-sm" aria-label=".form-select-sm" id="event_selector">
 						{% for id, name in events.items() %}
 						<option name="eid" value="{{ id }}">{{ name }}</option>

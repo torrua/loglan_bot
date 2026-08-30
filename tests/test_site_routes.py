@@ -20,7 +20,7 @@ async def test_home_route(test_client):
     assert response.status_code == 200
     body = await response.get_data(as_text=True)
     assert "Welcome to Loglan Online" in body
-    assert "Online LOD Dictionary" in body
+    assert "LOD Dictionary" in body
 
 
 @pytest.mark.asyncio
