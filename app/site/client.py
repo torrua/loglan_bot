@@ -46,12 +46,17 @@ class LoglanSiteClient:
                     if response.status != 200:
                         log.error("Failed to fetch %s, status code: %d", url, response.status)
                         return None
-                    html_content = await response.text()
+                    raw_bytes = await response.read()
+                    try:
+                        html_content = raw_bytes.decode("utf-8")
+                    except UnicodeDecodeError:
+                        html_content = raw_bytes.decode("latin-1", errors="replace")
+
                     soup = BeautifulSoup(html_content, "lxml")
                     self._cache[url] = CachedPage(soup=soup, timestamp=now)
                     return soup
-        except (aiohttp.ClientError, TimeoutError) as exc:
-            log.error("Network error while fetching %s: %s", url, exc)
+        except Exception as exc:
+            log.error("Error while fetching/parsing %s: %s", url, exc)
             return None
 
 

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import copy
 import re
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
@@ -15,7 +16,7 @@ if TYPE_CHECKING:
 SECTION_ANCHORS: dict[str, list[str]] = {
     "articles": ["articles", "Articles"],
     "texts": ["texts", "Texts", "Sample Texts"],
-    "columns": ["columns", "Columns", "Regular Columns from Lognet"],
+    "columns": ["columns", "Columns", "Regular Columns from Lognet", "sanpa"],
 }
 
 
@@ -42,7 +43,17 @@ class LoglanContentParser:
             return []
 
         articles: list[ArticleMeta] = []
-        for li in target_list.find_all("li", recursive=False):
+        for li in target_list.find_all("li"):
+            # Check if this item has an anchor link with href
+            link = li.find("a", href=True)
+            if not link:
+                continue
+
+            # Only process if this li is the immediate container of the link (avoid duplicating in nested lists)
+            nested_lis = li.find_all("li")
+            if any(n.find("a", href=True) == link for n in nested_lis):
+                continue
+
             item = cls._parse_list_item(li, section_key)
             if item:
                 articles.append(item)
@@ -69,8 +80,8 @@ class LoglanContentParser:
     @staticmethod
     def _parse_list_item(li: Tag, section_key: str) -> ArticleMeta | None:
         """Extracts article metadata from a single list item."""
-        link = li.find("a")
-        if not link or not link.get("href"):
+        link = li.find("a", href=True)
+        if not link or not isinstance(link.get("href"), str):
             return None
 
         raw_href = str(link["href"]).strip()
@@ -78,7 +89,12 @@ class LoglanContentParser:
         if not title:
             return None
 
-        full_text = li.get_text().replace(title, "").strip()
+        # Clean nested sub-lists from text
+        li_copy = copy.copy(li)
+        for nested in li_copy.find_all(["ol", "ul"]):
+            nested.decompose()
+
+        full_text = li_copy.get_text().replace(title, "").strip()
         full_text = re.sub(r"^[\s,.\-—:]+", "", full_text).strip()
 
         author = None
