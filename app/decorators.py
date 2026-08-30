@@ -1,46 +1,41 @@
-"""
-Decorators for Bot functions
-"""
+"""Execution Timing and Performance Decorators"""
 
+from __future__ import annotations
+
+import asyncio
+import functools
 import time
-from functools import wraps
+from collections.abc import Callable
+from typing import Any
 
 from app.logger import log
 
 
-def logging_time(func):
-    """
-    :param func:
-    :return:
-    """
+def logging_time(func: Callable[..., Any]) -> Callable[..., Any]:
+    """Decorator to measure and log execution time of both sync and async functions."""
 
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        """
-        :param args:
-        :param kwargs:
-        :return:
-        """
+    if asyncio.iscoroutinefunction(func):
 
-        def duration(start, end):
-            return f"{end - start:.2f}"
+        @functools.wraps(func)
+        async def async_wrapper(*args: Any, **kwargs: Any) -> Any:
+            start_time = time.perf_counter()
+            log.debug("%s - Started execution", func.__name__)
+            try:
+                return await func(*args, **kwargs)
+            finally:
+                duration = time.perf_counter() - start_time
+                log.debug("%s - Completed in %.3f seconds", func.__name__, duration)
 
-        start_time = time.time()
-        log.debug(
-            "%s - Start time: %s",
-            func.__name__,
-            time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(start_time)),
-        )
-        result = func(*args, **kwargs)
-        end_time = time.time()
-        log.debug(
-            "%s - End time: %s",
-            func.__name__,
-            time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(start_time)),
-        )
-        log.debug(
-            "%s - Duration: %s seconds", func.__name__, duration(start_time, end_time)
-        )
-        return result
+        return async_wrapper
 
-    return wrapper
+    @functools.wraps(func)
+    def sync_wrapper(*args: Any, **kwargs: Any) -> Any:
+        start_time = time.perf_counter()
+        log.debug("%s - Started execution", func.__name__)
+        try:
+            return func(*args, **kwargs)
+        finally:
+            duration = time.perf_counter() - start_time
+            log.debug("%s - Completed in %.3f seconds", func.__name__, duration)
+
+    return sync_wrapper

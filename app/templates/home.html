@@ -1,19 +1,97 @@
 {% extends 'base.html' %}
 
 {% block title %}
-    Home
+    Loglan Online - Home
 {% endblock %}
 
 {% block style %}
-<div></div>
+    .hero-section {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-radius: 12px;
+        padding: 40px 24px;
+        margin-bottom: 32px;
+    }
+    .feature-card {
+        border: 1px solid #e9ecef;
+        border-radius: 8px;
+        transition: transform 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    }
+    .feature-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+    }
+    .feature-icon {
+        font-size: 2.2rem;
+        margin-bottom: 12px;
+    }
 {% endblock %}
 
 {% block content %}
-<div class="container">
-    {{ article | safe }}
-    <!--div style="text-align: justify;">
-        Welcome to Loglan Online!<br>
-        All projects created to support and distribute the language are collected here.
-    </div -->
+<div class="container my-4">
+    <!-- Hero Section -->
+    <div class="hero-section text-center shadow-sm">
+        <h1 class="display-5 fw-bold mb-3">Welcome to Loglan Online</h1>
+        <p class="lead text-secondary mx-auto mb-4" style="max-width: 720px;">
+            Loglan is a logical human language designed to test the Sapir-Whorf hypothesis and provide an unambiguous, culturally neutral medium for human and machine communication.
+        </p>
+        <div class="d-flex justify-content-center gap-3 flex-wrap">
+            <a href="{{ url_for('site.dictionary') }}" class="btn btn-primary btn-lg px-4">📖 Open Dictionary</a>
+            <a href="https://t.me/LoglanBot" target="_blank" rel="noopener noreferrer" class="btn btn-outline-primary btn-lg px-4">🤖 Telegram Bot</a>
+            <a href="{{ url_for('site.texts') }}" class="btn btn-outline-secondary btn-lg px-4">📚 Sample Texts</a>
+        </div>
+    </div>
+
+    <!-- Feature Grid -->
+    <div class="row g-4 mb-5">
+        <div class="col-md-4">
+            <div class="card feature-card h-100 p-3">
+                <div class="card-body text-center">
+                    <div class="feature-icon">🔍</div>
+                    <h5 class="card-title fw-bold">Online LOD Dictionary</h5>
+                    <p class="card-text text-muted">
+                        Fast bidirectional search between Loglan and English. Explore complex derivations, primitive roots (prims), and affix definitions.
+                    </p>
+                    <a href="{{ url_for('site.dictionary') }}" class="btn btn-sm btn-outline-primary mt-2">Explore Words →</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card feature-card h-100 p-3">
+                <div class="card-body text-center">
+                    <div class="feature-icon">📜</div>
+                    <h5 class="card-title fw-bold">Texts & Articles</h5>
+                    <p class="card-text text-muted">
+                        Access original essays, translations, and pedagogical materials published by The Loglan Institute and community contributors.
+                    </p>
+                    <a href="{{ url_for('site.articles') }}" class="btn btn-sm btn-outline-primary mt-2">Read Articles →</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card feature-card h-100 p-3">
+                <div class="card-body text-center">
+                    <div class="feature-icon">🤖</div>
+                    <h5 class="card-title fw-bold">Mobile Telegram Bot</h5>
+                    <p class="card-text text-muted">
+                        Instant translation and word morphology breakdown in Telegram. Use <code>@LoglanBot</code> directly in your chats.
+                    </p>
+                    <a href="https://t.me/LoglanBot" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline-primary mt-2">Open in Telegram →</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- About Section -->
+    <div class="p-4 bg-light rounded-3 border">
+        <h4 class="fw-bold mb-3">About Loglan</h4>
+        <p class="text-secondary mb-2">
+            Invented in 1955 by Dr. James Cooke Brown, Loglan was conceived as a speakable language based on first-order predicate logic. Its grammar is completely regular and parses without ambiguity.
+        </p>
+        <p class="text-secondary mb-0">
+            For learning materials and historical reference, visit our <a href="{{ url_for('site.how_to_read') }}">How to Read Guide</a> or browse the <a href="{{ url_for('site.columns') }}">Lognet Columns Archive</a>.
+        </p>
+    </div>
 </div>
 {% endblock %}

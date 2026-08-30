@@ -1,34 +1,42 @@
+"""Quart Application Factory and Entrypoint"""
+
+from __future__ import annotations
+
 from quart import Quart, render_template
 
-from .bot import bot_blueprint
-from .site.routes import site_blueprint
+from app.bot import bot_blueprint
+from app.config import settings
+from app.logger import log
+from app.site.routes import site_blueprint
 
 
-def create_app():
-    """
-    Create app
-    """
+def create_app() -> Quart:
+    """Creates and configures the Quart ASGI application instance."""
+    app = Quart(__name__, template_folder="templates")
+    app.config["DEBUG"] = settings.debug
 
-    new_app = Quart(__name__)
-    new_app.register_blueprint(bot_blueprint, url_prefix="/bot")
-    new_app.register_blueprint(site_blueprint, url_prefix="/site")
-    new_app.debug = False
+    # Register blueprints
+    app.register_blueprint(bot_blueprint, url_prefix="/bot")
+    app.register_blueprint(site_blueprint, url_prefix="/site")
 
-    @new_app.errorhandler(404)
+    @app.errorhandler(404)
     async def page_not_found(_):
         return await render_template("404.html"), 404
 
-    @new_app.route("/", methods=["GET"])
-    @new_app.route("/index")
+    @app.errorhandler(500)
+    async def server_error(error):
+        log.error("Internal server error: %s", error)
+        return "Internal Server Error", 500
+
+    @app.route("/", methods=["GET"])
+    @app.route("/index")
     async def index():
-        """
-        example endpoint
-        """
+        """Root landing page."""
         return await render_template("index.html")
 
-    return new_app
+    return app
 
 
 if __name__ == "__main__":
-    app = create_app()
-    app.run()
+    application = create_app()
+    application.run(host=settings.host, port=settings.port)

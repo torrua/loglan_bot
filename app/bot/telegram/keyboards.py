@@ -1,18 +1,28 @@
+"""Telegram Bot Keyboards and Inline Navigation Generator"""
+
+from __future__ import annotations
+
+from collections.abc import Callable
+from typing import TYPE_CHECKING, Any
+
 from callbaker import callback_from_info
 from keyboa import Keyboa
 
-from app.bot.telegram import MIN_NUMBER_OF_BUTTONS
+from app.bot.telegram.constants import MIN_NUMBER_OF_BUTTONS
 from app.bot.telegram.variables import (
-    entity_predy,
-    t,
-    cbd,
     Action,
     Mark,
+    cbd,
+    entity_predy,
+    t,
 )
+
+if TYPE_CHECKING:
+    from loglan_core import Word
 
 
 def get_delimiter(number_of_items: int) -> int:
-
+    """Calculates best number of items per page."""
     allowed_range = list(range(MIN_NUMBER_OF_BUTTONS, MIN_NUMBER_OF_BUTTONS + 11))
     lst = [(number_of_items % i, i) for i in allowed_range]
     delimiter = min(lst, key=lambda x: abs(x[0] - MIN_NUMBER_OF_BUTTONS))[1]
@@ -24,28 +34,18 @@ def get_delimiter(number_of_items: int) -> int:
 
 
 def get_slice_end(slice_start: int, number_of_items: int) -> int:
+    """Calculates the end slice index."""
     last_allowed_item = slice_start + get_delimiter(number_of_items)
-    slice_end = min(last_allowed_item, number_of_items)
-    return slice_end
+    return min(last_allowed_item, number_of_items)
 
 
-def keyboard_navi(
-    index_start: int, number_of_items: int, word_id: int, action_mark: str
-):
-    """
-    :param action_mark:
-    :param word_id:
-    :param number_of_items:
-    :param index_start:
-    :return:
-    """
-
+def keyboard_navi(index_start: int, number_of_items: int, word_id: int, action_mark: str) -> Any:
+    """Generates pagination back/forward navigation keyboard."""
     delimiter = get_delimiter(number_of_items)
     if number_of_items <= delimiter:
         return None
 
     index_end = get_slice_end(index_start, number_of_items)
-
     text_arrow_back = "❮❮"
     text_arrow_forward = "❯❯"
     button_back, button_forward = None, None
@@ -80,15 +80,15 @@ def keyboard_navi(
     return Keyboa(nav_row, items_in_row=2)()
 
 
-def kb_close():
-    """
-    :return:
-    """
+def kb_close() -> Any:
+    """Returns a standalone Close button."""
     return Keyboa({t: "Close", cbd: "close"})()
 
 
-def combine_and_close(func):
-    def wrapper(self, *args, **kwargs):
+def combine_and_close(func: Callable[..., list[Any]]) -> Callable[..., Any]:
+    """Decorator to append Close button to keyboard layout."""
+
+    def wrapper(self: Any, *args: Any, **kwargs: Any) -> Any:
         kb_combo = func(self, *args, **kwargs)
         kbs = [i for i in kb_combo if i]
         kbs.append(kb_close())
@@ -98,16 +98,12 @@ def combine_and_close(func):
 
 
 class WordKeyboard:
+    """Generates inline keyboards for a specific Loglan word (Complexes, Affixes, Parents)."""
 
-    def __init__(self, word):
+    def __init__(self, word: Word):
         self.word = word
 
-    def keyboard_data(self, action: str, slice_start: int = 0):
-        """
-        :param action:
-        :param slice_start:
-        :return:
-        """
+    def keyboard_data(self, action: str, slice_start: int = 0) -> Any:
         items_dict = {
             "p": self.word.parents,
             "d": self.word.affixes,
@@ -137,7 +133,7 @@ class WordKeyboard:
 
         return Keyboa(items=kb_items, items_in_row=3)()
 
-    def get_title(self, show: bool, items_type: str):
+    def get_title(self, show: bool, items_type: str) -> str:
         show_text = "Show" if show else "Hide"
 
         title_formats = {
@@ -160,22 +156,16 @@ class WordKeyboard:
 
         return title_formats.get(items_type, show_text)
 
-    def keyboard_show_hide(self, title: str, action_mark: str):
-        """
-        :return:
-        """
-
+    def keyboard_show_hide(self, title: str, action_mark: str) -> Any:
         cbd_predy = {
             Mark.entity: entity_predy,
             Mark.action: action_mark,
             Mark.record_id: self.word.id,
         }
-        button = [
-            {t: title, cbd: callback_from_info(cbd_predy)},
-        ]
+        button = [{t: title, cbd: callback_from_info(cbd_predy)}]
         return Keyboa(button)()
 
-    def keyboard_title(self, action: str):
+    def keyboard_title(self, action: str) -> Any:
         show = action.endswith("s")
         items_type = action[0]
         items = {
@@ -190,34 +180,25 @@ class WordKeyboard:
         title = self.get_title(show, items_type)
         return self.keyboard_show_hide(title, action)
 
-    def keyboard_cpx(self, action: str = "", slice_start: int = 0):
-        """
-        :param action:
-        :param slice_start:
-        :return:
-        """
-
+    def keyboard_cpx(self, action: str = "", slice_start: int = 0) -> Any:
         match action:
             case Action.kb_cpx_show:
                 return self.get_kb_cpx_show(slice_start)
-
             case Action.kb_dji_show:
                 return self.get_kb_dji_show()
-
             case Action.kb_pnt_show:
                 return self.get_kb_pnt_show()
-
             case _:
                 return self.get_default_kb()
 
     @combine_and_close
-    def get_kb_pnt_show(self):
+    def get_kb_pnt_show(self) -> list[Any]:
         kb_title = self.keyboard_title(action=Action.kb_pnt_hide)
         kb_data = self.keyboard_data(action=Action.kb_pnt_hide)
         return [kb_title, kb_data]
 
     @combine_and_close
-    def get_kb_cpx_show(self, slice_start: int = 0):
+    def get_kb_cpx_show(self, slice_start: int = 0) -> list[Any]:
         kb_title_dji = self.keyboard_title(action=Action.kb_dji_show)
         kb_title_cpx = self.keyboard_title(action=Action.kb_cpx_hide)
         kb_data_cpx = self.keyboard_data(
@@ -234,13 +215,13 @@ class WordKeyboard:
         return [kb_title_dji, kb_title_cpx, kb_data_cpx, kb_navi]
 
     @combine_and_close
-    def get_kb_dji_show(self):
+    def get_kb_dji_show(self) -> list[Any]:
         kb_title_dji = self.keyboard_title(action=Action.kb_dji_hide)
         kb_data = self.keyboard_data(action=Action.kb_dji_hide)
         kb_title_cpx = self.keyboard_title(action=Action.kb_cpx_show)
         return [kb_title_dji, kb_data, kb_title_cpx]
 
     @combine_and_close
-    def get_default_kb(self):
+    def get_default_kb(self) -> list[Any]:
         actions = [Action.kb_dji_show, Action.kb_cpx_show, Action.kb_pnt_show]
         return [self.keyboard_title(action=action) for action in actions]

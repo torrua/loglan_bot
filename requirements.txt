@@ -1,2 +1,13 @@
--r ./app/bot/requirements.txt
--r ./app/site/requirements.txt
+Quart>=0.22.0
+Hypercorn>=0.18.0
+SQLAlchemy[asyncio]>=2.0.38
+asyncpg>=0.30.0
+psycopg2-binary>=2.9.10
+Loglan-Core>=0.5.0
+pyTelegramBotAPI>=4.36.0
+callbaker>=1.4.0
+keyboa>=3.1.0
+beautifulsoup4>=4.14.0
+lxml>=6.0.0
+aiohttp>=3.12.0
+python-dotenv>=1.1.0

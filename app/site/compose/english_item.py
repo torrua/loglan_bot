@@ -1,17 +1,23 @@
-"""
-This module contains a EnglishItem Model
-"""
+"""English-to-Loglan HTML Presentation Model"""
 
-from loglan_core.definition import BaseDefinition
+from __future__ import annotations
+
+from collections.abc import Sequence
+from typing import TYPE_CHECKING
 
 from app.site.compose import DEFAULT_HTML_STYLE, Item
 from app.site.compose.definition_formatter import DefinitionFormatter
 
+if TYPE_CHECKING:
+    from loglan_core import Definition
+
 
 class EnglishItem(Item):
+    """Formats English-to-Loglan search results into HTML."""
+
     def __init__(
         self,
-        definitions: list[BaseDefinition],
+        definitions: Sequence[Definition],
         key: str,
         style: str = DEFAULT_HTML_STYLE,
     ):
@@ -19,18 +25,17 @@ class EnglishItem(Item):
         self.key = key
         self.style = style
 
-    def export_as_html(self):
+    def export_as_html(self) -> str:
         return "\n".join(
             [self.export_for_english(d, self.key, self.style) for d in self.definitions]
         )
 
     @staticmethod
-    def export_for_english(  # pylint: disable=too-many-locals
-        definition: BaseDefinition,
+    def export_for_english(
+        definition: Definition,
         key: str,
         style: str = DEFAULT_HTML_STYLE,
     ) -> str:
-        # de = definition english
         tags = {
             "normal": [
                 '<span class="dg">(%s)</span>',
@@ -52,6 +57,7 @@ class EnglishItem(Item):
             ],
         }
 
+        style_tags = tags.get(style, tags["normal"])
         (
             t_d_gram,
             t_d_tags,
@@ -60,9 +66,9 @@ class EnglishItem(Item):
             t_def_line,
             t_word_name,
             t_word_origin,
-        ) = tags[style]
+        ) = style_tags
 
-        gram_form = str(definition.slots or "") + definition.grammar_code
+        gram_form = str(definition.slots or "") + (definition.grammar_code or "")
         def_gram = t_d_gram % gram_form if gram_form else ""
         def_tags = (
             t_d_tags % definition.case_tags.replace("-", "&zwj;-&zwj;")
@@ -70,11 +76,10 @@ class EnglishItem(Item):
             else ""
         )
 
-        def_body = DefinitionFormatter(definition).tagged_definition_body(key, t_d_body)
-        word_name = DefinitionFormatter(definition).tagged_word_name(t_word_name)
-        word_origin_x = DefinitionFormatter(definition).tagged_word_origin_x(
-            t_word_origin
-        )
+        formatter = DefinitionFormatter(definition)
+        def_body = formatter.tagged_definition_body(key, t_d_body)
+        word_name = formatter.tagged_word_name(t_word_name)
+        word_origin_x = formatter.tagged_word_origin_x(t_word_origin)
 
-        definition = t_def % f"{def_tags}{def_gram}{def_body}"
-        return t_def_line % f"{word_name}{word_origin_x}{definition}"
+        inner_def = t_def % f"{def_tags}{def_gram}{def_body}"
+        return t_def_line % f"{word_name}{word_origin_x}{inner_def}"
