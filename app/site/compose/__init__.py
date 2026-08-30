@@ -1,4 +1,6 @@
-"""HTML Export extensions of LOD database models"""
+"""
+HTML Export extensions of LOD database models
+"""
 
 from __future__ import annotations
 
@@ -15,3 +17,4 @@ class Item(ABC):
     @abstractmethod
     def export_as_html(self) -> str:
         """Render the item as an HTML string."""
+        pass
