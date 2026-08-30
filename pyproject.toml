@@ -7,7 +7,7 @@ name = "loglan-bot"
 version = "0.2.0"
 description = "Loglan Dictionary Telegram Bot and Web Service"
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.12"
 authors = [
     { name = "torrua" },
 ]
