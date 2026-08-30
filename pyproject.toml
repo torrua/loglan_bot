@@ -73,6 +73,7 @@ ignore = [
 ]
 
 [tool.pytest.ini_options]
+pythonpath = ["."]
 asyncio_mode = "auto"
 testpaths = ["tests"]
 python_files = ["test_*.py"]

@@ -38,8 +38,10 @@ jobs:
 
       - name: Run Mypy (Type checking)
         run: |
-          mypy app
+          mypy app tests
 
       - name: Run Pytest
+        env:
+          PYTHONPATH: .
         run: |
           pytest tests/ -v

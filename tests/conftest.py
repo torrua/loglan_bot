@@ -2,12 +2,19 @@
 
 from __future__ import annotations
 
+import sys
+from pathlib import Path
 from typing import Any
 from unittest.mock import MagicMock
 
 import pytest
 
-from app.main import create_app
+# Ensure project root is in sys.path
+ROOT_DIR = Path(__file__).resolve().parent.parent
+if str(ROOT_DIR) not in sys.path:
+    sys.path.insert(0, str(ROOT_DIR))
+
+from app.main import create_app  # noqa: E402
 
 
 @pytest.fixture
