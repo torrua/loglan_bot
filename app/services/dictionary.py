@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections import OrderedDict
-from typing import TYPE_CHECKING, Any, Generic, TypeVar
+from typing import TYPE_CHECKING, Any
 
 from loglan_core import BaseSelector, Definition, DefinitionSelector, Event, Word, WordSelector
 from sqlalchemy.orm import joinedload
@@ -13,10 +13,8 @@ from app.engine import async_session_maker
 if TYPE_CHECKING:
     from collections.abc import Sequence
 
-T = TypeVar("T")
 
-
-class _LRUCache(Generic[T]):
+class _LRUCache[T]:
     """Lightweight bounded LRU in-memory cache."""
 
     def __init__(self, maxsize: int = 512):
