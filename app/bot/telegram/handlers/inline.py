@@ -1,42 +1,40 @@
-# -*- coding:utf-8 -*-
-"""
-Telegram bot inline requests functions
-"""
+"""Telegram Bot Inline Query and Callback Dispatcher"""
+
+from __future__ import annotations
+
 from callbaker import info_from_callback
 
-from app.bot.telegram import cbq
-from app.bot.telegram.handlers.bib_functions import bib_cancel
-from app.bot.telegram.handlers.bib_functions import (
-    bib_predy_send_card,
-    bib_predy_kb_cpx_switcher,
+from app.bot.telegram.constants import (
+    cbq,
 )
-
+from app.bot.telegram.handlers.bib_functions import (
+    bib_cancel,
+    bib_predy_kb_cpx_switcher,
+    bib_predy_send_card,
+)
 from app.bot.telegram.variables import (
     Action,
+    Mark,
     cancel,
     close,
-    Mark,
     entity_predy,
 )
 from app.decorators import logging_time
 
 
 @logging_time
-async def bot_callback_inline(call: cbq):
-    """
-    Основной обработчик событий по нажатым inline кнопкам
-    :param call:
-    :return:
-    """
+async def bot_callback_inline(call: cbq) -> None:
+    """Main callback query dispatcher for inline button interactions."""
+    if not call.data:
+        return
 
-    # Если сообщение из чата с ботом
-    if call.data in [cancel, close]:
-        await bib_cancel(call)  # no need to lang input
+    if call.data in (cancel, close):
+        await bib_cancel(call)
         return
 
     info = info_from_callback(call.data)
-    current_entity = info.get(Mark.entity, None)
-    current_action = info.get(Mark.action, None)
+    current_entity = info.get(Mark.entity)
+    current_action = info.get(Mark.action)
 
     if not (current_entity and current_action):
         return
@@ -45,30 +43,30 @@ async def bot_callback_inline(call: cbq):
 
 
 @logging_time
-async def entity_selector_general(call: cbq):
-    """
-    :param call:
-    :return:
-    """
+async def entity_selector_general(call: cbq) -> None:
+    """Routes callbacks based on entity type."""
+    if not call.data:
+        return
+
     info = info_from_callback(call.data)
-    current_entity = info.get(Mark.entity, None)
+    current_entity = info.get(Mark.entity)
 
     if current_entity == entity_predy:
         await action_selector_predy(call)
 
 
 @logging_time
-async def action_selector_predy(call: cbq):
-    """
-    :param call:
-    :return:
-    """
+async def action_selector_predy(call: cbq) -> None:
+    """Routes predy entity callbacks to specific handler functions."""
+    if not call.data:
+        return
+
     info = info_from_callback(call.data)
-    current_action = info.get(Mark.action, None)
+    current_action = info.get(Mark.action)
 
     actions = {
         Action.send_card: bib_predy_send_card,
     }
 
-    if action_to_run := actions.get(current_action, bib_predy_kb_cpx_switcher):
-        await action_to_run(call)
+    action_to_run = actions.get(current_action, bib_predy_kb_cpx_switcher)
+    await action_to_run(call)

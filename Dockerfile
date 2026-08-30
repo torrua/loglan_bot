@@ -1,35 +1,38 @@
-# Create a ubuntu base image with python 3 installed.
+# Production Dockerfile for Loglan Bot & Site
 FROM python:3.12-slim
 
-# Set the working directory
-WORKDIR /
+# Set environment variables
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PIP_NO_CACHE_DIR=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    PORT=8080
 
-# Отключаем создание лишних файлов питоном
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONUNBUFFERED=1
+# Create non-root system user
+RUN groupadd -r appgroup && useradd -r -g appgroup -d /app -s /sbin/nologin appuser
 
-# Create and activate a virtual environment
-RUN python -m venv /venv
-ENV PATH="/venv/bin:$PATH"
+# Set working directory
+WORKDIR /app
 
-# Copy requirements.txt and install dependencies
-COPY requirements.txt .
+# Copy dependency files first for layer caching
+COPY requirements.txt pyproject.toml ./
 
-# Copy all the files
-COPY /app /app/
-COPY *.py ./
+# Install python dependencies
+RUN pip install --upgrade pip && \
+    pip install -r requirements.txt
 
-# Clean up
-RUN rm -rf /var/cache/apk/* && \
-rm -rf /root/.cache
+# Copy application source code
+COPY app/ ./app/
+COPY main.py ./
 
-RUN ls -la /app/*
+# Ensure correct permissions
+RUN chown -R appuser:appgroup /app
 
+# Switch to non-root user
+USER appuser
+
+# Expose service port
 EXPOSE 8080
 
-# Install the dependencies
-RUN /venv/bin/python -m pip install --upgrade pip
-RUN /venv/bin/pip install --no-cache-dir -r requirements.txt
-
-# Run the command
+# Run with ASGI server Hypercorn
 CMD ["hypercorn", "-b", "0.0.0.0:8080", "main:app"]

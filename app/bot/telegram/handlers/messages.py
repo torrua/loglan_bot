@@ -1,34 +1,30 @@
-# -*- coding:utf-8 -*-
-"""
-Telegram bot messages functions
-"""
-from loglan_core import WordSelector
+"""Telegram Bot Free-Text and Regex Message Handlers"""
 
-from app.bot.telegram import msg
+from __future__ import annotations
+
+from app.bot.telegram.constants import msg
 from app.bot.telegram.handlers.commands import (
     send_message_by_key,
     send_messages_with_words,
 )
-from app.engine import async_session_maker
+from app.bot.telegram.notifications import notify_admin_query
+from app.services.dictionary import DictionaryService
 
 
 async def bot_text_messages_handler(message: msg) -> None:
-    """
-    Handle user's text messages
-    :param message:
-    :return: None
-    """
+    """Handles arbitrary text and slash-prefixed search requests."""
+    if not message.text:
+        return
 
-    user_request = message.text.removeprefix("/")
-    async with async_session_maker() as session:
+    await notify_admin_query(
+        getattr(message, "from_user", None), message.text, query_type="Text Query"
+    )
 
-        words = await (
-            WordSelector()
-            .by_name(user_request)
-            .with_relationships()
-            .all_async(session, unique=True)
-        )
+    user_request = message.text.removeprefix("/").strip()
+    if not user_request:
+        return
 
+    words = await DictionaryService.get_words_by_name(name=user_request)
     if words:
         await send_messages_with_words(message, words)
     else:
