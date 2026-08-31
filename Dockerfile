@@ -1,11 +1,25 @@
-# Production Dockerfile for Loglan Bot & Site
+# Production Multi-Stage Dockerfile for Loglan Bot & Site
+# Stage 1: Dependency builder using uv
+FROM ghcr.io/astral-sh/uv:latest AS uv_installer
+FROM python:3.12-slim AS builder
+
+WORKDIR /app
+COPY --from=uv_installer /uv /uvx /bin/
+
+# Copy requirements for layer caching
+COPY requirements.txt ./
+
+# Install dependencies into virtual environment
+RUN uv venv /opt/venv && \
+    uv pip install --no-cache -r requirements.txt --python /opt/venv/bin/python
+
+# Stage 2: Minimal runtime image
 FROM python:3.12-slim
 
 # Set environment variables
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
-    PIP_NO_CACHE_DIR=1 \
-    PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    PATH="/opt/venv/bin:$PATH" \
     PORT=8080
 
 # Create non-root system user
@@ -14,14 +28,8 @@ RUN groupadd -r appgroup && useradd -r -g appgroup -d /app -s /sbin/nologin appu
 # Set working directory
 WORKDIR /app
 
-# Copy dependency files first for layer caching
-COPY requirements.txt pyproject.toml ./
-
-# Install python dependencies
-RUN pip install --upgrade pip && \
-    pip install -r requirements.txt
-
-# Copy application source code
+# Copy virtual environment and application code
+COPY --from=builder /opt/venv /opt/venv
 COPY app/ ./app/
 COPY main.py ./
 
