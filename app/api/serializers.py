@@ -17,13 +17,22 @@ def serialize_definition(d: Definition) -> dict[str, Any]:
         g_part = str(d.grammar_code) if d.grammar_code is not None else ""
         grammar = (s_part + g_part) or None
 
+    pos = getattr(d, "position", None)
+    position = int(pos) if isinstance(pos, (int, float)) else 1
+
+    tags = getattr(d, "case_tags", None)
+    tags_str = str(tags) if tags and "Mock" not in str(tags) else None
+
+    usage = getattr(d, "usage", None)
+    usage_str = str(usage) if usage and "Mock" not in str(usage) else None
+
     return {
         "id": d.id,
-        "position": d.position or 1,
+        "position": position,
         "grammar": grammar,
-        "usage": d.usage,
-        "body": d.body or "",
-        "tags": getattr(d, "case_tags", None),
+        "usage": usage_str,
+        "body": str(d.body) if d.body and "Mock" not in str(d.body) else "",
+        "tags": tags_str,
     }
 
 
@@ -68,11 +77,23 @@ def serialize_word_detail(word: Word) -> dict[str, Any]:
 
     # Year as string
     year_val = word.year
-    year_str = str(year_val.year) if hasattr(year_val, "year") else (str(year_val)[:4] if year_val else None)
-    combined_year = f"{year_str} {note_year}" if (year_str and note_year) else (year_str or (str(note_year) if note_year else None))
+    year_str = (
+        str(year_val.year)
+        if hasattr(year_val, "year")
+        else (str(year_val)[:4] if year_val else None)
+    )
+    combined_year = (
+        f"{year_str} {note_year}"
+        if (year_str and note_year)
+        else (year_str or (str(note_year) if note_year else None))
+    )
 
     rank_str = str(word.rank) if word.rank is not None else None
-    combined_rank = f"{rank_str} {note_rank}" if (rank_str and note_rank) else (rank_str or (str(note_rank) if note_rank else None))
+    combined_rank = (
+        f"{rank_str} {note_rank}"
+        if (rank_str and note_rank)
+        else (rank_str or (str(note_rank) if note_rank else None))
+    )
 
     # Definitions sorted by position
     raw_defs = getattr(word, "definitions", []) or []

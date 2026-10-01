@@ -207,3 +207,159 @@ async def test_api_get_words_with_event_filter(test_client):
         assert words[0]["type_name"] == "C-Prim"
         assert words[0]["def_count"] == 2
 
+
+@pytest.mark.asyncio
+async def test_api_auth_me_anonymous(test_client):
+    res = await test_client.get("/api/v1/auth/me")
+    assert res.status_code == 200
+    data = await res.get_json()
+    assert data["is_admin"] is False
+    assert data["user"] is None
+
+
+@pytest.mark.asyncio
+async def test_api_auth_me_admin(test_client):
+    token = "test_token"
+    admin_id = 999
+    init_data = generate_mock_init_data(token, user_id=admin_id)
+
+    with (
+        patch("app.api.auth.get_bot_token", return_value=token),
+        patch("app.api.auth.get_admin_ids", return_value={admin_id}),
+    ):
+        res = await test_client.get(
+            "/api/v1/auth/me",
+            headers={"X-Telegram-Init-Data": init_data},
+        )
+        assert res.status_code == 200
+        data = await res.get_json()
+        assert data["is_admin"] is True
+        assert data["user"]["id"] == admin_id
+
+
+@pytest.mark.asyncio
+async def test_api_stats_contract(test_client):
+    mock_session = AsyncMock()
+    # word_count, def_count, event_count, type_count, author_count, affix_type, affix_count, setting
+    mock_scalars = [100, 200, 5, 10, 4, 1, 15]
+    mock_session.execute = AsyncMock(
+        side_effect=[
+            MagicMock(scalar=MagicMock(return_value=mock_scalars[0])),
+            MagicMock(scalar=MagicMock(return_value=mock_scalars[1])),
+            MagicMock(scalar=MagicMock(return_value=mock_scalars[2])),
+            MagicMock(scalar=MagicMock(return_value=mock_scalars[3])),
+            MagicMock(scalar=MagicMock(return_value=mock_scalars[4])),
+            MagicMock(scalar=MagicMock(return_value=mock_scalars[5])),
+            MagicMock(scalar=MagicMock(return_value=mock_scalars[6])),
+            MagicMock(scalar_one_or_none=MagicMock(return_value=None)),
+        ]
+    )
+
+    with patch("app.api.routes.async_session_maker") as mock_maker:
+        mock_maker.return_value.__aenter__.return_value = mock_session
+        res = await test_client.get("/api/v1/stats")
+        assert res.status_code == 200
+        data = await res.get_json()
+        assert data["db_path"] == "PostgreSQL (Remote)"
+        assert data["word_count"] == 100
+        assert data["definition_count"] == 200
+        assert data["spelling_count"] == 100
+        assert isinstance(data["settings"], list)
+        assert len(data["settings"]) >= 1
+
+
+@pytest.mark.asyncio
+async def test_api_search_english_contract(test_client):
+    mock_session = AsyncMock()
+    mock_def = MagicMock()
+    mock_def.id = 1
+    mock_def.slots = 2
+    mock_def.grammar_code = "a"
+    mock_def.body = "clear or lucid"
+
+    mock_word = MagicMock()
+    mock_word.id = 42
+    mock_word.name = "kliri"
+
+    mock_type = MagicMock()
+    mock_type.type_ = "C-Prim"
+
+    # row: (Definition, Word, Type, Key.word)
+    mock_row = (mock_def, mock_word, mock_type, "clear")
+    mock_session.execute = AsyncMock(return_value=[mock_row])
+
+    with patch("app.api.routes.async_session_maker") as mock_maker:
+        mock_maker.return_value.__aenter__.return_value = mock_session
+        res = await test_client.get("/api/v1/search/english?query=clear&use_keywords_only=true")
+        assert res.status_code == 200
+        data = await res.get_json()
+        assert len(data) == 1
+        item = data[0]
+        assert item["word_id"] == 42
+        assert item["word_name"] == "kliri"
+        assert item["type_name"] == "C-Prim"
+        assert item["grammar"] == "2a"
+        assert item["match_count"] == 1
+        assert "«clear»" in item["snippet"]
+
+
+@pytest.mark.asyncio
+async def test_api_definition_crud(test_client, mock_word):
+    token = "test_token"
+    admin_id = 999
+    init_data = generate_mock_init_data(token, user_id=admin_id)
+
+    mock_word.definitions = []
+    mock_word.notes = None
+    mock_word.djifoa = []
+    mock_word.spellings = []
+    mock_word.complexes = []
+    mock_word.parents = []
+    mock_word.derivatives = []
+
+    mock_session = AsyncMock()
+    mock_session.add = MagicMock()
+    mock_session.get = AsyncMock(return_value=mock_word)
+    mock_session.execute = AsyncMock(return_value=MagicMock(scalar=MagicMock(return_value=1)))
+
+    with (
+        patch("app.api.auth.get_bot_token", return_value=token),
+        patch("app.api.auth.get_admin_ids", return_value={admin_id}),
+        patch("app.api.routes.async_session_maker") as mock_maker,
+        patch("app.api.routes.DictionaryService.get_word_by_id", AsyncMock(return_value=mock_word)),
+    ):
+        mock_maker.return_value.__aenter__.return_value = mock_session
+        res = await test_client.post(
+            "/api/v1/words/42/definitions",
+            json={"grammar": "2a", "body": "to be clear"},
+            headers={"X-Telegram-Init-Data": init_data},
+        )
+        assert res.status_code == 201
+        data = await res.get_json()
+        assert data["id"] == 42
+
+
+@pytest.mark.asyncio
+async def test_api_event_crud(test_client):
+    token = "test_token"
+    admin_id = 999
+    init_data = generate_mock_init_data(token, user_id=admin_id)
+
+    mock_session = AsyncMock()
+    mock_session.add = MagicMock()
+    mock_session.execute = AsyncMock(return_value=MagicMock(scalar=MagicMock(return_value=5)))
+
+    with (
+        patch("app.api.auth.get_bot_token", return_value=token),
+        patch("app.api.auth.get_admin_ids", return_value={admin_id}),
+        patch("app.api.routes.async_session_maker") as mock_maker,
+    ):
+        mock_maker.return_value.__aenter__.return_value = mock_session
+        res = await test_client.post(
+            "/api/v1/events",
+            json={"name": "Event 6", "date": "2020-01-01"},
+            headers={"X-Telegram-Init-Data": init_data},
+        )
+        assert res.status_code == 201
+        data = await res.get_json()
+        assert data["name"] == "Event 6"

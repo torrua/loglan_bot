@@ -5,6 +5,7 @@ from __future__ import annotations
 import hashlib
 import hmac
 import json
+import os
 import time
 import urllib.parse
 from functools import wraps
@@ -21,6 +22,12 @@ def get_admin_ids() -> set[int]:
     admins: set[int] = set()
     if settings.telegram_admin_id:
         admins.add(settings.telegram_admin_id)
+    raw_env = os.getenv("ADMIN_IDS") or os.getenv("TELEGRAM_ADMIN_IDS")
+    if raw_env:
+        for p in raw_env.split(","):
+            p = p.strip()
+            if p.isdigit():
+                admins.add(int(p))
     return admins
 
 

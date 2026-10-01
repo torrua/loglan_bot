@@ -242,4 +242,3 @@ def kb_tma(url: str | None = None) -> Any:
         )
     )
     return kb
-
