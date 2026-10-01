@@ -232,10 +232,20 @@ async def search_english():
 # ─── Types, Events, Authors Lookups ──────────────────────────────────────────
 @api_bp.route("/types", methods=["GET"])
 async def get_types():
-    """Retrieve all word types/groups."""
+    """Retrieve all word types/groups with word counts."""
     async with async_session_maker() as session:
-        types = await BaseSelector(model=Type).all_async(session)
-        return jsonify([serialize_type(t) for t in sorted(types, key=lambda x: x.type_)])
+        query = (
+            select(
+                Type,
+                func.count(Word.id).label("word_count"),
+            )
+            .outerjoin(Word, Word.type_id == Type.id)
+            .group_by(Type.id)
+            .order_by(Type.type_)
+        )
+        res = await session.execute(query)
+        items = [serialize_type(t, word_count=cnt) for t, cnt in res]
+        return jsonify(items)
 
 
 @api_bp.route("/events", methods=["GET"])
@@ -246,12 +256,46 @@ async def get_events():
         return jsonify([serialize_event(e) for e in events])
 
 
+@api_bp.route("/events/<int:event_id>/words", methods=["GET"])
+async def get_event_words(event_id: int):
+    """Retrieve words added and removed in a specific event: [added_words, removed_words]."""
+    async with async_session_maker() as session:
+        ev = await session.get(Event, event_id)
+        target_ev = ev.event_id if ev else event_id
+
+        added_res = await session.execute(
+            select(Word.name)
+            .where(Word.event_start_id == target_ev)
+            .order_by(Word.name)
+        )
+        added = [r[0] for r in added_res]
+
+        removed_res = await session.execute(
+            select(Word.name)
+            .where(Word.event_end_id == target_ev)
+            .order_by(Word.name)
+        )
+        removed = [r[0] for r in removed_res]
+
+        return jsonify([added, removed])
+
+
 @api_bp.route("/authors", methods=["GET"])
 async def get_authors():
-    """Retrieve all authors."""
+    """Retrieve all authors with word counts."""
     async with async_session_maker() as session:
-        authors = await BaseSelector(model=Author).all_async(session)
-        return jsonify([serialize_author(a) for a in sorted(authors, key=lambda x: x.abbreviation)])
+        query = (
+            select(
+                Author,
+                func.count(Word.id).label("word_count"),
+            )
+            .outerjoin(Author.contribution)
+            .group_by(Author.id)
+            .order_by(Author.abbreviation)
+        )
+        res = await session.execute(query)
+        items = [serialize_author(a, word_count=cnt) for a, cnt in res]
+        return jsonify(items)
 
 
 @api_bp.route("/stats", methods=["GET"])

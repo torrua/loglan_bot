@@ -68,16 +68,19 @@ async def test_api_types(test_client):
     mock_type.parentable = True
     mock_type.description = "Complex Predicate"
 
-    with patch("app.api.routes.BaseSelector") as mock_selector_cls:
-        instance = mock_selector_cls.return_value
-        instance.all_async = AsyncMock(return_value=[mock_type])
+    mock_session = AsyncMock()
+    mock_session.execute = AsyncMock(return_value=[(mock_type, 15)])
 
+    with patch("app.api.routes.async_session_maker") as mock_maker:
+        mock_maker.return_value.__aenter__.return_value = mock_session
         res = await test_client.get("/api/v1/types")
         assert res.status_code == 200
         types = await res.get_json()
         assert len(types) == 1
+        assert types[0]["name"] == "C-Prim"
         assert types[0]["type"] == "C-Prim"
-        assert types[0]["group"] == "Prim"
+        assert types[0]["group_"] == "Prim"
+        assert types[0]["word_count"] == 15
 
 
 @pytest.mark.asyncio
@@ -100,6 +103,31 @@ async def test_api_events(test_client):
         events = await res.get_json()
         assert len(events) == 1
         assert events[0]["name"] == "Initial"
+        assert events[0]["notes"] == "Def"
+
+
+@pytest.mark.asyncio
+async def test_api_event_words(test_client):
+    mock_session = AsyncMock()
+    mock_event = MagicMock()
+    mock_event.event_id = 6
+    mock_session.get = AsyncMock(return_value=mock_event)
+
+    mock_added_res = MagicMock()
+    mock_added_res.__iter__.return_value = [("kliri",), ("suksi",)]
+    mock_removed_res = MagicMock()
+    mock_removed_res.__iter__.return_value = [("oldword",)]
+
+    mock_session.execute = AsyncMock(side_effect=[mock_added_res, mock_removed_res])
+
+    with patch("app.api.routes.async_session_maker") as mock_maker:
+        mock_maker.return_value.__aenter__.return_value = mock_session
+        res = await test_client.get("/api/v1/events/6/words")
+        assert res.status_code == 200
+        data = await res.get_json()
+        assert len(data) == 2
+        assert data[0] == ["kliri", "suksi"]
+        assert data[1] == ["oldword"]
 
 
 @pytest.mark.asyncio
@@ -110,15 +138,18 @@ async def test_api_authors(test_client):
     mock_author.full_name = "James Cooke Brown"
     mock_author.notes = None
 
-    with patch("app.api.routes.BaseSelector") as mock_selector_cls:
-        instance = mock_selector_cls.return_value
-        instance.all_async = AsyncMock(return_value=[mock_author])
+    mock_session = AsyncMock()
+    mock_session.execute = AsyncMock(return_value=[(mock_author, 42)])
 
+    with patch("app.api.routes.async_session_maker") as mock_maker:
+        mock_maker.return_value.__aenter__.return_value = mock_session
         res = await test_client.get("/api/v1/authors")
         assert res.status_code == 200
         authors = await res.get_json()
         assert len(authors) == 1
+        assert authors[0]["initials"] == "JCB"
         assert authors[0]["abbreviation"] == "JCB"
+        assert authors[0]["word_count"] == 42
 
 
 @pytest.mark.asyncio
