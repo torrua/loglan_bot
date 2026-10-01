@@ -68,7 +68,7 @@ async def get_words():
             )
             .outerjoin(Type, Word.type_id == Type.id)
             .outerjoin(Definition, Definition.word_id == Word.id)
-            .group_by(Word.id, Word.name, Type.type_)
+            .group_by(Word.id, Word.name, Type.type_, Word.event_end_id)
         )
 
         if q_str:
@@ -91,15 +91,15 @@ async def get_words():
             target_ev = ev.event_id if ev else event_id
 
             query = query.where(
-                (Word.event_start.is_(None) | (Word.event_start <= target_ev))
-                & (Word.event_end.is_(None) | (Word.event_end > target_ev))
+                (Word.event_start_id.is_(None) | (Word.event_start_id <= target_ev))
+                & (Word.event_end_id.is_(None) | (Word.event_end_id > target_ev))
             )
 
         # Ordering matching Rust backend: alphabetical by name, active words first
         query = (
             query.order_by(
                 func.lower(Word.name),
-                func.coalesce(Word.event_end, 0).asc(),
+                func.coalesce(Word.event_end_id, 0).asc(),
                 Word.id.desc(),
             )
             .limit(limit)

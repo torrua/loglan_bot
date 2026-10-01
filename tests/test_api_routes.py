@@ -151,3 +151,28 @@ async def test_api_word_detail_not_found(test_client):
 async def test_api_unauthorized_mutation(test_client):
     res = await test_client.post("/api/v1/words", json={"name": "testword"})
     assert res.status_code == 401
+
+
+@pytest.mark.asyncio
+async def test_api_get_words_with_event_filter(test_client):
+    mock_session = AsyncMock()
+    mock_event = MagicMock()
+    mock_event.event_id = 6
+    mock_session.get = AsyncMock(return_value=mock_event)
+
+    mock_row = (42, "kliri", "C-Prim", 2)
+    mock_result = MagicMock()
+    mock_result.all.return_value = [mock_row]
+    mock_session.execute = AsyncMock(return_value=mock_result)
+
+    with patch("app.api.routes.async_session_maker") as mock_maker:
+        mock_maker.return_value.__aenter__.return_value = mock_session
+        res = await test_client.get("/api/v1/words?eventId=6")
+        assert res.status_code == 200
+        words = await res.get_json()
+        assert len(words) == 1
+        assert words[0]["id"] == 42
+        assert words[0]["name"] == "kliri"
+        assert words[0]["type_name"] == "C-Prim"
+        assert words[0]["def_count"] == 2
+
