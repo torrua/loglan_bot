@@ -28,7 +28,9 @@ async def test_bot_cmd_start():
     with patch("app.bot.telegram.handlers.commands.bot.send_message", AsyncMock()) as mock_send:
         await bot_cmd_start(msg)  # type: ignore[arg-type]
         assert mock_send.call_count >= 1
-        mock_send.assert_any_call(12345, "Loi!")
+        from unittest.mock import ANY
+
+        mock_send.assert_any_call(12345, "Loi!", reply_markup=ANY)
 
 
 @pytest.mark.asyncio

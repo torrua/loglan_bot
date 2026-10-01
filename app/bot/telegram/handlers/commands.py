@@ -14,7 +14,7 @@ from app.bot.telegram.constants import (
     MESSAGE_SPECIFY_LOGLAN_WORD,
     msg,
 )
-from app.bot.telegram.keyboards import WordKeyboard, kb_close
+from app.bot.telegram.keyboards import WordKeyboard, kb_close, kb_tma
 from app.bot.telegram.models import export_as_str, translation_by_key
 from app.bot.telegram.notifications import admin_notifications, notify_admin_query
 from app.decorators import logging_time
@@ -44,7 +44,7 @@ async def send_message_by_key(user_request: str, user_id: int) -> None:
 @logging_time
 async def bot_cmd_start(message: msg) -> None:
     """Handles the /start command."""
-    await bot.send_message(message.chat.id, "Loi!")
+    await bot.send_message(message.chat.id, "Loi!", reply_markup=kb_tma())
 
     if ADMIN and message.from_user:
         user_dict = message.from_user.__dict__

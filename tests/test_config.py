@@ -32,7 +32,7 @@ def test_settings_defaults():
         assert s.telegram_admin_id is None
         assert s.default_style == "ultra"
         assert s.default_search_language == "log"
-        assert s.default_html_style == "normal"
+        assert s.tma_url == "https://torrua.github.io/LOD_manager/"
         assert s.port == 8080
         assert s.debug is False
 

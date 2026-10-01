@@ -94,10 +94,7 @@ async def set_bot_webhook():
         abort(403)
 
     raw_target = (
-        request.args.get("url")
-        or request.args.get("host")
-        or settings.webhook_host
-        or request.host
+        request.args.get("url") or request.args.get("host") or settings.webhook_host or request.host
     )
     webhook_url = _normalize_webhook_url(raw_target)
 

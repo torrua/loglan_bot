@@ -225,3 +225,21 @@ class WordKeyboard:
     def get_default_kb(self) -> list[Any]:
         actions = [Action.kb_dji_show, Action.kb_cpx_show, Action.kb_pnt_show]
         return [self.keyboard_title(action=action) for action in actions]
+
+
+def kb_tma(url: str | None = None) -> Any:
+    """Returns an inline keyboard with a button to open the Telegram Mini App."""
+    from telebot.types import InlineKeyboardButton, InlineKeyboardMarkup, WebAppInfo
+
+    from app.config import settings
+
+    target_url = url or settings.tma_url
+    kb = InlineKeyboardMarkup()
+    kb.add(
+        InlineKeyboardButton(
+            text="📖 Открыть словарь (Mini App)",
+            web_app=WebAppInfo(url=target_url),
+        )
+    )
+    return kb
+

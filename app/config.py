@@ -51,6 +51,7 @@ class Settings:
     default_style: str
     default_search_language: str
     default_html_style: str
+    tma_url: str
 
     # Server
     host: str
@@ -77,6 +78,7 @@ class Settings:
         default_style = os.getenv("DEFAULT_STYLE", "ultra").strip()
         default_search_language = os.getenv("DEFAULT_SEARCH_LANGUAGE", "log").strip()
         default_html_style = os.getenv("DEFAULT_HTML_STYLE", "normal").strip()
+        tma_url = os.getenv("TMA_URL", "https://torrua.github.io/LOD_manager/").strip()
 
         host = os.getenv("HOST", "0.0.0.0").strip()
         port = _str_to_int(os.getenv("PORT"), default=8080) or 8080
@@ -93,6 +95,7 @@ class Settings:
             default_style=default_style,
             default_search_language=default_search_language,
             default_html_style=default_html_style,
+            tma_url=tma_url,
             host=host,
             port=port,
             debug=debug,
