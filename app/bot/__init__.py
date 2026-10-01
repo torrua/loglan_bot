@@ -2,14 +2,43 @@
 
 from __future__ import annotations
 
+from urllib.parse import urlparse
+
 from quart import Blueprint, abort, jsonify, request
 from telebot import types
+from telebot.asyncio_helper import ApiTelegramException
 
 from app.bot.telegram import TOKEN, bot
 from app.config import settings
 from app.logger import log
 
 bot_blueprint = Blueprint("bot", __name__)
+
+
+def _normalize_webhook_url(raw: str) -> str:
+    """Normalize and build a valid Telegram webhook URL."""
+    raw = (raw or "").strip()
+    if not raw:
+        return ""
+
+    if "://" in raw:
+        parsed = urlparse(raw)
+        host = parsed.netloc or parsed.path
+        path = parsed.path if parsed.netloc else ""
+    else:
+        parts = raw.split("/", 1)
+        host = parts[0]
+        path = f"/{parts[1]}" if len(parts) > 1 and parts[1] else ""
+
+    host = host.strip("/")
+    path = path.rstrip("/")
+
+    if path in ("/bot/webhook", f"/bot/{TOKEN}"):
+        endpoint = path
+    else:
+        endpoint = "/bot/webhook"
+
+    return f"https://{host}{endpoint}"
 
 
 def _is_admin_authorized() -> bool:
@@ -64,17 +93,55 @@ async def set_bot_webhook():
     if not _is_admin_authorized():
         abort(403)
 
-    host = settings.webhook_host or request.host
-    webhook_url = f"https://{host}/bot/webhook"
+    raw_target = (
+        request.args.get("url")
+        or request.args.get("host")
+        or settings.webhook_host
+        or request.host
+    )
+    webhook_url = _normalize_webhook_url(raw_target)
+
+    if any(local in webhook_url.lower() for local in ("localhost", "127.0.0.1", "0.0.0.0")):
+        log.warning(
+            "Webhook target '%s' contains a local address. Telegram will reject non-public URLs.",
+            webhook_url,
+        )
+    if ":8080" in webhook_url:
+        log.warning(
+            "Webhook target '%s' contains port 8080. Telegram only supports ports 443, 80, 88, 8443.",
+            webhook_url,
+        )
+
+    log.info("Configuring Telegram webhook to: %s", webhook_url)
 
     await bot.remove_webhook()
     kwargs = {"url": webhook_url}
     if settings.webhook_secret:
         kwargs["secret_token"] = settings.webhook_secret
 
-    await bot.set_webhook(**kwargs)
-    log.info("Webhook configured to: %s", webhook_url)
-    return f"⚓ Webhook set to: {webhook_url}", 200
+    try:
+        await bot.set_webhook(**kwargs)
+        log.info("Webhook configured successfully to: %s", webhook_url)
+        return f"⚓ Webhook set to: {webhook_url}", 200
+    except ApiTelegramException as exc:
+        log.error("Telegram API error setting webhook to %s: %s", webhook_url, exc)
+        return (
+            jsonify(
+                {
+                    "status": "error",
+                    "message": "Telegram API rejected webhook URL",
+                    "attempted_url": webhook_url,
+                    "telegram_error": exc.description,
+                    "error_code": exc.error_code,
+                    "hint": (
+                        "Telegram webhooks require a public HTTPS URL with a valid SSL certificate. "
+                        "Only ports 443, 80, 88, and 8443 are supported. "
+                        "Addresses with localhost, 127.0.0.1, or port 8080 are rejected by Telegram."
+                    ),
+                }
+            ),
+            400,
+        )
 
 
 @bot_blueprint.route("/del")

@@ -63,6 +63,8 @@ class Settings:
         admin_id = _str_to_int(os.getenv("TELEGRAM_ADMIN_ID"))
         webhook_secret = os.getenv("WEBHOOK_SECRET")
         webhook_host = os.getenv("WEBHOOK_HOST")
+        if webhook_host:
+            webhook_host = webhook_host.strip()
         admin_notify_queries = _str_to_bool(os.getenv("ADMIN_NOTIFY_QUERIES"), default=True)
 
         db_url = os.getenv("LOD_DATABASE_URL", "").strip()
