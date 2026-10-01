@@ -116,9 +116,14 @@ def serialize_word_detail(word: Word) -> dict[str, Any]:
     raw_parents = getattr(word, "parents", []) or []
     parents = [p.name for p in raw_parents if getattr(p, "name", None)]
 
-    # Derivatives / Children
+    # Derivatives / Children (excluding affixes, matching desktop Tauri get_word)
     raw_derivatives = getattr(word, "derivatives", []) or []
-    children = [c.name for c in raw_derivatives if getattr(c, "name", None)]
+    children = [
+        c.name
+        for c in raw_derivatives
+        if getattr(c, "name", None)
+        and getattr(getattr(c, "type", None), "type_x", "") != "Affix"
+    ]
 
     # Type name and ID
     word_type = getattr(word, "type", None)
