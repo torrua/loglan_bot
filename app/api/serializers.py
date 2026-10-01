@@ -3,9 +3,37 @@
 from __future__ import annotations
 
 import json
+import re
 from typing import Any
 
 from loglan_core import Author, Definition, Event, Type, Word
+
+
+def _sort_parents_by_origin(parents: list[str], origin: Any) -> list[str]:
+    """Sort parent word names in morphological order according to `origin` (with alphabetical fallback)."""
+    if len(parents) <= 1 or not origin or not isinstance(origin, str):
+        return sorted(parents)
+
+    clean_origin = re.sub(r"[\(\)/+ ]", "", origin).lower()
+
+    def pos_of(p: str) -> int:
+        stem = p.strip("-").lower()
+        if not stem:
+            return 999999
+        idx = clean_origin.find(stem)
+        if idx != -1:
+            return idx
+        if len(stem) >= 4:
+            idx4 = clean_origin.find(stem[:4])
+            if idx4 != -1:
+                return idx4
+        if len(stem) >= 3:
+            idx3 = clean_origin.find(stem[:3])
+            if idx3 != -1:
+                return idx3
+        return 999999
+
+    return sorted(parents, key=lambda p: (pos_of(p), p))
 
 
 def serialize_definition(d: Definition) -> dict[str, Any]:
@@ -112,9 +140,12 @@ def serialize_word_detail(word: Word) -> dict[str, Any]:
     raw_complexes = getattr(word, "complexes", []) or []
     used_in = [c.name for c in raw_complexes if getattr(c, "name", None)]
 
-    # Parents (primitives / components)
+    # Parents (primitives / components sorted by appearance in word/origin)
     raw_parents = getattr(word, "parents", []) or []
-    parents = [p.name for p in raw_parents if getattr(p, "name", None)]
+    parents = _sort_parents_by_origin(
+        [p.name for p in raw_parents if getattr(p, "name", None)],
+        getattr(word, "origin", None),
+    )
 
     # Derivatives / Children (excluding affixes, matching desktop Tauri get_word)
     raw_derivatives = getattr(word, "derivatives", []) or []
