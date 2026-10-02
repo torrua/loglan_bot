@@ -155,7 +155,7 @@ async def test_api_authors(test_client):
 @pytest.mark.asyncio
 async def test_api_word_detail_found(test_client, mock_word):
     mock_word.definitions = []
-    mock_word.djifoa = []
+    mock_word.djifoa = None
     mock_word.spellings = []
     mock_word.complexes = []
     mock_word.parents = []
@@ -169,6 +169,7 @@ async def test_api_word_detail_found(test_client, mock_word):
         data = await res.get_json()
         assert data["id"] == 42
         assert data["name"] == "kliri"
+        assert data["affixes"] == ["kli"]
 
 
 @pytest.mark.asyncio

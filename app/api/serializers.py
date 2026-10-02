@@ -130,8 +130,12 @@ def serialize_word_detail(word: Word) -> dict[str, Any]:
     definitions = [serialize_definition(d) for d in sorted_defs]
 
     # Affixes (djifoa) - strip dashes if present
-    raw_affixes = getattr(word, "djifoa", []) or []
-    affixes = [a.name.replace("-", "") for a in raw_affixes if getattr(a, "name", None)]
+    raw_affixes = getattr(word, "djifoa", None) or getattr(word, "affixes", None) or []
+    affixes = [
+        getattr(a, "name", str(a)).replace("-", "")
+        for a in raw_affixes
+        if getattr(a, "name", str(a))
+    ]
 
     # Spellings
     raw_spellings = getattr(word, "spellings", []) or []
