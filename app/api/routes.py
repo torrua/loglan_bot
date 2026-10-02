@@ -466,7 +466,8 @@ async def create_word():
 
 async def _resolve_word_type_id(session, payload: dict[str, Any]) -> int | None:
     if "type_id" in payload:
-        return payload["type_id"]
+        type_id = payload["type_id"]
+        return int(type_id) if type_id is not None else None
     if "type_name" in payload:
         if not payload["type_name"]:
             return None

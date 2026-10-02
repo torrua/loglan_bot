@@ -98,6 +98,7 @@ def serialize_word_detail(word: Word) -> dict[str, Any]:
     note_rank = note_dict.get("rank")
 
     # Combine base authors and note author
+    source: str | None
     if base_authors and note_author:
         source = f"{base_authors} {note_author}"
     else:
