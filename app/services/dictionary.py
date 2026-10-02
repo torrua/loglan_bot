@@ -112,7 +112,7 @@ class DictionaryService:
                 .by_key(key=key, language=language)
             )
             # Ensure source_word.type is also eagerly loaded
-            selector.get_statement().options(
+            selector._statement = selector.statement.options(
                 joinedload(Definition.source_word).joinedload(Word.type)
             )
 
