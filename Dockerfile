@@ -1,7 +1,7 @@
 # Production Multi-Stage Dockerfile for Loglan Bot & Site
 # Stage 1: Dependency builder using uv
 FROM ghcr.io/astral-sh/uv:latest AS uv_installer
-FROM python:3.12-slim AS builder
+FROM python:3.13-slim AS builder
 
 WORKDIR /app
 COPY --from=uv_installer /uv /uvx /bin/
@@ -14,7 +14,7 @@ RUN uv venv /opt/venv && \
     uv pip install --no-cache -r requirements.txt --python /opt/venv/bin/python
 
 # Stage 2: Minimal runtime image
-FROM python:3.12-slim
+FROM python:3.13-slim
 
 # Set environment variables
 ENV PYTHONDONTWRITEBYTECODE=1 \

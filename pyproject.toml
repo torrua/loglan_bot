@@ -7,12 +7,12 @@ name = "loglan-bot"
 version = "0.2.0"
 description = "Loglan Dictionary Telegram Bot and Web Service"
 readme = "README.md"
-requires-python = ">=3.12"
+requires-python = ">=3.13"
 authors = [
     { name = "torrua" },
 ]
 dependencies = [
-    "Quart>=0.22.0",
+    "Quart>=0.23.1",
     "Hypercorn>=0.18.0",
     "quart-cors>=0.8.0",
     "SQLAlchemy[asyncio]>=2.1.2",
@@ -37,7 +37,7 @@ dev = [
 ]
 
 [tool.mypy]
-python_version = "3.12"
+python_version = "3.13"
 warn_return_any = true
 warn_unused_configs = true
 disallow_untyped_defs = false
@@ -54,7 +54,7 @@ module = [
 ignore_missing_imports = true
 
 [tool.ruff]
-target-version = "py312"
+target-version = "py313"
 line-length = 100
 
 [tool.ruff.lint]

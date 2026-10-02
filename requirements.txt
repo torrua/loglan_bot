@@ -1,4 +1,4 @@
-Quart>=0.22.0
+Quart>=0.23.1
 Hypercorn>=0.18.0
 quart-cors>=0.8.0
 SQLAlchemy[asyncio]>=2.1.2
