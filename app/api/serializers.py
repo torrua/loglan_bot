@@ -152,8 +152,7 @@ def serialize_word_detail(word: Word) -> dict[str, Any]:
     children = [
         c.name
         for c in raw_derivatives
-        if getattr(c, "name", None)
-        and getattr(getattr(c, "type", None), "type_x", "") != "Affix"
+        if getattr(c, "name", None) and getattr(getattr(c, "type", None), "type_x", "") != "Affix"
     ]
 
     # Type name and ID
