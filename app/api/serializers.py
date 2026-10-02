@@ -108,7 +108,7 @@ def serialize_word_detail(word: Word) -> dict[str, Any]:
     year_val = word.year
     year_str = (
         str(year_val.year)
-        if hasattr(year_val, "year")
+        if year_val is not None and hasattr(year_val, "year")
         else (str(year_val)[:4] if year_val else None)
     )
     combined_year = (

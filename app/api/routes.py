@@ -532,10 +532,12 @@ async def _update_word_model(session, word: Word, payload: dict[str, Any]) -> No
         word.name = payload["name"].strip()
 
     if "type_id" in payload or "type_name" in payload:
-        word.type_id = await _resolve_word_type_id(session, payload)
+        new_type_id = await _resolve_word_type_id(session, payload)
+        if new_type_id is not None:
+            word.type_id = new_type_id
 
     ev_start, ev_end, s_chg, e_chg = await _resolve_word_events(session, payload)
-    if s_chg:
+    if s_chg and ev_start is not None:
         word.event_start_id = ev_start
     if e_chg:
         word.event_end_id = ev_end
@@ -652,7 +654,10 @@ async def update_definition(word_id: int, def_id: int):
 
         loaded_word = await DictionaryService.get_word_by_id(word_id)
         word = await session.get(Word, word_id)
-        return jsonify(serialize_word_detail(loaded_word or word))
+        target_word = loaded_word or word
+        if target_word:
+            return jsonify(serialize_word_detail(target_word))
+        return jsonify({"error": "Word not found"}), 404
 
 
 @api_bp.route("/words/<int:word_id>/definitions/<int:def_id>", methods=["DELETE"])
@@ -670,7 +675,10 @@ async def delete_definition(word_id: int, def_id: int):
 
         loaded_word = await DictionaryService.get_word_by_id(word_id)
         word = await session.get(Word, word_id)
-        return jsonify(serialize_word_detail(loaded_word or word))
+        target_word = loaded_word or word
+        if target_word:
+            return jsonify(serialize_word_detail(target_word))
+        return jsonify({"error": "Word not found"}), 404
 
 
 # ─── Event Mutations ──────────────────────────────────────────────────────────
@@ -711,14 +719,11 @@ async def create_event():
 def _update_event_model(event: Event, payload: dict[str, Any]) -> None:
     if payload.get("name"):
         event.name = payload["name"].strip()
-    if "date" in payload:
-        if payload["date"]:
-            try:
-                event.date = datetime.date.fromisoformat(str(payload["date"])[:10])
-            except ValueError:
-                event.date = None
-        else:
-            event.date = None
+    if payload.get("date"):
+        try:
+            event.date = datetime.date.fromisoformat(str(payload["date"])[:10])
+        except ValueError:
+            pass
     if "notes" in payload:
         event.definition = payload["notes"]
     elif "definition" in payload:

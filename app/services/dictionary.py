@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections import OrderedDict
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
 
 from loglan_core import BaseSelector, Definition, DefinitionSelector, Event, Word, WordSelector
 from sqlalchemy.orm import joinedload
@@ -90,7 +90,7 @@ class DictionaryService:
             )
             if word is not None:
                 cls._word_by_id_cache.set(word_id, word)
-            return word
+            return cast(Word | None, word)
 
     @classmethod
     async def get_definitions_by_key(
