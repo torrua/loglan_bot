@@ -15,24 +15,24 @@ dependencies = [
     "Quart>=0.22.0",
     "Hypercorn>=0.18.0",
     "quart-cors>=0.8.0",
-    "SQLAlchemy[asyncio]>=2.0.38",
+    "SQLAlchemy[asyncio]>=2.1.2",
     "asyncpg>=0.30.0",
     "Loglan-Core>=0.5.0",
-    "pyTelegramBotAPI>=4.36.0",
+    "pyTelegramBotAPI>=4.37.0",
     "callbaker>=1.4.0",
     "keyboa>=3.1.0",
-    "beautifulsoup4>=4.14.0",
-    "lxml>=6.0.0",
+    "beautifulsoup4>=4.15.0",
+    "lxml>=6.1.3",
     "aiohttp>=3.12.0",
-    "python-dotenv>=1.1.0",
+    "python-dotenv>=1.2.4",
 ]
 
 [project.optional-dependencies]
 dev = [
     "pytest>=8.3.0",
     "pytest-asyncio>=0.24.0",
-    "mypy>=1.14.0",
-    "ruff>=0.9.0",
+    "mypy>=2.4.0",
+    "ruff>=0.16.10",
     "aiosqlite>=0.20.0",
 ]
 
