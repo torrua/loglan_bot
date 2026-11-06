@@ -56,6 +56,24 @@ async def test_api_health(test_client):
     assert res.status_code == 200
     data = await res.get_json()
     assert data["status"] == "ok"
+    assert data["api_version"] == "1.7.2"
+
+
+@pytest.mark.asyncio
+async def test_api_cwe_598_query_param_ignored(test_client):
+    token = "test_token"
+    admin_id = 999
+    init_data = generate_mock_init_data(token, user_id=admin_id)
+    with (
+        patch("app.api.auth.get_bot_token", return_value=token),
+        patch("app.api.auth.get_admin_ids", return_value={admin_id}),
+    ):
+        # Query parameter auth must be ignored to prevent CWE-598
+        res = await test_client.get(f"/api/v1/auth/me?tgWebAppData={init_data}")
+        assert res.status_code == 200
+        data = await res.get_json()
+        assert data["is_admin"] is False
+        assert data["user"] is None
 
 
 @pytest.mark.asyncio

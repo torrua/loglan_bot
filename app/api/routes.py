@@ -59,11 +59,20 @@ def parse_year(year_val: Any) -> datetime.date | None:
     return None
 
 
+API_VERSION = "1.7.2"
+
+
 # ─── Health check ─────────────────────────────────────────────────────────────
 @api_bp.route("/health", methods=["GET"])
 async def health_check():
     """Health check endpoint."""
-    return jsonify({"status": "ok", "app": "Loglan Dictionary API"})
+    return jsonify(
+        {
+            "status": "ok",
+            "app": "Loglan Dictionary API",
+            "api_version": API_VERSION,
+        }
+    )
 
 
 # ─── Auth / Current User ──────────────────────────────────────────────────────

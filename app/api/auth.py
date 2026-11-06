@@ -97,7 +97,7 @@ def validate_init_data(
 
 
 def extract_init_data() -> str:
-    """Extract initData from request headers or query params."""
+    """Extract initData strictly from request headers (CWE-598 hardening)."""
     # 1. Primary custom header
     header_val = request.headers.get("X-Telegram-Init-Data")
     if header_val:
@@ -108,8 +108,7 @@ def extract_init_data() -> str:
     if auth_header.lower().startswith("tma "):
         return auth_header[4:].strip()
 
-    # 3. Query parameter: ?tgWebAppData=...
-    return request.args.get("tgWebAppData", "").strip()
+    return ""
 
 
 def require_admin(fn):
